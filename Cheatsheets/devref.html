@@ -1,0 +1,2294 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevRef — Developer Cheat Sheet Library</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ─────────────────────────────────────────────────────────── */
+:root {
+  --accent: #f0883e;
+  --accent2: #58a6ff;
+  --bg:       #0d1117;
+  --bg2:      #161b22;
+  --bg3:      #21262d;
+  --bg4:      #30363d;
+  --border:   #30363d;
+  --text:     #e6edf3;
+  --text2:    #8b949e;
+  --text3:    #6e7681;
+  --code-bg:  #161b22;
+  --tag-bg:   #1f2937;
+  --fav:      #f0883e;
+  --green:    #3fb950;
+  --red:      #f85149;
+  --purple:   #bc8cff;
+  --cyan:     #39d353;
+  --yellow:   #e3b341;
+  --sidebar-w: 220px;
+  --transition: 0.18s cubic-bezier(.4,0,.2,1);
+}
+[data-theme="light"] {
+  --bg:       #ffffff;
+  --bg2:      #f6f8fa;
+  --bg3:      #eaeef2;
+  --bg4:      #d0d7de;
+  --border:   #d0d7de;
+  --text:     #1f2328;
+  --text2:    #636c76;
+  --text3:    #9198a1;
+  --code-bg:  #f6f8fa;
+  --tag-bg:   #e8f0fe;
+}
+
+/* ── RESET ───────────────────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'JetBrains Mono',monospace;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;transition:background var(--transition),color var(--transition)}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+::selection{background:rgba(240,136,62,.25)}
+
+/* ── LAYOUT ──────────────────────────────────────────────────────────── */
+.shell{display:flex;height:100vh;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{
+  width:var(--sidebar-w);flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;transition:width var(--transition),background var(--transition);z-index:50;
+}
+.sidebar.collapsed{width:52px}
+.sidebar-header{padding:14px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--accent);white-space:nowrap;overflow:hidden;letter-spacing:-0.5px}
+.logo span{color:var(--text2)}
+.sidebar.collapsed .logo,.sidebar.collapsed .sidebar-search,.sidebar.collapsed .cat-label{display:none}
+.sidebar-search{padding:10px 12px;flex-shrink:0}
+.sidebar-search input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-family:inherit;font-size:11px;outline:none;transition:border-color var(--transition)}
+.sidebar-search input:focus{border-color:var(--accent)}
+.sidebar-nav{flex:1;overflow-y:auto;padding:8px 0}
+.cat-label{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;padding:12px 14px 4px;pointer-events:none}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer;
+  font-size:11.5px;color:var(--text2);transition:all var(--transition);white-space:nowrap;overflow:hidden;border-left:2px solid transparent;
+}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--bg3);color:var(--accent);border-left-color:var(--accent)}
+.nav-item .icon{font-size:15px;flex-shrink:0;width:20px;text-align:center}
+.nav-item .badge{margin-left:auto;background:var(--bg4);border-radius:10px;padding:1px 6px;font-size:9px;color:var(--text3);flex-shrink:0}
+.sidebar.collapsed .nav-item{padding:10px;justify-content:center}
+.sidebar.collapsed .nav-item .badge{display:none}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column;min-width:0}
+
+/* TOPBAR */
+.topbar{
+  position:sticky;top:0;z-index:40;background:var(--bg);border-bottom:1px solid var(--border);
+  padding:12px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0;
+  backdrop-filter:blur(10px);background:rgba(13,17,23,.9);
+  transition:background var(--transition);
+}
+[data-theme="light"] .topbar{background:rgba(255,255,255,.92)}
+.toggle-sidebar{background:none;border:1px solid var(--border);border-radius:6px;padding:5px 8px;cursor:pointer;color:var(--text2);font-size:13px;transition:all var(--transition)}
+.toggle-sidebar:hover{border-color:var(--accent);color:var(--accent)}
+.search-wrap{flex:1;position:relative;max-width:560px}
+.search-wrap input{
+  width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;
+  padding:9px 14px 9px 36px;color:var(--text);font-family:inherit;font-size:13px;outline:none;
+  transition:border-color var(--transition),box-shadow var(--transition)
+}
+.search-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(240,136,62,.12)}
+.search-wrap .s-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;pointer-events:none}
+.search-wrap .clear-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;display:none}
+.search-wrap input:not(:placeholder-shown)+.clear-btn{display:block}
+.topbar-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
+.icon-btn{background:none;border:1px solid var(--border);border-radius:6px;padding:6px 10px;cursor:pointer;color:var(--text2);font-size:13px;transition:all var(--transition);display:flex;align-items:center;gap:5px;font-family:inherit;font-size:11px;white-space:nowrap}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+.icon-btn.active{border-color:var(--fav);color:var(--fav);background:rgba(240,136,62,.08)}
+.theme-btn{min-width:32px}
+
+/* FILTER BAR */
+.filter-bar{padding:10px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--bg);transition:background var(--transition)}
+.filter-chip{
+  padding:4px 11px;border-radius:20px;font-size:10.5px;border:1px solid var(--border);
+  cursor:pointer;color:var(--text2);transition:all var(--transition);background:none;font-family:inherit;
+}
+.filter-chip:hover{border-color:var(--accent);color:var(--accent)}
+.filter-chip.on{background:var(--accent);border-color:var(--accent);color:#000;font-weight:600}
+.filter-label{font-size:10px;color:var(--text3);margin-right:4px;white-space:nowrap}
+
+/* CONTENT */
+.content{padding:20px;flex:1}
+.section-header{
+  display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:12px;
+  border-bottom:1px solid var(--border);
+}
+.section-icon{font-size:22px}
+.section-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--text)}
+.section-desc{font-size:11px;color:var(--text2);margin-top:2px}
+.section-count{margin-left:auto;font-size:10px;color:var(--text3);background:var(--bg3);padding:3px 9px;border-radius:10px}
+
+.section-block{margin-bottom:40px}
+.section-block.hidden{display:none}
+
+/* CARDS GRID */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;margin-top:14px}
+.card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;
+  transition:border-color var(--transition),transform var(--transition),box-shadow var(--transition);
+  position:relative;
+}
+.card:hover{border-color:var(--bg4);box-shadow:0 4px 20px rgba(0,0,0,.3);transform:translateY(-1px)}
+[data-theme="light"] .card:hover{box-shadow:0 4px 20px rgba(0,0,0,.1)}
+.card-head{
+  padding:11px 14px;display:flex;align-items:center;gap:8px;
+  border-bottom:1px solid var(--border);background:var(--bg3);
+}
+.card-title{font-size:12px;font-weight:600;color:var(--text);flex:1}
+.card-tags{display:flex;gap:4px;flex-wrap:wrap}
+.tag{font-size:9px;padding:2px 7px;border-radius:10px;background:var(--tag-bg);color:var(--text3);border:1px solid var(--border)}
+.fav-btn{background:none;border:none;cursor:pointer;font-size:14px;color:var(--text3);transition:all var(--transition);padding:2px;flex-shrink:0;line-height:1}
+.fav-btn:hover,.fav-btn.active{color:var(--fav);transform:scale(1.2)}
+.card-body{padding:12px 14px}
+.card-desc{font-size:11px;color:var(--text2);margin-bottom:10px;line-height:1.6}
+
+/* CODE BLOCK */
+.code-block{
+  background:var(--code-bg);border:1px solid var(--border);border-radius:6px;
+  overflow:hidden;margin:5px 0;
+}
+.code-block-head{
+  padding:5px 12px;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);background:var(--bg3);
+}
+.code-label{font-size:9px;color:var(--text3);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.copy-btn{
+  background:none;border:1px solid var(--border);border-radius:4px;padding:2px 8px;
+  font-size:9px;color:var(--text3);cursor:pointer;font-family:inherit;transition:all var(--transition)
+}
+.copy-btn:hover{border-color:var(--accent2);color:var(--accent2)}
+.copy-btn.copied{border-color:var(--green);color:var(--green)}
+.code-block pre{padding:10px 12px;overflow-x:auto;font-size:11.5px;line-height:1.65;color:var(--text)}
+.code-block code .kw{color:var(--purple)}
+.code-block code .fn{color:var(--accent2)}
+.code-block code .str{color:var(--green)}
+.code-block code .cm{color:var(--text3)}
+.code-block code .num{color:var(--yellow)}
+.code-block code .op{color:var(--accent)}
+.code-block code .flag{color:var(--cyan)}
+
+/* CMD ROW — compact single-line */
+.cmd-row{
+  display:flex;align-items:center;gap:8px;padding:6px 10px;
+  border-radius:6px;background:var(--code-bg);border:1px solid var(--border);margin:4px 0;
+  transition:border-color var(--transition);cursor:default;
+}
+.cmd-row:hover{border-color:var(--bg4)}
+.cmd-row code{flex:1;font-size:11.5px;color:var(--accent2);font-family:'JetBrains Mono',monospace}
+.cmd-row .cmd-desc{font-size:10px;color:var(--text3);flex:1;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmd-row .copy-btn{flex-shrink:0}
+
+/* TABLE */
+.ref-table{width:100%;border-collapse:collapse;font-size:11px;margin:6px 0}
+.ref-table th{text-align:left;padding:6px 10px;background:var(--bg3);color:var(--text2);font-weight:600;font-size:10px;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+.ref-table td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top}
+.ref-table td:first-child{color:var(--accent2);white-space:nowrap;font-weight:500}
+.ref-table tr:last-child td{border-bottom:none}
+.ref-table tr:hover td{background:var(--bg3)}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:60px 20px;color:var(--text3)}
+.empty .e-icon{font-size:40px;margin-bottom:12px}
+.empty h3{font-family:'Syne',sans-serif;color:var(--text2);margin-bottom:6px}
+.empty p{font-size:12px}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:20px;right:20px;background:var(--bg3);border:1px solid var(--border);
+  border-radius:8px;padding:10px 16px;font-size:12px;color:var(--text);z-index:9999;
+  opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:none;
+  display:flex;align-items:center;gap:8px;
+}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast .t-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0}
+
+/* STATS BAR */
+.stats-bar{
+  padding:8px 20px;border-bottom:1px solid var(--border);
+  font-size:10px;color:var(--text3);display:flex;gap:16px;align-items:center;background:var(--bg);
+}
+.stat{display:flex;align-items:center;gap:5px}
+.stat-val{color:var(--text2);font-weight:600}
+
+/* BACK TO TOP */
+.back-top{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  background:var(--bg3);border:1px solid var(--border);border-radius:20px;
+  padding:6px 16px;font-size:11px;color:var(--text2);cursor:pointer;
+  transition:all var(--transition);display:none;z-index:100;font-family:inherit;
+}
+.back-top:hover{border-color:var(--accent);color:var(--accent)}
+
+/* KEYBOARD HINT */
+.kb-hint{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--text3)}
+kbd{background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-size:10px;font-family:inherit;color:var(--text2)}
+
+/* HIGHLIGHT */
+.hl{background:rgba(240,136,62,.3);color:var(--text);border-radius:2px;padding:0 2px}
+
+/* SECTION NAV PILL */
+.s-pill{
+  display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;
+  background:var(--bg3);border:1px solid var(--border);font-size:11px;color:var(--text2);
+  cursor:pointer;transition:all var(--transition);
+}
+.s-pill:hover{border-color:var(--accent);color:var(--accent)}
+
+/* PROGRESS INDICATOR */
+.progress{height:2px;background:var(--bg4);position:fixed;top:0;left:0;right:0;z-index:200}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width .1s}
+
+@media(max-width:768px){
+  .sidebar{position:absolute;height:100vh;box-shadow:2px 0 20px rgba(0,0,0,.5)}
+  .sidebar:not(.collapsed){z-index:200}
+  .cards{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="progress"><div class="progress-bar" id="progress"></div></div>
+
+<div class="shell">
+<!-- ╔══════════════════════════════╗ -->
+<!-- ║           SIDEBAR            ║ -->
+<!-- ╚══════════════════════════════╝ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">Dev<span>Ref</span></div>
+  </div>
+  <div class="sidebar-search">
+    <input type="text" id="sideSearch" placeholder="Filter categories…">
+  </div>
+  <nav class="sidebar-nav" id="sideNav">
+    <div class="cat-label">Navigation</div>
+    <div class="nav-item active" data-section="all" onclick="filterSection('all',this)"><span class="icon">⚡</span>All Sheets<span class="badge" id="badge-all">0</span></div>
+    <div class="nav-item" data-section="fav" onclick="filterSection('fav',this)"><span class="icon">★</span>Favorites<span class="badge" id="badge-fav">0</span></div>
+
+    <div class="cat-label">Version Control</div>
+    <div class="nav-item" data-section="git" onclick="filterSection('git',this)"><span class="icon">🌿</span>Git<span class="badge" id="badge-git"></span></div>
+
+    <div class="cat-label">CLI / Shell</div>
+    <div class="nav-item" data-section="cmd" onclick="filterSection('cmd',this)"><span class="icon">⬛</span>Windows CMD<span class="badge" id="badge-cmd"></span></div>
+    <div class="nav-item" data-section="linux" onclick="filterSection('linux',this)"><span class="icon">🐧</span>Linux / Bash<span class="badge" id="badge-linux"></span></div>
+    <div class="nav-item" data-section="batch" onclick="filterSection('batch',this)"><span class="icon">📄</span>Batch Files<span class="badge" id="badge-batch"></span></div>
+
+    <div class="cat-label">Languages</div>
+    <div class="nav-item" data-section="cpp" onclick="filterSection('cpp',this)"><span class="icon">⚙️</span>C++<span class="badge" id="badge-cpp"></span></div>
+    <div class="nav-item" data-section="js" onclick="filterSection('js',this)"><span class="icon">🟨</span>JS / TypeScript<span class="badge" id="badge-js"></span></div>
+    <div class="nav-item" data-section="python" onclick="filterSection('python',this)"><span class="icon">🐍</span>Python<span class="badge" id="badge-python"></span></div>
+
+    <div class="cat-label">AI / Agents</div>
+    <div class="nav-item" data-section="langchain" onclick="filterSection('langchain',this)"><span class="icon">🔗</span>LangChain<span class="badge" id="badge-langchain"></span></div>
+    <div class="nav-item" data-section="langgraph" onclick="filterSection('langgraph',this)"><span class="icon">🕸️</span>LangGraph<span class="badge" id="badge-langgraph"></span></div>
+  </nav>
+</aside>
+
+<!-- ╔══════════════════════════════╗ -->
+<!-- ║             MAIN             ║ -->
+<!-- ╚══════════════════════════════╝ -->
+<div class="main" id="mainArea">
+  <div class="topbar">
+    <button class="toggle-sidebar" onclick="toggleSidebar()" title="Toggle sidebar (Ctrl+B)">☰</button>
+    <div class="search-wrap">
+      <span class="s-icon">🔍</span>
+      <input type="text" id="globalSearch" placeholder="Search commands, functions, keywords… (Ctrl+K)" oninput="onSearch(this.value)">
+      <button class="clear-btn" onclick="clearSearch()">✕</button>
+    </div>
+    <div class="topbar-actions">
+      <span class="kb-hint" style="margin-right:4px"><kbd>Ctrl</kbd><kbd>K</kbd> search</span>
+      <button class="icon-btn active" id="favToggleBtn" onclick="toggleFavMode()" title="Show favorites">★ Favs</button>
+      <button class="icon-btn theme-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle theme (Ctrl+T)">🌙</button>
+    </div>
+  </div>
+
+  <div class="filter-bar" id="filterBar">
+    <span class="filter-label">TAGS:</span>
+    <button class="filter-chip on" data-tag="all" onclick="filterTag('all',this)">All</button>
+    <button class="filter-chip" data-tag="basic" onclick="filterTag('basic',this)">Basic</button>
+    <button class="filter-chip" data-tag="advanced" onclick="filterTag('advanced',this)">Advanced</button>
+    <button class="filter-chip" data-tag="stl" onclick="filterTag('stl',this)">STL</button>
+    <button class="filter-chip" data-tag="async" onclick="filterTag('async',this)">Async</button>
+    <button class="filter-chip" data-tag="network" onclick="filterTag('network',this)">Network</button>
+    <button class="filter-chip" data-tag="files" onclick="filterTag('files',this)">Files</button>
+    <button class="filter-chip" data-tag="agents" onclick="filterTag('agents',this)">Agents</button>
+    <button class="filter-chip" data-tag="typescript" onclick="filterTag('typescript',this)">TypeScript</button>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat">📦 <span class="stat-val" id="statTotal">0</span> cards</div>
+    <div class="stat">★ <span class="stat-val" id="statFavs">0</span> favorites</div>
+    <div class="stat">🔍 <span class="stat-val" id="statSearch">–</span></div>
+  </div>
+
+  <div class="content" id="content"></div>
+</div>
+</div>
+
+<div class="toast" id="toast"><div class="t-dot"></div><span id="toastMsg">Copied!</span></div>
+<button class="back-top" id="backTop" onclick="document.getElementById('mainArea').scrollTo({top:0,behavior:'smooth'})">↑ Top</button>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────
+const DATA = {
+
+git: {
+  icon: '🌿', title: 'Git', desc: 'Version control commands & workflows',
+  cards: [
+    {id:'git-setup', title:'Initial Setup', tags:['basic'], desc:'One-time global configuration',
+     content:[{type:'cmds', rows:[
+      ['git config --global user.name "Your Name"','Set global username'],
+      ['git config --global user.email "you@mail.com"','Set global email'],
+      ['git config --global core.editor "code --wait"','Set VS Code as editor'],
+      ['git config --list','List all config'],
+      ['git config --global alias.lg "log --oneline --graph --decorate"','Create alias'],
+    ]}]},
+    {id:'git-basics', title:'Core Workflow', tags:['basic'], desc:'Everyday git operations',
+     content:[{type:'cmds', rows:[
+      ['git init','Initialize repo in current dir'],
+      ['git clone <url>','Clone remote repo'],
+      ['git clone <url> --depth 1','Shallow clone (faster)'],
+      ['git status','Show working tree status'],
+      ['git add .','Stage all changes'],
+      ['git add -p','Stage interactively (hunk by hunk)'],
+      ['git commit -m "msg"','Commit staged changes'],
+      ['git commit --amend --no-edit','Amend last commit (keep msg)'],
+      ['git push origin <branch>','Push branch to remote'],
+      ['git pull --rebase','Pull and rebase local commits'],
+      ['git fetch --prune','Fetch + remove stale remote refs'],
+    ]}]},
+    {id:'git-branch', title:'Branching & Merging', tags:['basic'], desc:'Branch management',
+     content:[{type:'cmds', rows:[
+      ['git branch','List local branches'],
+      ['git branch -a','List all branches (incl remote)'],
+      ['git branch <name>','Create new branch'],
+      ['git checkout -b <name>','Create & switch to branch'],
+      ['git switch <name>','Switch branch (modern)'],
+      ['git switch -c <name>','Create & switch (modern)'],
+      ['git merge <branch>','Merge branch into current'],
+      ['git merge --no-ff <branch>','Merge with merge commit'],
+      ['git merge --squash <branch>','Squash-merge (one commit)'],
+      ['git rebase <branch>','Rebase current onto branch'],
+      ['git rebase -i HEAD~3','Interactive rebase last 3 commits'],
+      ['git branch -d <name>','Delete merged branch'],
+      ['git branch -D <name>','Force delete branch'],
+      ['git push origin --delete <name>','Delete remote branch'],
+    ]}]},
+    {id:'git-log', title:'Log & History', tags:['basic'], desc:'Inspect commit history',
+     content:[{type:'cmds', rows:[
+      ['git log --oneline','Compact one-line log'],
+      ['git log --oneline --graph --all','Visual branch graph'],
+      ['git log -p <file>','Patch history for file'],
+      ['git log --author="name"','Filter by author'],
+      ['git log --since="2 weeks ago"','Filter by date'],
+      ['git diff','Unstaged changes'],
+      ['git diff --staged','Staged changes vs last commit'],
+      ['git diff <branch1>..<branch2>','Diff between branches'],
+      ['git show <hash>','Show commit details'],
+      ['git blame <file>','Who changed each line'],
+      ['git log -S "searchterm"','Find commits touching string'],
+    ]}]},
+    {id:'git-stash', title:'Stash', tags:['basic'], desc:'Temporarily shelve changes',
+     content:[{type:'cmds', rows:[
+      ['git stash','Stash working changes'],
+      ['git stash push -m "wip: feature"','Stash with description'],
+      ['git stash list','List all stashes'],
+      ['git stash pop','Apply latest stash & remove'],
+      ['git stash apply stash@{2}','Apply specific stash (keep it)'],
+      ['git stash drop stash@{0}','Delete specific stash'],
+      ['git stash clear','Delete ALL stashes'],
+      ['git stash show -p','Show diff of latest stash'],
+    ]}]},
+    {id:'git-undo', title:'Undo & Fix', tags:['advanced'], desc:'Recover from mistakes',
+     content:[{type:'cmds', rows:[
+      ['git restore <file>','Discard unstaged changes in file'],
+      ['git restore --staged <file>','Unstage a file'],
+      ['git reset HEAD~1','Undo last commit (keep changes staged)'],
+      ['git reset --soft HEAD~1','Undo last commit (keep changes staged)'],
+      ['git reset --hard HEAD~1','Undo last commit (DISCARD changes)'],
+      ['git revert <hash>','Create revert commit (safe undo)'],
+      ['git cherry-pick <hash>','Apply commit from another branch'],
+      ['git reflog','Find lost commits / HEAD history'],
+      ['git bisect start','Start binary search for bug'],
+    ]}]},
+    {id:'git-remote', title:'Remote & Tags', tags:['basic'], desc:'Work with remotes',
+     content:[{type:'cmds', rows:[
+      ['git remote -v','List remotes with URLs'],
+      ['git remote add origin <url>','Add remote'],
+      ['git remote set-url origin <url>','Change remote URL'],
+      ['git tag v1.0.0','Create lightweight tag'],
+      ['git tag -a v1.0.0 -m "msg"','Create annotated tag'],
+      ['git push --tags','Push all tags'],
+      ['git push origin v1.0.0','Push specific tag'],
+      ['git tag -d v1.0.0','Delete local tag'],
+    ]}]},
+    {id:'git-worktree', title:'Advanced: Worktree & Submodules', tags:['advanced'], desc:'Power user features',
+     content:[{type:'cmds', rows:[
+      ['git worktree add ../hotfix hotfix-branch','Checkout branch in new dir'],
+      ['git worktree list','List all worktrees'],
+      ['git submodule add <url>','Add submodule'],
+      ['git submodule update --init --recursive','Init all submodules'],
+      ['git clean -fd','Remove untracked files & dirs'],
+      ['git clean -fdn','Dry run of clean'],
+    ]}]},
+  ]
+},
+
+cmd: {
+  icon: '⬛', title: 'Windows CMD / PowerShell', desc: 'Command Prompt & PowerShell cheat sheet',
+  cards: [
+    {id:'cmd-nav', title:'Navigation & Directory', tags:['basic'], desc:'Moving around the filesystem',
+     content:[{type:'cmds', rows:[
+      ['cd <path>','Change directory'],
+      ['cd ..','Go up one level'],
+      ['cd /d D:\\projects','Change drive and path'],
+      ['dir','List directory contents'],
+      ['dir /a','Show hidden files'],
+      ['dir /s /b *.txt','Recursive search for .txt files'],
+      ['mkdir <name>','Create directory'],
+      ['mkdir a\\b\\c','Create nested directories'],
+      ['rmdir /s /q <dir>','Delete dir and all contents'],
+      ['tree /f','Show directory tree with files'],
+    ]}]},
+    {id:'cmd-file', title:'File Operations', tags:['basic','files'], desc:'Copy, move, delete files',
+     content:[{type:'cmds', rows:[
+      ['copy src.txt dst.txt','Copy file'],
+      ['xcopy /s /e /i src dst','Copy dir recursively'],
+      ['robocopy src dst /mir','Mirror copy (powerful!)'],
+      ['move file.txt C:\\dest\\','Move file'],
+      ['ren old.txt new.txt','Rename file'],
+      ['del file.txt','Delete file'],
+      ['del /s /q *.log','Delete all .log files recursively'],
+      ['type file.txt','Print file contents'],
+      ['more file.txt','Page through file'],
+      ['fc file1.txt file2.txt','Compare files'],
+      ['findstr "pattern" *.txt','Search string in files (like grep)'],
+      ['findstr /s /i "error" *.log','Case-insensitive recursive search'],
+    ]}]},
+    {id:'cmd-net', title:'Networking', tags:['network'], desc:'Network diagnostics and info',
+     content:[{type:'cmds', rows:[
+      ['ipconfig','Show IP configuration'],
+      ['ipconfig /all','Detailed adapter info'],
+      ['ipconfig /flushdns','Flush DNS cache'],
+      ['ping google.com','Ping host'],
+      ['ping -t google.com','Continuous ping (Ctrl+C to stop)'],
+      ['tracert google.com','Trace route to host'],
+      ['netstat -ano','Active connections with PIDs'],
+      ['netstat -ano | findstr :8080','Find what is on port 8080'],
+      ['nslookup google.com','DNS lookup'],
+      ['curl -s https://api.example.com','HTTP request (Win10+)'],
+      ['telnet host 80','Test TCP port (if enabled)'],
+    ]}]},
+    {id:'cmd-proc', title:'Processes & System', tags:['basic'], desc:'Manage running processes',
+     content:[{type:'cmds', rows:[
+      ['tasklist','List running processes'],
+      ['tasklist | findstr node','Find specific process'],
+      ['taskkill /pid 1234 /f','Kill process by PID'],
+      ['taskkill /im node.exe /f','Kill all processes by name'],
+      ['systeminfo','System info summary'],
+      ['where node','Find executable location'],
+      ['set','List all environment variables'],
+      ['set PATH','Show PATH variable'],
+      ['setx MY_VAR "value"','Set persistent env variable'],
+      ['wmic cpu get name','CPU info'],
+      ['wmic logicaldisk get size,freespace,caption','Disk usage'],
+    ]}]},
+    {id:'cmd-ps', title:'PowerShell Essentials', tags:['advanced'], desc:'Modern Windows shell',
+     content:[{type:'cmds', rows:[
+      ['Get-ChildItem -Recurse -Filter *.log','Recursive file find'],
+      ['Get-Content log.txt | Select-String "error"','Grep equivalent'],
+      ['Select-String -Path "*.txt" -Pattern "TODO"','Search in files'],
+      ['Get-Process | Where-Object CPU -gt 50','Filter processes by CPU'],
+      ['Stop-Process -Name "node" -Force','Kill process'],
+      ['Invoke-RestMethod https://api.example.com','HTTP GET request'],
+      ['$env:MY_VAR = "hello"','Set env var (session)',''],
+      ['[System.Environment]::SetEnvironmentVariable("X","y","User")','Set persistent env var'],
+      ['Get-Command *-Service','Find cmdlets by pattern'],
+      ['Get-Help Get-ChildItem -Examples','Show command help with examples'],
+    ]}]},
+    {id:'cmd-redirect', title:'Redirection & Pipes', tags:['basic'], desc:'I/O redirection tricks',
+     content:[{type:'cmds', rows:[
+      ['command > out.txt','Redirect stdout to file'],
+      ['command >> out.txt','Append stdout to file'],
+      ['command 2> err.txt','Redirect stderr to file'],
+      ['command > out.txt 2>&1','Redirect both stdout+stderr'],
+      ['command1 | command2','Pipe output to next command'],
+      ['echo %DATE% %TIME%','Print current date and time'],
+      ['cls','Clear screen'],
+      ['doskey /history','Show command history'],
+    ]}]},
+  ]
+},
+
+linux: {
+  icon: '🐧', title: 'Linux / Bash', desc: 'Linux shell commands and bash scripting',
+  cards: [
+    {id:'linux-nav', title:'Navigation & Files', tags:['basic'], desc:'Filesystem navigation',
+     content:[{type:'cmds', rows:[
+      ['ls -la','List all files with details'],
+      ['ls -lh --sort=size','Sort by size, human readable'],
+      ['pwd','Print working directory'],
+      ['cd -','Go to previous directory'],
+      ['mkdir -p a/b/c','Create nested dirs'],
+      ['rm -rf <dir>','Remove dir recursively (CAREFUL!)'],
+      ['cp -r src/ dst/','Copy dir recursively'],
+      ['mv file.txt newname.txt','Move/rename file'],
+      ['ln -s /path/to/file link','Create symbolic link'],
+      ['find . -name "*.cpp" -type f','Find .cpp files'],
+      ['find . -mtime -7','Files modified in last 7 days'],
+      ['du -sh *','Disk usage of each item'],
+      ['df -h','Disk space for all mounts'],
+    ]}]},
+    {id:'linux-text', title:'Text Processing', tags:['basic'], desc:'grep, sed, awk, pipes',
+     content:[{type:'cmds', rows:[
+      ['grep -rni "pattern" .','Recursive case-insensitive grep'],
+      ['grep -v "pattern" file','Invert match (exclude)'],
+      ['cat file | grep "err" | wc -l','Count matching lines'],
+      ['tail -f app.log','Follow log file in real time'],
+      ['tail -n 100 app.log','Last 100 lines'],
+      ['head -n 20 file','First 20 lines'],
+      ['sort file | uniq -c | sort -rn','Count unique lines'],
+      ['sed "s/foo/bar/g" file','Replace all foo with bar'],
+      ['sed -i "s/old/new/g" file.txt','In-place replace'],
+      ['awk "{print $1,$3}" file','Print cols 1 and 3'],
+      ['awk -F: "{print $1}" /etc/passwd','Field separator'],
+      ['cut -d, -f1,3 file.csv','Cut CSV columns'],
+      ['tr "[:upper:]" "[:lower:]"','Lowercase conversion'],
+      ['xargs -I{} cmd {}','Build commands from stdin'],
+    ]}]},
+    {id:'linux-proc', title:'Processes', tags:['basic'], desc:'Process management',
+     content:[{type:'cmds', rows:[
+      ['ps aux','All running processes'],
+      ['ps aux | grep node','Find node processes'],
+      ['kill -9 <PID>','Force kill process'],
+      ['pkill -f "python script.py"','Kill by name pattern'],
+      ['top','Interactive process monitor'],
+      ['htop','Better interactive monitor'],
+      ['nohup cmd &','Run in background, keep after logout'],
+      ['disown','Detach background job from shell'],
+      ['jobs','List background jobs'],
+      ['fg %1','Bring job 1 to foreground'],
+      ['lsof -i :8080','What is listening on port 8080'],
+      ['strace -p <PID>','Trace system calls'],
+    ]}]},
+    {id:'linux-perm', title:'Permissions', tags:['basic'], desc:'File ownership & permissions',
+     content:[{type:'cmds', rows:[
+      ['chmod 755 script.sh','rwxr-xr-x permissions'],
+      ['chmod +x script.sh','Make executable'],
+      ['chmod -R 644 ./dir','Recursive permission set'],
+      ['chown user:group file','Change owner'],
+      ['chown -R user:group ./dir','Recursive chown'],
+      ['ls -la','View permissions'],
+      ['sudo !!','Re-run last cmd as root'],
+      ['sudo -u postgres psql','Run cmd as another user'],
+      ['umask 022','Set default permission mask'],
+    ]}]},
+    {id:'linux-net', title:'Networking', tags:['network'], desc:'Network tools',
+     content:[{type:'cmds', rows:[
+      ['ip addr show','Show all IPs'],
+      ['curl -X POST -H "Content-Type: application/json" -d @data.json URL','POST JSON'],
+      ['curl -s -o /dev/null -w "%{http_code}" URL','Check HTTP status code'],
+      ['wget -O file.zip https://url','Download file'],
+      ['ssh user@host -p 22','SSH connect'],
+      ['ssh -L 8080:localhost:8080 user@host','SSH tunnel (port forward)'],
+      ['scp file.txt user@host:/path/','Copy file to remote'],
+      ['scp -r user@host:/path/ ./local/','Copy from remote recursively'],
+      ['nc -zv host 80','Test if port is open'],
+      ['netstat -tlnp','Listening ports with PIDs'],
+      ['ss -tlnp','Modern netstat alternative'],
+      ['nmap -sV host','Scan ports & versions'],
+    ]}]},
+    {id:'linux-bash', title:'Bash Scripting Essentials', tags:['advanced'], desc:'Shell scripting patterns',
+     content:[{type:'code', label:'bash', code:`#!/bin/bash
+set -euo pipefail  # strict mode
+
+# Variables
+NAME="World"
+echo "Hello, \${NAME}!"
+
+# Conditionals
+if [[ -f "file.txt" ]]; then
+  echo "File exists"
+elif [[ -d "dir/" ]]; then
+  echo "Dir exists"
+else
+  echo "Neither"
+fi
+
+# Loops
+for f in *.cpp; do
+  echo "Processing: \$f"
+done
+
+# While loop
+i=0
+while [[ \$i -lt 5 ]]; do
+  echo "i=\$i"; ((i++))
+done
+
+# Functions
+build() {
+  local target="\$1"
+  echo "Building \$target..."
+}
+build "myapp"
+
+# Arrays
+arr=(a b c d)
+echo "\${arr[@]}"    # all elements
+echo "\${#arr[@]}"  # length
+echo "\${arr[1]}"   # index 1`}]},
+    {id:'linux-env', title:'Environment & Shell', tags:['basic'], desc:'Shell environment tips',
+     content:[{type:'cmds', rows:[
+      ['export MY_VAR="value"','Set env var for session'],
+      ['echo $MY_VAR','Print env var'],
+      ['env | grep MY','List matching env vars'],
+      ['source ~/.bashrc','Reload shell config'],
+      ['alias ll="ls -la"','Create alias'],
+      ['history | grep git','Search command history'],
+      ['Ctrl+R','Reverse history search'],
+      ['!!','Repeat last command'],
+      ['!git','Repeat last git command'],
+      ['echo $?','Exit code of last command'],
+      ['command1 && command2','Run cmd2 only if cmd1 succeeds'],
+      ['command1 || command2','Run cmd2 only if cmd1 fails'],
+    ]}]},
+  ]
+},
+
+batch: {
+  icon: '📄', title: 'Batch Files (Windows)', desc: 'Windows .bat/.cmd scripting',
+  cards: [
+    {id:'batch-basics', title:'Batch Basics', tags:['basic'], desc:'Core batch file syntax',
+     content:[{type:'code', label:'batch', code:`@echo off
+REM This is a comment
+SETLOCAL ENABLEDELAYEDEXPANSION
+
+REM Variables
+SET NAME=World
+ECHO Hello %NAME%!
+
+REM Arguments: %0=script, %1=first arg, %*=all args
+ECHO Script: %~nx0
+ECHO First arg: %1
+ECHO All args: %*
+
+REM String in var
+SET GREETING=Hello
+ECHO %GREETING%, world!
+
+REM Delayed expansion (for loops)
+SET COUNT=0
+FOR %%i IN (a b c) DO (
+  SET /A COUNT+=1
+  ECHO !COUNT!: %%i
+)`}]},
+    {id:'batch-flow', title:'Control Flow', tags:['basic'], desc:'IF/ELSE, loops, labels',
+     content:[{type:'code', label:'batch', code:`@echo off
+
+REM IF / ELSE
+IF "%1"=="" (
+  ECHO No argument provided
+) ELSE (
+  ECHO Argument: %1
+)
+
+REM Numeric comparison
+IF %ERRORLEVEL% EQU 0 (ECHO Success) ELSE (ECHO Failed)
+
+REM File/dir checks
+IF EXIST "config.json" ECHO Config found
+IF NOT EXIST "out\" MKDIR out
+
+REM FOR loops
+FOR %%f IN (*.txt) DO ECHO Found: %%f
+FOR /R . %%f IN (*.log) DO DEL "%%f"  &REM recursive
+FOR /L %%i IN (1,1,10) DO ECHO %%i   &REM 1 to 10
+
+REM GOTO labels
+GOTO :main
+
+:build
+  ECHO Building...
+  GOTO :EOF
+
+:main
+  CALL :build`}]},
+    {id:'batch-useful', title:'Useful Batch Patterns', tags:['advanced'], desc:'Common developer batch scripts',
+     content:[{type:'code', label:'batch', code:`@echo off
+REM ── PATTERN 1: Check admin rights
+NET SESSION >NUL 2>&1
+IF %ERRORLEVEL% NEQ 0 (ECHO Run as Admin & PAUSE & EXIT)
+
+REM ── PATTERN 2: Script dir (works from anywhere)
+SET DIR=%~dp0
+ECHO Script dir: %DIR%
+
+REM ── PATTERN 3: Timestamp in filename
+FOR /F "tokens=*" %%i IN ('powershell -c "Get-Date -f yyyyMMdd_HHmmss"') DO SET TS=%%i
+ECHO log-%TS%.txt
+
+REM ── PATTERN 4: Run npm install if node_modules missing
+IF NOT EXIST "node_modules\" (
+  ECHO Installing deps...
+  npm install
+)
+
+REM ── PATTERN 5: Wait for user
+PAUSE
+CHOICE /C YN /M "Continue?"
+IF %ERRORLEVEL%==1 ECHO Yes selected
+
+REM ── PATTERN 6: Log to file + console
+SET LOG=build.log
+ECHO Starting build... | CALL :log
+:log
+  ECHO %~1
+  ECHO %~1 >> %LOG%
+  GOTO :EOF`}]},
+    {id:'batch-env', title:'Environment & Registry', tags:['advanced'], desc:'Environment manipulation',
+     content:[{type:'cmds', rows:[
+      ['SET /P VAR=Enter value: ','Prompt user for input'],
+      ['SET /A RESULT=5*10','Arithmetic expression'],
+      ['FOR /F "tokens=2" %%i IN (\'ver\') DO SET VER=%%i','Parse command output'],
+      ['REG QUERY HKCU\\Environment /v PATH','Read registry value'],
+      ['WMIC OS GET Caption','Get Windows version'],
+      ['WMIC CPU GET Name,NumberOfCores','CPU info'],
+      ['START "" "C:\\app.exe"','Launch app (non-blocking)'],
+      ['CALL other.bat %*','Call another batch, pass args'],
+      ['EXIT /B 0','Exit with code 0'],
+    ]}]},
+  ]
+},
+
+cpp: {
+  icon: '⚙️', title: 'C++ (Modern C++17/20)', desc: 'STL, smart pointers, lambdas, and more',
+  cards: [
+    {id:'cpp-stl-containers', title:'STL Containers', tags:['stl'], desc:'Choosing the right container',
+     content:[{type:'table', cols:['Container','Header','Use when…'], rows:[
+      ['vector<T>','<vector>','Dynamic array, random access, append-heavy'],
+      ['deque<T>','<deque>','Push/pop at both ends'],
+      ['list<T>','<list>','Frequent insert/delete in middle'],
+      ['array<T,N>','<array>','Fixed-size stack array with STL interface'],
+      ['map<K,V>','<map>','Sorted key-value, O(log n) ops'],
+      ['unordered_map<K,V>','<unordered_map>','O(1) avg lookup, no ordering needed'],
+      ['set<T>','<set>','Sorted unique values'],
+      ['unordered_set<T>','<unordered_set>','O(1) avg lookup unique values'],
+      ['stack<T>','<stack>','LIFO adaptor'],
+      ['queue<T>','<queue>','FIFO adaptor'],
+      ['priority_queue<T>','<queue>','Max-heap by default'],
+      ['pair<A,B>','<utility>','Two related values'],
+      ['optional<T>','<optional>','Nullable value (C++17)'],
+      ['variant<Ts…>','<variant>','Type-safe union (C++17)'],
+     ]}]},
+    {id:'cpp-stl-algo', title:'STL Algorithms', tags:['stl'], desc:'<algorithm> cheat sheet',
+     content:[{type:'code', label:'c++', code:`#include <algorithm>
+#include <numeric>
+#include <vector>
+
+std::vector<int> v = {5,3,1,4,2};
+
+// Sorting
+std::sort(v.begin(), v.end());                          // ascending
+std::sort(v.begin(), v.end(), std::greater<int>());     // descending
+std::stable_sort(v.begin(), v.end());                   // preserve order
+
+// Search
+auto it = std::find(v.begin(), v.end(), 3);
+bool has = std::binary_search(v.begin(), v.end(), 3);  // sorted only
+auto pos = std::lower_bound(v.begin(), v.end(), 3);    // first >= 3
+
+// Transform
+std::transform(v.begin(), v.end(), v.begin(),
+  [](int x){ return x * 2; });
+
+// Filter (C++20 ranges)
+auto even = v | std::views::filter([](int x){ return x%2==0; });
+
+// Reduce
+int sum = std::accumulate(v.begin(), v.end(), 0);
+int product = std::accumulate(v.begin(), v.end(), 1, std::multiplies<int>());
+
+// Min/Max
+auto [mn, mx] = std::minmax_element(v.begin(), v.end());
+
+// Partition
+auto mid = std::partition(v.begin(), v.end(), [](int x){ return x<3; });
+
+// Erase-remove idiom
+v.erase(std::remove(v.begin(), v.end(), 3), v.end());
+// C++20: std::erase(v, 3); // simpler`}]},
+    {id:'cpp-smart-ptr', title:'Smart Pointers', tags:['advanced'], desc:'Memory management without leaks',
+     content:[{type:'code', label:'c++', code:`#include <memory>
+
+// unique_ptr — sole ownership
+auto up = std::make_unique<MyClass>(arg1, arg2);
+up->method();                    // use normally
+auto raw = up.get();             // borrow raw pointer (no transfer)
+auto moved = std::move(up);      // transfer ownership
+
+// shared_ptr — shared ownership (ref-counted)
+auto sp1 = std::make_shared<MyClass>();
+auto sp2 = sp1;                  // both own it
+sp1.use_count();                 // reference count
+
+// weak_ptr — observe without owning (breaks cycles)
+std::weak_ptr<MyClass> wp = sp1;
+if (auto locked = wp.lock()) {   // try to get shared_ptr
+    locked->method();
+}
+
+// Custom deleter
+auto file = std::unique_ptr<FILE, decltype(&fclose)>(
+    fopen("f.txt","r"), &fclose);
+
+// Rule: prefer make_unique/make_shared over new`}]},
+    {id:'cpp-lambda', title:'Lambdas & Functional', tags:['advanced'], desc:'Modern C++ lambdas',
+     content:[{type:'code', label:'c++', code:`// Basic lambda
+auto add = [](int a, int b) -> int { return a + b; };
+add(2, 3);  // 5
+
+// Capture by value [=] or reference [&]
+int multiplier = 3;
+auto mul = [multiplier](int x){ return x * multiplier; };   // value copy
+auto mulRef = [&multiplier](int x){ return x * multiplier; }; // by ref
+
+// Mutable lambda (modify captured copy)
+auto counter = [n=0]() mutable { return ++n; };
+
+// Generic lambda (C++14)
+auto print = [](const auto& x){ std::cout << x << "\n"; };
+
+// Immediately invoked
+int result = [](int x){ return x * x; }(5);  // 25
+
+// As function parameter
+void doThing(std::function<int(int)> fn) { fn(42); }
+doThing([](int x){ return x + 1; });
+
+// std::bind alternative (prefer lambdas)
+auto add5 = [](int x){ return x + 5; };`}]},
+    {id:'cpp-string', title:'String Operations', tags:['basic'], desc:'std::string cheat sheet',
+     content:[{type:'code', label:'c++', code:`#include <string>
+#include <sstream>
+
+std::string s = "Hello, World!";
+
+s.length();           // 13
+s.empty();            // false
+s.find("World");      // 7, std::string::npos if not found
+s.substr(7, 5);       // "World"
+s.replace(7, 5, "C++"); // "Hello, C++!"
+s.starts_with("He"); // true (C++20)
+s.ends_with("!");    // true (C++20)
+
+// Convert
+std::string n = std::to_string(42);
+int val = std::stoi("123");
+double d = std::stod("3.14");
+
+// Split (no stdlib split)
+std::string line = "a,b,c";
+std::stringstream ss(line);
+std::string tok;
+while(std::getline(ss, tok, ',')) { /*use tok*/ }
+
+// String formatting (C++20)
+#include <format>
+auto msg = std::format("Hello, {}! You are {} years old.", name, age);
+
+// Trim whitespace
+auto trim = [](std::string s){
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int c){ return !std::isspace(c); }));
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](int c){ return !std::isspace(c); }).base(), s.end());
+    return s;
+};`}]},
+    {id:'cpp-file', title:'File I/O', tags:['files'], desc:'Reading and writing files',
+     content:[{type:'code', label:'c++', code:`#include <fstream>
+#include <sstream>
+#include <filesystem>  // C++17
+
+// Write to file
+std::ofstream out("output.txt");
+out << "Line 1\n" << "Line 2\n";
+out.close();
+
+// Read line by line
+std::ifstream in("input.txt");
+std::string line;
+while (std::getline(in, line)) { /* use line */ }
+
+// Read entire file to string
+std::ifstream f("file.txt");
+std::ostringstream ss;
+ss << f.rdbuf();
+std::string content = ss.str();
+
+// Binary file
+std::ofstream bin("data.bin", std::ios::binary);
+int x = 42;
+bin.write(reinterpret_cast<char*>(&x), sizeof(x));
+
+// Filesystem (C++17)
+namespace fs = std::filesystem;
+fs::path p = "src/main.cpp";
+p.filename();      // "main.cpp"
+p.stem();          // "main"
+p.extension();     // ".cpp"
+p.parent_path();   // "src"
+
+for (auto& e : fs::recursive_directory_iterator("./src")) {
+    if (e.path().extension() == ".cpp")
+        std::cout << e.path() << "\n";
+}`}]},
+    {id:'cpp-thread', title:'Threading (C++11+)', tags:['advanced'], desc:'std::thread, mutex, future',
+     content:[{type:'code', label:'c++', code:`#include <thread>
+#include <mutex>
+#include <future>
+
+// Basic thread
+std::thread t([](){ std::cout << "Worker thread\n"; });
+t.join();  // wait for completion
+
+// Mutex
+std::mutex mtx;
+{
+    std::lock_guard<std::mutex> lock(mtx);  // RAII lock
+    // critical section
+}
+
+// async / future (prefer over raw threads)
+auto fut = std::async(std::launch::async, [](){
+    return heavyComputation();
+});
+auto result = fut.get();  // blocks until ready
+
+// Promise / Future pair
+std::promise<int> prom;
+std::future<int> fut2 = prom.get_future();
+std::thread([&prom](){ prom.set_value(42); }).detach();
+int val = fut2.get();
+
+// Condition variable
+std::condition_variable cv;
+std::unique_lock<std::mutex> lk(mtx);
+cv.wait(lk, []{ return ready; });   // wait with predicate
+cv.notify_all();`}]},
+    {id:'cpp-modern', title:'Modern C++ Tips', tags:['advanced'], desc:'C++17/20 useful features',
+     content:[{type:'code', label:'c++', code:`// Structured bindings (C++17)
+auto [x, y] = std::make_pair(1, 2);
+auto [key, val] = *mymap.begin();
+
+// if-init statement (C++17)
+if (auto it = m.find(key); it != m.end()) {
+    use(it->second);
+}
+
+// std::optional (C++17)
+std::optional<int> findVal(int key) {
+    if (found) return value;
+    return std::nullopt;
+}
+auto v = findVal(5);
+int x = v.value_or(0);
+
+// Fold expressions (C++17)
+template<typename... Args>
+auto sum(Args... args) { return (args + ...); }
+
+// Ranges (C++20)
+#include <ranges>
+auto even_sq = std::views::iota(1,10)
+  | std::views::filter([](int n){ return n%2==0; })
+  | std::views::transform([](int n){ return n*n; });
+
+// Concepts (C++20)
+template<std::integral T>
+T double_it(T x) { return x * 2; }
+
+// constexpr if
+template<typename T>
+auto process(T v) {
+    if constexpr (std::is_integral_v<T>) return v * 2;
+    else return v + " extra";
+}`}]},
+  ]
+},
+
+js: {
+  icon: '🟨', title: 'JavaScript / TypeScript', desc: 'ES2022+, async patterns, and TypeScript',
+  cards: [
+    {id:'js-array', title:'Array Methods', tags:['basic'], desc:'The most useful array operations',
+     content:[{type:'code', label:'javascript', code:`const arr = [1, 2, 3, 4, 5];
+
+// Transform
+arr.map(x => x * 2)             // [2,4,6,8,10]
+arr.flatMap(x => [x, x*2])      // [1,2,2,4,3,6,...]
+arr.filter(x => x % 2 === 0)    // [2,4]
+arr.reduce((acc,x) => acc+x, 0) // 15
+arr.reduceRight((acc,x) => acc+x, 0) // right-to-left
+
+// Search
+arr.find(x => x > 3)            // 4
+arr.findIndex(x => x > 3)       // 3
+arr.includes(3)                  // true
+arr.some(x => x > 4)            // true
+arr.every(x => x > 0)           // true
+
+// Sort (MUTATES!)
+[...arr].sort((a,b) => b-a)     // [5,4,3,2,1] — copy first!
+['b','a','c'].sort()             // ['a','b','c']
+
+// Flat
+[[1,2],[3,[4]]].flat()          // [1,2,3,[4]]
+[[1,2],[3,[4]]].flat(Infinity)  // [1,2,3,4]
+
+// Convert
+Array.from({length:5}, (_,i) => i)  // [0,1,2,3,4]
+Array.from('hello')                  // ['h','e','l','l','o']
+Array.from(new Set([1,1,2,3]))      // [1,2,3] — dedupe!
+Object.keys/values/entries(obj)      // array of keys/vals/pairs`}]},
+    {id:'js-object', title:'Object & Spread', tags:['basic'], desc:'Destructuring, spread, cloning',
+     content:[{type:'code', label:'javascript', code:`const user = { name: 'Alice', age: 30, role: 'dev' };
+
+// Destructuring
+const { name, age } = user;
+const { name: n, role: r = 'user' } = user;  // rename + default
+
+// Spread (shallow clone)
+const copy = { ...user };
+const updated = { ...user, age: 31 };         // override field
+
+// Object methods
+Object.keys(user)     // ['name','age','role']
+Object.values(user)   // ['Alice',30,'dev']
+Object.entries(user)  // [['name','Alice'],...]
+Object.assign({}, user, { age: 31 });         // shallow merge
+Object.freeze(user)   // immutable
+Object.fromEntries([['a',1],['b',2]])  // {a:1,b:2}
+
+// Optional chaining & nullish coalescing
+const city = user?.address?.city ?? 'Unknown';
+
+// Dynamic keys
+const key = 'name';
+const val = user[key];   // 'Alice'
+const obj = { [key]: val };  // { name: 'Alice' }
+
+// Array destructuring
+const [first, , third, ...rest] = [1,2,3,4,5];
+
+// Deep clone (modern)
+const deep = structuredClone(user);`}]},
+    {id:'js-async', title:'Async / Await & Promises', tags:['async'], desc:'Modern async patterns',
+     content:[{type:'code', label:'javascript', code:`// Basic async/await
+async function fetchUser(id) {
+  try {
+    const res = await fetch(\`/api/users/\${id}\`);
+    if (!res.ok) throw new Error(\`HTTP \${res.status}\`);
+    return await res.json();
+  } catch (err) {
+    console.error('Fetch failed:', err);
+    throw err;
+  }
+}
+
+// Parallel execution
+const [users, posts] = await Promise.all([
+  fetchUsers(), fetchPosts()
+]);
+
+// First to resolve
+const result = await Promise.race([slow(), fast()]);
+
+// All settled (don't fail on one error)
+const results = await Promise.allSettled([p1, p2, p3]);
+results.forEach(r => {
+  if (r.status === 'fulfilled') console.log(r.value);
+  else console.error(r.reason);
+});
+
+// Retry pattern
+async function withRetry(fn, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try { return await fn(); }
+    catch (e) { if (i === retries-1) throw e; }
+  }
+}
+
+// Timeout wrapper
+const withTimeout = (promise, ms) => Promise.race([
+  promise,
+  new Promise((_, rej) => setTimeout(() => rej(new Error('Timeout')), ms))
+]);`}]},
+    {id:'js-ts', title:'TypeScript Essentials', tags:['typescript'], desc:'Types, interfaces, generics',
+     content:[{type:'code', label:'typescript', code:`// Basic types
+let n: number = 42;
+let s: string = "hello";
+let b: boolean = true;
+let arr: number[] = [1,2,3];
+let tuple: [string, number] = ["alice", 30];
+
+// Interface vs Type
+interface User { id: number; name: string; email?: string; }
+type Point = { x: number; y: number; };
+type Status = 'active' | 'inactive' | 'pending';  // union
+
+// Generics
+function first<T>(arr: T[]): T | undefined { return arr[0]; }
+interface ApiResponse<T> { data: T; status: number; error?: string; }
+
+// Utility Types
+Partial<User>        // all props optional
+Required<User>       // all props required
+Pick<User,'id'|'name'>  // subset
+Omit<User,'email'>   // exclude fields
+Readonly<User>       // immutable
+Record<string, User> // dict type
+NonNullable<T>       // remove null/undefined
+
+// Type narrowing
+function process(val: string | number) {
+  if (typeof val === 'string') val.toUpperCase();  // string here
+  else val.toFixed(2);                              // number here
+}
+
+// Discriminated unions
+type Shape =
+  | { kind: 'circle'; radius: number }
+  | { kind: 'rect'; w: number; h: number };
+
+function area(s: Shape) {
+  switch(s.kind) {
+    case 'circle': return Math.PI * s.radius ** 2;
+    case 'rect': return s.w * s.h;
+  }
+}
+
+// Mapped types
+type Getters<T> = { [K in keyof T as \`get\${Capitalize<string & K>}\`]: () => T[K] };`}]},
+    {id:'js-patterns', title:'Common JS Patterns', tags:['advanced'], desc:'Patterns every dev should know',
+     content:[{type:'code', label:'javascript', code:`// Debounce
+const debounce = (fn, ms) => {
+  let timer;
+  return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), ms); };
+};
+const onSearch = debounce(fetchResults, 300);
+
+// Throttle
+const throttle = (fn, ms) => {
+  let last = 0;
+  return (...args) => { const now = Date.now(); if (now-last >= ms) { last=now; fn(...args); } };
+};
+
+// Memoize
+const memoize = (fn) => {
+  const cache = new Map();
+  return (...args) => {
+    const key = JSON.stringify(args);
+    if (!cache.has(key)) cache.set(key, fn(...args));
+    return cache.get(key);
+  };
+};
+
+// EventEmitter pattern
+class Emitter {
+  #listeners = new Map();
+  on(event, fn)   { (this.#listeners.get(event) || this.#listeners.set(event,[]).get(event)).push(fn); }
+  off(event, fn)  { this.#listeners.set(event, (this.#listeners.get(event)||[]).filter(f=>f!==fn)); }
+  emit(event, ...args) { (this.#listeners.get(event)||[]).forEach(fn=>fn(...args)); }
+}
+
+// Deep equal
+const deepEqual = (a,b) => JSON.stringify(a) === JSON.stringify(b);
+
+// Pipe / compose
+const pipe = (...fns) => x => fns.reduce((v,f) => f(v), x);
+const double = x => x*2;
+const addOne = x => x+1;
+const doubleThenAdd = pipe(double, addOne); // 5 → 11`}]},
+    {id:'js-dom', title:'DOM & Browser APIs', tags:['basic'], desc:'Essential DOM operations',
+     content:[{type:'cmds', rows:[
+      ['document.querySelector("#id .class")','Select element (CSS selector)'],
+      ['document.querySelectorAll("li")','Select all matching elements'],
+      ['el.addEventListener("click", fn)','Add event listener'],
+      ['el.removeEventListener("click", fn)','Remove event listener'],
+      ['el.closest(".parent")','Walk up DOM to matching ancestor'],
+      ['el.dataset.myAttr','Access data-my-attr attribute'],
+      ['el.classList.toggle("active")','Toggle CSS class'],
+      ['el.insertAdjacentHTML("beforeend","<li>…</li>")','Insert HTML'],
+      ['new ResizeObserver(fn).observe(el)','Watch element resize'],
+      ['new IntersectionObserver(fn).observe(el)','Watch element visibility'],
+      ['localStorage.setItem("k","v")','Persist to localStorage'],
+      ['sessionStorage.getItem("k")','Read from sessionStorage'],
+      ['navigator.clipboard.writeText("txt")','Copy to clipboard (async)'],
+      ['window.matchMedia("(prefers-color-scheme:dark)")','Check dark mode'],
+    ]}]},
+  ]
+},
+
+python: {
+  icon: '🐍', title: 'Python', desc: 'Pythonic patterns, stdlib, and data structures',
+  cards: [
+    {id:'py-comprehensions', title:'Comprehensions', tags:['basic'], desc:'Pythonic data transformation',
+     content:[{type:'code', label:'python', code:`# List comprehension
+squares = [x**2 for x in range(10)]
+evens = [x for x in range(20) if x % 2 == 0]
+flat = [n for row in matrix for n in row]  # flatten 2D
+
+# Dict comprehension
+word_len = {word: len(word) for word in ["apple","banana","cherry"]}
+inverted = {v: k for k, v in original.items()}
+
+# Set comprehension
+unique_lens = {len(word) for word in words}
+
+# Generator expression (lazy, memory-efficient)
+gen = (x**2 for x in range(1000000))  # doesn't compute all
+total = sum(x**2 for x in range(1000))
+
+# Nested
+matrix = [[row[i] for row in matrix] for i in range(4)]  # transpose
+
+# With conditions
+classified = {k: "big" if v > 100 else "small" for k, v in data.items()}`}]},
+    {id:'py-builtins', title:'Powerful Builtins', tags:['basic'], desc:'Built-in functions cheat sheet',
+     content:[{type:'code', label:'python', code:`# enumerate — index + value
+for i, item in enumerate(items, start=1):
+    print(f"{i}: {item}")
+
+# zip — parallel iteration
+for name, score in zip(names, scores):
+    print(f"{name}: {score}")
+
+# zip with fillvalue
+from itertools import zip_longest
+for a, b in zip_longest(list1, list2, fillvalue=None): ...
+
+# map / filter
+doubled = list(map(lambda x: x*2, nums))
+evens = list(filter(lambda x: x%2==0, nums))
+
+# sorted with key
+words = sorted(words, key=str.lower)
+people = sorted(people, key=lambda p: (p.age, p.name))
+
+# min/max with key
+oldest = max(people, key=lambda p: p.age)
+
+# any / all
+has_error = any("error" in line for line in logs)
+all_valid = all(v > 0 for v in values)
+
+# groupby (itertools)
+from itertools import groupby
+data = sorted(data, key=lambda x: x['type'])  # must sort first!
+for key, group in groupby(data, key=lambda x: x['type']):
+    items = list(group)`}]},
+    {id:'py-dict', title:'Dict & Collections', tags:['basic'], desc:'Dictionary patterns & collections',
+     content:[{type:'code', label:'python', code:`from collections import defaultdict, Counter, OrderedDict, deque
+
+# defaultdict — no KeyError
+word_count = defaultdict(int)
+for word in words: word_count[word] += 1
+
+graph = defaultdict(list)
+graph['A'].append('B')
+
+# Counter
+c = Counter("hello world")    # {'l':3,'o':2,...}
+c.most_common(3)               # top 3
+c1 + c2                        # combine counts
+
+# deque — O(1) append/pop at both ends
+dq = deque([1,2,3], maxlen=100)
+dq.appendleft(0)
+dq.rotate(2)
+
+# Dict methods
+d = {'a':1,'b':2,'c':3}
+d.get('x', 0)          # safe get with default
+d.setdefault('key',[]).append(val)  # init if missing
+d.update({'d':4,'e':5})
+{**d1, **d2}           # merge (py3.9+: d1 | d2)
+
+# sorted dict
+sorted_d = dict(sorted(d.items(), key=lambda x: x[1]))
+
+# ChainMap
+from collections import ChainMap
+combined = ChainMap(env_vars, defaults)`}]},
+    {id:'py-pathlib', title:'File I/O & Pathlib', tags:['files'], desc:'Modern file operations',
+     content:[{type:'code', label:'python', code:`from pathlib import Path
+
+# Path operations
+p = Path("src/main.py")
+p.name          # "main.py"
+p.stem          # "main"
+p.suffix        # ".py"
+p.parent        # Path("src")
+p.absolute()    # full path
+p.exists()      # True/False
+p.is_file()     # True/False
+p.is_dir()      # True/False
+
+# Find files
+for f in Path(".").rglob("*.py"):
+    print(f)
+
+# Read/write
+text = p.read_text(encoding="utf-8")
+p.write_text("content\n", encoding="utf-8")
+data = p.read_bytes()
+
+# Create dirs
+Path("output/logs").mkdir(parents=True, exist_ok=True)
+
+# Context manager
+with open(p, 'r', encoding='utf-8') as f:
+    for line in f:
+        process(line.rstrip())
+
+# JSON
+import json
+with open("data.json") as f: data = json.load(f)
+with open("out.json","w") as f: json.dump(data, f, indent=2)
+
+# CSV
+import csv
+with open("data.csv") as f:
+    reader = csv.DictReader(f)
+    rows = list(reader)`}]},
+    {id:'py-regex', title:'Regular Expressions', tags:['advanced'], desc:'Python regex quick reference',
+     content:[{type:'code', label:'python', code:`import re
+
+text = "My email is user@example.com and phone 555-1234"
+
+# Basics
+re.search(r'\d+', text)                 # first match
+re.findall(r'\d+', text)                # ['555','1234']
+re.sub(r'\d{3}-\d{4}', '[PHONE]', text) # replace
+re.split(r'[,\s]+', "a, b  c,d")       # ['a','b','c','d']
+
+# Groups
+m = re.search(r'(\w+)@(\w+)\.(\w+)', text)
+m.group(0)  # full match: user@example.com
+m.group(1)  # user
+m.groups()  # ('user','example','com')
+
+# Named groups
+m = re.search(r'(?P<user>\w+)@(?P<domain>[\w.]+)', text)
+m.group('user')    # 'user'
+m.groupdict()      # {'user':'user','domain':'example.com'}
+
+# Compile for repeated use
+EMAIL_RE = re.compile(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}')
+emails = EMAIL_RE.findall(big_text)
+
+# Flags
+re.search(r'hello', text, re.IGNORECASE | re.MULTILINE)
+
+# Common patterns
+IP    = r'\b(?:\d{1,3}\.){3}\d{1,3}\b'
+URL   = r'https?://[^\s]+'
+DATE  = r'\d{4}-\d{2}-\d{2}'`}]},
+    {id:'py-dataclass', title:'Dataclasses & Type Hints', tags:['advanced'], desc:'Modern Python classes',
+     content:[{type:'code', label:'python', code:`from dataclasses import dataclass, field
+from typing import Optional, List, Dict, Any, Union, TypeVar
+from typing import Protocol
+
+@dataclass
+class User:
+    id: int
+    name: str
+    email: str = ""
+    tags: List[str] = field(default_factory=list)
+    active: bool = True
+
+    def __post_init__(self):
+        self.email = self.email.lower()
+
+@dataclass(frozen=True)  # immutable, hashable
+class Point:
+    x: float
+    y: float
+
+# Type aliases
+UserId = int
+Config = Dict[str, Any]
+
+# Generics
+T = TypeVar('T')
+def first(items: List[T]) -> Optional[T]:
+    return items[0] if items else None
+
+# Protocol (structural typing — like interface)
+class Drawable(Protocol):
+    def draw(self) -> None: ...
+
+# TypedDict
+from typing import TypedDict
+class UserDict(TypedDict):
+    id: int
+    name: str
+    email: str`}]},
+    {id:'py-decorators', title:'Decorators & Context Managers', tags:['advanced'], desc:'Python metaprogramming',
+     content:[{type:'code', label:'python', code:`import functools, time, contextlib
+
+# Timer decorator
+def timer(fn):
+    @functools.wraps(fn)
+    def wrapper(*args, **kwargs):
+        start = time.perf_counter()
+        result = fn(*args, **kwargs)
+        print(f"{fn.__name__}: {time.perf_counter()-start:.4f}s")
+        return result
+    return wrapper
+
+# Retry decorator
+def retry(max_attempts=3, exceptions=(Exception,)):
+    def decorator(fn):
+        @functools.wraps(fn)
+        def wrapper(*args, **kwargs):
+            for attempt in range(max_attempts):
+                try: return fn(*args, **kwargs)
+                except exceptions as e:
+                    if attempt == max_attempts-1: raise
+                    time.sleep(2 ** attempt)  # exponential backoff
+        return wrapper
+    return decorator
+
+@retry(max_attempts=3, exceptions=(ConnectionError,))
+def fetch_data(url): ...
+
+# Context manager
+@contextlib.contextmanager
+def timer_ctx(label):
+    start = time.perf_counter()
+    try: yield
+    finally: print(f"{label}: {time.perf_counter()-start:.4f}s")
+
+with timer_ctx("heavy computation"):
+    result = compute()`}]},
+  ]
+},
+
+langchain: {
+  icon: '🔗', title: 'LangChain', desc: 'LLM chains, prompts, retrievers & agents',
+  cards: [
+    {id:'lc-install', title:'Installation & Imports', tags:['basic'], desc:'Setup and core imports',
+     content:[{type:'code', label:'bash', code:`pip install langchain langchain-openai langchain-community
+pip install langchain-anthropic     # For Claude
+pip install langchain-google-genai  # For Gemini
+pip install faiss-cpu chromadb      # Vector stores
+pip install tiktoken                # Token counting`},
+     {type:'code', label:'python', code:`# Core
+from langchain_openai import ChatOpenAI
+from langchain_anthropic import ChatAnthropic
+from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
+from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
+from langchain_core.runnables import RunnablePassthrough, RunnableLambda
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+# Memory
+from langchain.memory import ConversationBufferMemory, ConversationSummaryMemory
+# Documents
+from langchain_community.document_loaders import PyPDFLoader, WebBaseLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+# Vector
+from langchain_community.vectorstores import FAISS, Chroma
+from langchain_openai import OpenAIEmbeddings`}]},
+    {id:'lc-llm', title:'LLM Initialization', tags:['basic'], desc:'Configure LLM providers',
+     content:[{type:'code', label:'python', code:`import os
+from langchain_openai import ChatOpenAI
+from langchain_anthropic import ChatAnthropic
+
+# OpenAI
+llm = ChatOpenAI(
+    model="gpt-4o",
+    temperature=0.7,         # 0=deterministic, 1=creative
+    max_tokens=2048,
+    api_key=os.environ["OPENAI_API_KEY"],  # or set OPENAI_API_KEY env
+)
+
+# Anthropic Claude
+llm = ChatAnthropic(
+    model="claude-sonnet-4-20250514",
+    temperature=0,
+    max_tokens=4096,
+)
+
+# Invoke directly
+response = llm.invoke("What is 2+2?")
+print(response.content)   # "4"
+
+# Streaming
+for chunk in llm.stream("Tell me a joke"):
+    print(chunk.content, end="", flush=True)
+
+# Batch
+responses = llm.batch(["What is AI?", "What is ML?"])`}]},
+    {id:'lc-prompt', title:'Prompt Templates', tags:['basic'], desc:'Structured prompts',
+     content:[{type:'code', label:'python', code:`from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+
+# Simple template
+template = ChatPromptTemplate.from_messages([
+    ("system", "You are a helpful {role} assistant."),
+    ("human", "{question}")
+])
+prompt = template.invoke({"role": "coding", "question": "What is a closure?"})
+
+# With chat history (for memory)
+template = ChatPromptTemplate.from_messages([
+    ("system", "You are a helpful assistant."),
+    MessagesPlaceholder(variable_name="history"),
+    ("human", "{input}")
+])
+
+# Few-shot prompting
+from langchain_core.prompts import FewShotChatMessagePromptTemplate
+
+examples = [
+    {"input": "Paris", "output": "France"},
+    {"input": "Berlin", "output": "Germany"},
+]
+example_prompt = ChatPromptTemplate.from_messages([
+    ("human", "{input}"), ("ai", "{output}")
+])
+few_shot = FewShotChatMessagePromptTemplate(examples=examples, example_prompt=example_prompt)
+final_prompt = ChatPromptTemplate.from_messages([
+    ("system", "Map city to country:"),
+    few_shot,
+    ("human", "{input}")
+])`}]},
+    {id:'lc-chain', title:'LCEL Chains', tags:['basic'], desc:'LangChain Expression Language (LCEL)',
+     content:[{type:'code', label:'python', code:`from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(model="gpt-4o")
+
+# Basic chain (pipe operator)
+chain = (
+    ChatPromptTemplate.from_template("Tell me a fact about {topic}")
+    | llm
+    | StrOutputParser()
+)
+result = chain.invoke({"topic": "Python"})
+
+# JSON output chain
+from langchain_core.pydantic_v1 import BaseModel, Field
+class Joke(BaseModel):
+    setup: str = Field(description="The setup of the joke")
+    punchline: str = Field(description="The punchline")
+
+structured_llm = llm.with_structured_output(Joke)
+joke_chain = ChatPromptTemplate.from_template("Tell me a joke about {topic}") | structured_llm
+
+# Parallel execution
+from langchain_core.runnables import RunnableParallel, RunnablePassthrough
+parallel = RunnableParallel(
+    summary=summary_chain,
+    sentiment=sentiment_chain,
+    original=RunnablePassthrough()
+)
+
+# Dynamic routing
+from langchain_core.runnables import RunnableBranch
+branch = RunnableBranch(
+    (lambda x: x["topic"] == "code", code_chain),
+    default_chain
+)`}]},
+    {id:'lc-rag', title:'RAG — Retrieval Augmented Generation', tags:['advanced'], desc:'Load, split, embed, retrieve',
+     content:[{type:'code', label:'python', code:`from langchain_community.document_loaders import PyPDFLoader, WebBaseLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_openai import OpenAIEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+
+# 1. Load documents
+loader = PyPDFLoader("docs/manual.pdf")
+# loader = WebBaseLoader("https://docs.example.com")
+docs = loader.load()
+
+# 2. Split into chunks
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size=1000,
+    chunk_overlap=200,
+    separators=["\n\n", "\n", " ", ""]
+)
+chunks = splitter.split_documents(docs)
+
+# 3. Embed and store
+embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+vectorstore = FAISS.from_documents(chunks, embeddings)
+vectorstore.save_local("faiss_index")
+
+# Load existing
+vectorstore = FAISS.load_local("faiss_index", embeddings,
+                                allow_dangerous_deserialization=True)
+
+# 4. Create retriever
+retriever = vectorstore.as_retriever(
+    search_type="mmr",      # or "similarity"
+    search_kwargs={"k": 5}
+)
+
+# 5. RAG chain
+prompt = ChatPromptTemplate.from_template("""
+Answer using only the context below.
+Context: {context}
+Question: {question}
+""")
+
+def format_docs(docs):
+    return "\n\n".join(d.page_content for d in docs)
+
+rag_chain = (
+    {"context": retriever | format_docs, "question": RunnablePassthrough()}
+    | prompt | llm | StrOutputParser()
+)
+answer = rag_chain.invoke("What does the manual say about X?")`}]},
+    {id:'lc-memory', title:'Memory & Conversation', tags:['advanced'], desc:'Stateful conversations',
+     content:[{type:'code', label:'python', code:`from langchain_core.chat_history import BaseChatMessageHistory
+from langchain_community.chat_message_histories import ChatMessageHistory
+from langchain_core.runnables.history import RunnableWithMessageHistory
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+
+# In-memory history store
+store = {}
+def get_session_history(session_id: str) -> BaseChatMessageHistory:
+    if session_id not in store:
+        store[session_id] = ChatMessageHistory()
+    return store[session_id]
+
+# Chain with history
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are a helpful assistant."),
+    MessagesPlaceholder(variable_name="history"),
+    ("human", "{input}"),
+])
+chain = prompt | llm | StrOutputParser()
+
+chain_with_history = RunnableWithMessageHistory(
+    chain,
+    get_session_history,
+    input_messages_key="input",
+    history_messages_key="history",
+)
+
+# Invoke with session
+config = {"configurable": {"session_id": "user-123"}}
+resp1 = chain_with_history.invoke({"input": "My name is Alice"}, config=config)
+resp2 = chain_with_history.invoke({"input": "What is my name?"}, config=config)
+# resp2 knows it's Alice!`}]},
+    {id:'lc-tools', title:'Tools & Agents', tags:['agents'], desc:'Tool calling and agent creation',
+     content:[{type:'code', label:'python', code:`from langchain_core.tools import tool
+from langchain.agents import create_tool_calling_agent, AgentExecutor
+from langchain_community.tools import DuckDuckGoSearchRun, WikipediaQueryRun
+
+# Define custom tool
+@tool
+def get_weather(city: str) -> str:
+    """Get current weather for a city. Use when user asks about weather."""
+    return f"Weather in {city}: 22°C, sunny"  # Replace with real API
+
+@tool
+def calculate(expression: str) -> str:
+    """Evaluate a mathematical expression. e.g. '2 + 2', '10 / 3'"""
+    try: return str(eval(expression))
+    except: return "Invalid expression"
+
+# Built-in tools
+search = DuckDuckGoSearchRun()
+wiki = WikipediaQueryRun()
+
+# Create agent
+tools = [get_weather, calculate, search]
+
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are a helpful assistant with access to tools."),
+    ("human", "{input}"),
+    MessagesPlaceholder(variable_name="agent_scratchpad"),
+])
+
+agent = create_tool_calling_agent(llm, tools, prompt)
+executor = AgentExecutor(agent=agent, tools=tools, verbose=True, max_iterations=5)
+
+result = executor.invoke({"input": "What's the weather in Mumbai and 15 * 23?"})`}]},
+  ]
+},
+
+langgraph: {
+  icon: '🕸️', title: 'LangGraph', desc: 'Stateful multi-agent workflows as graphs',
+  cards: [
+    {id:'lg-install', title:'Installation & Concepts', tags:['basic'], desc:'LangGraph setup and core concepts',
+     content:[{type:'code', label:'bash', code:`pip install langgraph langgraph-checkpoint-sqlite`},
+     {type:'code', label:'python', code:`from langgraph.graph import StateGraph, END, START
+from langgraph.graph.message import add_messages
+from langgraph.checkpoint.memory import MemorySaver
+from typing import Annotated, TypedDict
+from langchain_openai import ChatOpenAI
+
+# Core concepts:
+# StateGraph  — directed graph with shared state
+# Node        — function that reads/writes state
+# Edge        — connection between nodes
+# Conditional — router to decide next node
+# Checkpointer— persistence for state (memory/sqlite/postgres)
+# START/END   — special entry/exit nodes`}]},
+    {id:'lg-state', title:'State Definition', tags:['basic'], desc:'Defining graph state',
+     content:[{type:'code', label:'python', code:`from typing import TypedDict, Annotated, List
+from langgraph.graph.message import add_messages
+from langchain_core.messages import BaseMessage
+
+# Simple state
+class SimpleState(TypedDict):
+    messages: Annotated[list, add_messages]  # auto-append messages
+    step_count: int
+    result: str
+
+# Richer state with custom reducer
+from typing import Sequence
+import operator
+
+class AgentState(TypedDict):
+    # add_messages = appends new msgs to existing list
+    messages: Annotated[Sequence[BaseMessage], operator.add]
+    next_step: str          # which node to run next
+    context: dict           # shared context dict
+    error: str | None       # error state
+
+# State with default values
+from dataclasses import dataclass, field
+
+@dataclass
+class WorkflowState:
+    input: str = ""
+    output: str = ""
+    steps: List[str] = field(default_factory=list)
+    retry_count: int = 0
+    done: bool = False`}]},
+    {id:'lg-basic-graph', title:'Basic Graph Construction', tags:['basic'], desc:'Build and compile a graph',
+     content:[{type:'code', label:'python', code:`from langgraph.graph import StateGraph, END, START
+from langgraph.graph.message import add_messages
+from typing import TypedDict, Annotated
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(model="gpt-4o")
+
+# 1. Define state
+class State(TypedDict):
+    messages: Annotated[list, add_messages]
+
+# 2. Define nodes (functions)
+def chatbot(state: State) -> dict:
+    """Main LLM node."""
+    response = llm.invoke(state["messages"])
+    return {"messages": [response]}
+
+def process(state: State) -> dict:
+    """Pre-processing node."""
+    last = state["messages"][-1].content
+    return {"messages": [("human", f"[processed] {last}")]}
+
+# 3. Build graph
+builder = StateGraph(State)
+builder.add_node("process", process)
+builder.add_node("chatbot", chatbot)
+
+# 4. Add edges
+builder.add_edge(START, "process")
+builder.add_edge("process", "chatbot")
+builder.add_edge("chatbot", END)
+
+# 5. Compile
+graph = builder.compile()
+
+# 6. Invoke
+result = graph.invoke({"messages": [("human", "Hello!")]})
+print(result["messages"][-1].content)`}]},
+    {id:'lg-conditional', title:'Conditional Edges & Routing', tags:['advanced'], desc:'Dynamic graph routing',
+     content:[{type:'code', label:'python', code:`from langgraph.graph import StateGraph, END, START
+from langchain_core.messages import ToolMessage
+import json
+
+# Router function — returns name of next node (or END)
+def should_continue(state: State) -> str:
+    """Route based on last message."""
+    messages = state["messages"]
+    last = messages[-1]
+    # If the LLM made tool calls, go to tools node
+    if hasattr(last, "tool_calls") and last.tool_calls:
+        return "tools"
+    return END
+
+# Tool execution node
+def call_tools(state: State) -> dict:
+    tools_by_name = {t.name: t for t in tools}
+    messages = []
+    for call in state["messages"][-1].tool_calls:
+        tool = tools_by_name[call["name"]]
+        result = tool.invoke(call["args"])
+        messages.append(ToolMessage(content=str(result), tool_call_id=call["id"]))
+    return {"messages": messages}
+
+# Build graph with routing
+builder = StateGraph(State)
+builder.add_node("agent", agent_node)
+builder.add_node("tools", call_tools)
+
+builder.add_edge(START, "agent")
+builder.add_conditional_edges(
+    "agent",            # from node
+    should_continue,    # router function
+    {
+        "tools": "tools",   # "tools" → tools node
+        END: END            # END → exit
+    }
+)
+builder.add_edge("tools", "agent")  # after tools, back to agent
+
+graph = builder.compile()`}]},
+    {id:'lg-memory', title:'Persistence & Checkpointing', tags:['advanced'], desc:'Save and resume graph state',
+     content:[{type:'code', label:'python', code:`from langgraph.checkpoint.memory import MemorySaver
+from langgraph.checkpoint.sqlite import SqliteSaver
+
+# In-memory (lost on restart)
+memory = MemorySaver()
+
+# SQLite (persistent)
+with SqliteSaver.from_conn_string("checkpoints.db") as memory:
+    graph = builder.compile(checkpointer=memory)
+
+    # thread_id groups messages into a "conversation"
+    config = {"configurable": {"thread_id": "user-abc-session-1"}}
+
+    # First turn
+    result = graph.invoke(
+        {"messages": [("human", "My name is Alice")]},
+        config=config
+    )
+
+    # Second turn — remembers Alice!
+    result = graph.invoke(
+        {"messages": [("human", "What is my name?")]},
+        config=config
+    )
+
+    # Get current state
+    state = graph.get_state(config)
+    print(state.values["messages"])
+
+    # Replay from specific checkpoint
+    history = list(graph.get_state_history(config))
+    for snap in history[:3]:
+        print(snap.config, snap.values)`}]},
+    {id:'lg-multiagent', title:'Multi-Agent Patterns', tags:['agents'], desc:'Supervisor & subgraph patterns',
+     content:[{type:'code', label:'python', code:`from langgraph.graph import StateGraph, END, START
+from typing import TypedDict, Annotated, List
+import operator
+
+# ── PATTERN 1: Supervisor ─────────────────────────────────────────────
+class SupervisorState(TypedDict):
+    messages: Annotated[list, operator.add]
+    next: str  # which agent to call
+
+members = ["researcher", "coder", "reviewer"]
+
+supervisor_system = f"""
+You are a supervisor managing: {members}.
+Given the conversation, decide who should act next.
+Reply with ONLY one of: {members} or FINISH.
+"""
+
+def supervisor_node(state):
+    resp = llm.invoke([("system", supervisor_system)] + state["messages"])
+    return {"next": resp.content.strip()}
+
+def route_from_supervisor(state):
+    if state["next"] == "FINISH": return END
+    return state["next"]
+
+# Build
+builder = StateGraph(SupervisorState)
+builder.add_node("supervisor", supervisor_node)
+for name in members:
+    builder.add_node(name, make_agent_node(name))
+
+builder.add_edge(START, "supervisor")
+builder.add_conditional_edges("supervisor", route_from_supervisor)
+for name in members:
+    builder.add_edge(name, "supervisor")  # always report back
+
+# ── PATTERN 2: Subgraph ───────────────────────────────────────────────
+# Compile inner graph
+inner_graph = inner_builder.compile()
+
+# Use as node in outer graph
+outer_builder.add_node("sub_workflow", inner_graph)
+outer_builder.add_edge(START, "sub_workflow")
+outer_builder.add_edge("sub_workflow", END)`}]},
+    {id:'lg-humanloop', title:'Human-in-the-Loop', tags:['agents'], desc:'Pause for human approval',
+     content:[{type:'code', label:'python', code:`from langgraph.checkpoint.memory import MemorySaver
+
+memory = MemorySaver()
+graph = builder.compile(
+    checkpointer=memory,
+    interrupt_before=["tools"],    # pause BEFORE tools node
+    # interrupt_after=["agent"],   # or pause AFTER a node
+)
+
+config = {"configurable": {"thread_id": "review-session"}}
+
+# Run until interrupt
+result = graph.invoke({"messages": [("human", "Delete all temp files")]}, config)
+# Graph pauses before executing tools
+
+# Inspect what it wants to do
+state = graph.get_state(config)
+print("Planned action:", state.values["messages"][-1].tool_calls)
+
+# Option 1: Approve — just continue
+final = graph.invoke(None, config)  # None = resume from checkpoint
+
+# Option 2: Override state then continue
+graph.update_state(config, {"messages": [("human", "Actually, list files instead")]})
+final = graph.invoke(None, config)
+
+# Option 3: Reject
+# Just don't resume — let it stay paused`}]},
+    {id:'lg-streaming', title:'Streaming & Debugging', tags:['advanced'], desc:'Stream events and debug graph',
+     content:[{type:'code', label:'python', code:`# Stream final output
+for chunk in graph.stream({"messages": [("human", "Hello")]}, config):
+    print(chunk)
+
+# Stream all events (nodes, edges, LLM tokens)
+for event in graph.stream(
+    {"messages": [("human", "Hello")]},
+    config,
+    stream_mode="values"   # or "updates" or "debug"
+):
+    print(event)
+
+# Get last message token-by-token
+async for event in graph.astream_events(inputs, config, version="v2"):
+    if event["event"] == "on_chat_model_stream":
+        content = event["data"]["chunk"].content
+        if content: print(content, end="", flush=True)
+
+# Visualize graph (requires graphviz)
+from IPython.display import Image
+img = Image(graph.get_graph().draw_mermaid_png())
+
+# Print mermaid diagram source
+print(graph.get_graph().draw_mermaid())
+
+# Print all nodes and edges
+print(graph.get_graph().nodes)
+print(graph.get_graph().edges)`}]},
+  ]
+}
+
+}; // end DATA
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let activeSection = 'all';
+let activeTag = 'all';
+let searchQuery = '';
+let favMode = false;
+let favorites = JSON.parse(localStorage.getItem('devref_favs') || '[]');
+let sidebarCollapsed = false;
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function render() {
+  const container = document.getElementById('content');
+  container.innerHTML = '';
+  let totalRendered = 0;
+
+  Object.entries(DATA).forEach(([sectionKey, section]) => {
+    const shouldShowSection = activeSection === 'all' || activeSection === sectionKey
+                           || (activeSection === 'fav');
+
+    const matchingCards = section.cards.filter(card => {
+      if (activeSection === 'fav' && !favorites.includes(card.id)) return false;
+      if (activeTag !== 'all' && !card.tags.includes(activeTag)) return false;
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const inTitle = card.title.toLowerCase().includes(q);
+        const inDesc = card.desc.toLowerCase().includes(q);
+        const inContent = JSON.stringify(card.content).toLowerCase().includes(q);
+        if (!inTitle && !inDesc && !inContent) return false;
+      }
+      return true;
+    });
+
+    if (!shouldShowSection || matchingCards.length === 0) return;
+    totalRendered += matchingCards.length;
+
+    const block = document.createElement('div');
+    block.className = 'section-block';
+    block.id = 'section-' + sectionKey;
+    block.innerHTML = `
+      <div class="section-header">
+        <span class="section-icon">${section.icon}</span>
+        <div>
+          <div class="section-title">${section.title}</div>
+          <div class="section-desc">${section.desc}</div>
+        </div>
+        <span class="section-count">${matchingCards.length} card${matchingCards.length!==1?'s':''}</span>
+      </div>
+      <div class="cards">${matchingCards.map(renderCard).join('')}</div>
+    `;
+    container.appendChild(block);
+  });
+
+  if (totalRendered === 0) {
+    container.innerHTML = `<div class="empty">
+      <div class="e-icon">🔭</div>
+      <h3>Nothing found</h3>
+      <p>Try a different search term or clear your filters.</p>
+    </div>`;
+  }
+
+  document.getElementById('statTotal').textContent = totalRendered;
+  document.getElementById('statSearch').textContent = searchQuery ? `"${searchQuery}" – ${totalRendered} results` : '–';
+  updateBadges();
+}
+
+function renderCard(card) {
+  const isFav = favorites.includes(card.id);
+  const content = card.content.map(renderContent).join('');
+  const tags = card.tags.map(t => `<span class="tag">${t}</span>`).join('');
+  return `
+    <div class="card" id="card-${card.id}" data-tags="${card.tags.join(' ')}">
+      <div class="card-head">
+        <span class="card-title">${highlightSearch(card.title)}</span>
+        <div class="card-tags">${tags}</div>
+        <button class="fav-btn ${isFav?'active':''}" onclick="toggleFav('${card.id}',this)" title="Favorite">★</button>
+      </div>
+      <div class="card-body">
+        <div class="card-desc">${highlightSearch(card.desc)}</div>
+        ${content}
+      </div>
+    </div>`;
+}
+
+function renderContent(c) {
+  if (c.type === 'cmds') {
+    return c.rows.map(([cmd, desc]) => `
+      <div class="cmd-row">
+        <code>${highlightSearch(escapeHtml(cmd))}</code>
+        <span class="cmd-desc">${highlightSearch(escapeHtml(desc||''))}</span>
+        <button class="copy-btn" onclick="copyText(this,'${escapeAttr(cmd)}')">copy</button>
+      </div>`).join('');
+  }
+  if (c.type === 'code') {
+    const hl = highlightCode(c.code, c.label);
+    return `<div class="code-block">
+      <div class="code-block-head">
+        <span class="code-label">${c.label||'code'}</span>
+        <button class="copy-btn" onclick="copyText(this,\`${escapeAttr(c.code)}\`)">copy all</button>
+      </div>
+      <pre><code>${hl}</code></pre>
+    </div>`;
+  }
+  if (c.type === 'table') {
+    const headers = c.cols.map(col => `<th>${col}</th>`).join('');
+    const rows = c.rows.map(row =>
+      `<tr>${row.map((cell,i) => `<td>${i===0?`<code>${escapeHtml(cell)}</code>`:escapeHtml(cell)}</td>`).join('')}</tr>`
+    ).join('');
+    return `<div style="overflow-x:auto"><table class="ref-table"><thead><tr>${headers}</tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  return '';
+}
+
+function highlightCode(code, lang) {
+  let c = escapeHtml(code);
+  if (['python','javascript','typescript','c++'].includes(lang)) {
+    // keywords
+    const kws = lang==='python'
+      ? 'def|class|import|from|return|if|elif|else|for|while|with|as|try|except|finally|raise|pass|yield|async|await|True|False|None|and|or|not|in|is|lambda|global|nonlocal'
+      : lang==='c++'
+      ? 'auto|const|int|float|double|bool|void|char|struct|class|template|typename|namespace|using|return|if|else|for|while|do|switch|case|break|continue|new|delete|nullptr|true|false|public|private|protected|virtual|override|static|constexpr|inline|explicit|noexcept'
+      : 'const|let|var|function|return|if|else|for|while|do|switch|case|break|continue|new|delete|typeof|instanceof|this|class|extends|import|export|default|from|async|await|try|catch|finally|throw|yield|true|false|null|undefined|interface|type|enum|implements|abstract|readonly|void|never|any|unknown|as|of|in';
+    c = c.replace(new RegExp(`\\b(${kws})\\b`, 'g'), '<span class="kw">$1</span>');
+    // strings
+    c = c.replace(/(&quot;.*?&quot;|&#039;.*?&#039;|`.*?`)/g, '<span class="str">$1</span>');
+    // comments
+    c = c.replace(/(#.*$|\/\/.*$|\/\*[\s\S]*?\*\/)/gm, '<span class="cm">$1</span>');
+    // numbers
+    c = c.replace(/\b(\d+\.?\d*)\b/g, '<span class="num">$1</span>');
+  }
+  if (['bash','batch'].includes(lang)) {
+    c = c.replace(/(#.*$|REM\s.*$)/gim, '<span class="cm">$1</span>');
+    c = c.replace(/(&quot;[^&]*&quot;)/g, '<span class="str">$1</span>');
+    c = c.replace(/(-{1,2}[\w-]+)/g, '<span class="flag">$1</span>');
+  }
+  return c;
+}
+
+// ── INTERACTIONS ──────────────────────────────────────────────────────────────
+function toggleFav(id, btn) {
+  if (favorites.includes(id)) {
+    favorites = favorites.filter(f => f !== id);
+    btn.classList.remove('active');
+  } else {
+    favorites.push(id);
+    btn.classList.add('active');
+  }
+  localStorage.setItem('devref_favs', JSON.stringify(favorites));
+  document.getElementById('statFavs').textContent = favorites.length;
+  document.getElementById('badge-fav').textContent = favorites.length || '';
+  if (activeSection === 'fav') render();
+}
+
+function filterSection(key, el) {
+  activeSection = key;
+  favMode = key === 'fav';
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+  render();
+  document.getElementById('mainArea').scrollTo({top:0, behavior:'smooth'});
+}
+
+function filterTag(tag, btn) {
+  activeTag = tag;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('on'));
+  btn.classList.add('on');
+  render();
+}
+
+function onSearch(q) {
+  searchQuery = q;
+  render();
+}
+
+function clearSearch() {
+  document.getElementById('globalSearch').value = '';
+  searchQuery = '';
+  render();
+}
+
+function toggleFavMode() {
+  const btn = document.getElementById('favToggleBtn');
+  if (activeSection === 'fav') {
+    filterSection('all', document.querySelector('[data-section="all"]'));
+    btn.classList.remove('active');
+  } else {
+    filterSection('fav', document.querySelector('[data-section="fav"]'));
+    btn.classList.add('active');
+  }
+}
+
+function toggleSidebar() {
+  sidebarCollapsed = !sidebarCollapsed;
+  document.getElementById('sidebar').classList.toggle('collapsed', sidebarCollapsed);
+}
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.dataset.theme === 'dark';
+  html.dataset.theme = isDark ? 'light' : 'dark';
+  document.getElementById('themeBtn').textContent = isDark ? '🌙' : '☀️';
+  localStorage.setItem('devref_theme', html.dataset.theme);
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function copyText(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ copied';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = btn.textContent.includes('all') ? 'copy all' : 'copy'; btn.classList.remove('copied'); }, 1800);
+    showToast('Copied to clipboard!');
+  });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function highlightSearch(text) {
+  if (!searchQuery || !text) return text;
+  const re = new RegExp(`(${escapeRegex(searchQuery)})`, 'gi');
+  return text.replace(re, '<span class="hl">$1</span>');
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+function escapeAttr(s) {
+  return s.replace(/\\/g,'\\\\').replace(/`/g,'\\`').replace(/\$/g,'\\$');
+}
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+}
+
+function updateBadges() {
+  let total = 0;
+  Object.entries(DATA).forEach(([key, sec]) => {
+    const count = sec.cards.length;
+    total += count;
+    const el = document.getElementById('badge-' + key);
+    if (el) el.textContent = count;
+  });
+  document.getElementById('badge-all').textContent = total;
+  document.getElementById('badge-fav').textContent = favorites.length || '';
+  document.getElementById('statFavs').textContent = favorites.length;
+}
+
+// Sidebar category filter
+document.getElementById('sideSearch').addEventListener('input', e => {
+  const q = e.target.value.toLowerCase();
+  document.querySelectorAll('.nav-item[data-section]').forEach(item => {
+    const sec = item.dataset.section;
+    const d = DATA[sec];
+    const match = !q || (d && d.title.toLowerCase().includes(q)) || sec.includes(q);
+    item.style.display = match ? '' : 'none';
+  });
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key === 'k') { e.preventDefault(); document.getElementById('globalSearch').focus(); }
+  if (e.ctrlKey && e.key === 'b') toggleSidebar();
+  if (e.ctrlKey && e.key === 't') toggleTheme();
+  if (e.key === 'Escape') { clearSearch(); document.getElementById('globalSearch').blur(); }
+});
+
+// Scroll progress & back to top
+document.getElementById('mainArea').addEventListener('scroll', () => {
+  const el = document.getElementById('mainArea');
+  const pct = el.scrollTop / (el.scrollHeight - el.clientHeight) * 100;
+  document.getElementById('progress').style.width = pct + '%';
+  document.getElementById('backTop').style.display = el.scrollTop > 400 ? 'block' : 'none';
+});
+
+// Init
+(function init() {
+  const saved = localStorage.getItem('devref_theme');
+  if (saved) {
+    document.documentElement.dataset.theme = saved;
+    document.getElementById('themeBtn').textContent = saved === 'dark' ? '🌙' : '☀️';
+  }
+  render();
+})();
+</script>
+</body>
+</html>

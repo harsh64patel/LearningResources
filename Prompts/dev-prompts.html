@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dev Prompt Arsenal</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;700;800&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --border: #1e1e2e;
+    --accent-cpp: #00d4ff;
+    --accent-js: #f7df1e;
+    --accent-py: #3776ab;
+    --accent-ai: #a855f7;
+    --accent-mgr: #22c55e;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --glow: rgba(0,212,255,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  header {
+    position: relative;
+    padding: 60px 40px 40px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(0,212,255,0.04) 0%, transparent 100%);
+  }
+
+  .header-tag {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -2px;
+  }
+
+  h1 span {
+    display: block;
+    color: var(--muted);
+    font-size: 0.45em;
+    font-weight: 400;
+    letter-spacing: 0;
+    margin-top: 8px;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 0;
+    padding: 0 40px;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,15,0.95);
+    backdrop-filter: blur(12px);
+    z-index: 10;
+  }
+
+  .tabs::-webkit-scrollbar { display: none; }
+
+  .tab {
+    padding: 18px 28px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    cursor: pointer;
+    position: relative;
+    white-space: nowrap;
+    transition: color 0.2s;
+    text-transform: uppercase;
+  }
+
+  .tab::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0; right: 0;
+    height: 2px;
+    background: currentColor;
+    transform: scaleX(0);
+    transition: transform 0.2s;
+  }
+
+  .tab:hover { color: var(--text); }
+
+  .tab.active::after { transform: scaleX(1); }
+
+  .tab[data-color="cpp"].active { color: var(--accent-cpp); }
+  .tab[data-color="js"].active { color: var(--accent-js); }
+  .tab[data-color="py"].active { color: var(--accent-py); }
+  .tab[data-color="ai"].active { color: var(--accent-ai); }
+  .tab[data-color="mgr"].active { color: var(--accent-mgr); }
+
+  .content { padding: 40px; max-width: 1400px; }
+
+  .section { display: none; }
+  .section.active { display: block; animation: fadeIn 0.3s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-intro {
+    margin-bottom: 40px;
+    padding: 24px 28px;
+    border-left: 3px solid currentColor;
+    background: rgba(255,255,255,0.02);
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--muted);
+  }
+
+  .prompts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    gap: 20px;
+  }
+
+  .prompt-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: default;
+  }
+
+  .prompt-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255,255,255,0.12);
+  }
+
+  .prompt-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 12px 12px 0 0;
+    background: var(--card-color, var(--accent-cpp));
+    opacity: 0.6;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--text);
+  }
+
+  .card-tag {
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.06);
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .prompt-text {
+    font-size: 12px;
+    line-height: 1.8;
+    color: #94a3b8;
+    background: rgba(0,0,0,0.3);
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid rgba(255,255,255,0.04);
+    position: relative;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .prompt-text .placeholder {
+    color: var(--card-color, var(--accent-cpp));
+    opacity: 0.9;
+  }
+
+  .copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 5px 12px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.5px;
+  }
+
+  .copy-btn:hover {
+    background: rgba(255,255,255,0.12);
+    color: var(--text);
+  }
+
+  .copy-btn.copied {
+    color: #22c55e;
+    border-color: #22c55e40;
+  }
+
+  .category-label {
+    grid-column: 1 / -1;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 0 4px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+    margin-top: 16px;
+  }
+
+  .category-label:first-child { margin-top: 0; }
+
+  /* Color themes per section */
+  .cpp-theme { --card-color: var(--accent-cpp); }
+  .js-theme { --card-color: var(--accent-js); }
+  .py-theme { --card-color: var(--accent-py); }
+  .ai-theme { --card-color: var(--accent-ai); }
+  .mgr-theme { --card-color: var(--accent-mgr); }
+
+  .section-intro.cpp-theme { color: #94a3b8; border-color: var(--accent-cpp); }
+  .section-intro.js-theme { border-color: var(--accent-js); }
+  .section-intro.py-theme { border-color: var(--accent-py); }
+  .section-intro.ai-theme { border-color: var(--accent-ai); }
+  .section-intro.mgr-theme { border-color: var(--accent-mgr); }
+
+  @media (max-width: 600px) {
+    header, .tabs, .content { padding-left: 20px; padding-right: 20px; }
+    .prompts-grid { grid-template-columns: 1fr; }
+    .tab { padding: 14px 16px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-tag">// prompt-arsenal v1.0</div>
+  <h1>Dev Prompt<span>Must-have AI prompts for engineers & tech managers</span></h1>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="cpp" data-color="cpp">C++</button>
+  <button class="tab" data-tab="js" data-color="js">JavaScript</button>
+  <button class="tab" data-tab="py" data-color="py">Python</button>
+  <button class="tab" data-tab="ai" data-color="ai">AI Agent Dev</button>
+  <button class="tab" data-tab="mgr" data-color="mgr">Tech Manager</button>
+</nav>
+
+<div class="content">
+
+  <!-- C++ -->
+  <div class="section cpp-theme active" id="cpp">
+    <div class="section-intro cpp-theme">
+      Prompts tuned for modern C++ (C++17/20/23) — covering performance, safety, memory, and architecture patterns used in systems, game, and embedded engineering.
+    </div>
+    <div class="prompts-grid">
+
+      <div class="category-label">Code Review & Safety</div>
+
+      <div class="prompt-card cpp-theme">
+        <div class="card-header">
+          <div class="card-title">Memory Safety Audit</div>
+          <div class="card-tag">Safety</div>
+        </div>
+        <div class="prompt-text">Review this C++ code for memory safety issues. Check for: raw pointer leaks, use-after-free, dangling references, uninitialized variables, buffer overflows, and missing RAII patterns. Suggest modern C++ alternatives (smart pointers, std::span, std::string_view) where applicable.
+
+<span class="placeholder">[paste code]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="prompt-card cpp-theme">
+        <div class="card-header">
+          <div class="card-title">Undefined Behavior Finder</div>
+          <div class="card-tag">Safety</div>
+        </div>
+        <div class="prompt-text">Analyze this C++ code for undefined behavior. Look for: signed integer overflow, strict aliasing violations, out-of-bounds access, unsequenced modifications, null pointer dereference, and misaligned memory access. Explain WHY each is UB per the C++ standard.
+
+<span class="placeholder">[paste code]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="category-label">Performance</div>
+
+      <div class="prompt-card cpp-theme">
+        <div class="card-header">
+          <div class="card-title">Performance Bottleneck Analysis</div>
+          <div class="card-tag">Perf</div>
+        </div>
+        <div class="prompt-text">Identify performance bottlenecks in this C++ code. Consider: cache misses, unnecessary allocations, virtual dispatch overhead, branch mispredictions, missed vectorization opportunities, and lock contention. Provide concrete optimization suggestions with expected impact.
+
+<span class="placeholder">[paste code]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="prompt-card cpp-theme">
+        <div class="card-header">
+          <div class="card-title">Zero-Cost Abstraction Rewrite</div>
+          <div class="card-tag">Perf</div>
+        </div>
+        <div class="prompt-text">Rewrite this code using zero-cost abstractions. Replace runtime polymorphism with CRTP or std::variant where appropriate. Use constexpr, if constexpr, and template metaprogramming to move work to compile time. Target: <span class="placeholder">[runtime/embedded/game]</span>.
+
+<span class="placeholder">[paste code]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="category-label">Modern C++ Patterns</div>
+
+      <div class="prompt-card cpp-theme">
+        <div class="card-header">
+          <div class="card-title">Modernize to C++20/23</div>
+          <div class="card-tag">Modernize</div>
+        </div>
+        <div class="prompt-text">Modernize this legacy C++ code to C++20/23. Use: concepts instead of SFINAE, ranges/views instead of raw loops, std::expected for error handling instead of exceptions/error codes, coroutines where async patterns exist, and modules if applicable. Preserve behavior.
+
+<span class="placeholder">[paste code]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="prompt-card cpp-theme">
+        <div class="card-header">
+          <div class="card-title">CMake Build System</div>
+          <div class="card-tag">Tooling</div>
+        </div>
+        <div class="prompt-text">Write a modern CMakeLists.txt for a C++ project with: target-based dependencies, proper include visibility (PUBLIC/PRIVATE/INTERFACE), sanitizer build presets, vcpkg/Conan integration, and CTest setup. Project: <span class="placeholder">[describe project structure and dependencies]</span>.</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="prompt-card cpp-theme">
+        <div class="card-header">
+          <div class="card-title">Thread-Safe Design Review</div>
+          <div class="card-tag">Concurrency</div>
+        </div>
+        <div class="prompt-text">Review this concurrent C++ code for thread safety issues. Check for: data races, improper use of atomics (memory ordering), deadlock potential, missing volatile on hardware registers, lock-free algorithm correctness, and ABA problem. Suggest fixes.
+
+<span class="placeholder">[paste code]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="prompt-card cpp-theme">
+        <div class="card-header">
+          <div class="card-title">Unit Test Generation (GTest)</div>
+          <div class="card-tag">Testing</div>
+        </div>
+        <div class="prompt-text">Write comprehensive Google Test unit tests for this C++ class/function. Cover: happy path, edge cases, null/empty inputs, boundary conditions, exception safety, and thread safety if applicable. Use RAII for setup/teardown and parameterized tests where DRY applies.
+
+<span class="placeholder">[paste code]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <div class="section js-theme" id="js">
+    <div class="section-intro js-theme">
+      Prompts for modern JavaScript/TypeScript — frontend, Node.js, APIs, async patterns, and the full JS ecosystem used daily by web and fullstack engineers.
+    </div>
+    <div class="prompts-grid">
+
+      <div class="category-label">TypeScript & Types</div>
+
+      <div class="prompt-card js-theme">
+        <div class="card-header">
+          <div class="card-title">Type Safety Upgrade</div>
+          <div class="card-tag">TypeScript</div>
+        </div>
+        <div class="prompt-text">Convert this JavaScript to strict TypeScript. Eliminate all `any` types. Add proper generics, discriminated unions for state, Zod schemas for runtime validation, and utility types (Partial, Required, Pick, Omit) where appropriate. Enable strictNullChecks.
+
+<span class="placeholder">[paste code]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="prompt-card js-theme">
+        <div class="card-header">
+          <div class="card-title">API Response Types Generator</div>
+          <div class="card-tag">TypeScript</div>
+        </div>
+        <div class="prompt-text">Generate TypeScript interfaces and Zod validation schemas for this API response. Include: nested object types, optional fields, union types for status/enum fields, and a type-safe fetch wrapper function that validates at runtime.
+
+<span class="placeholder">[paste JSON response or OpenAPI spec]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="category-label">Async & State</div>
+
+      <div class="prompt-card js-theme">
+        <div class="card-header">
+          <div class="card-title">Async Error Handling Refactor</div>
+          <div class="card-tag">Async</div>
+        </div>
+        <div class="prompt-text">Refactor this async JavaScript code to handle errors properly. Use Result/Either pattern instead of thrown exceptions. Add retry logic with exponential backoff for network calls, proper cancellation with AbortController, and structured error types.
+
+<span class="placeholder">[paste code]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="prompt-card js-theme">
+        <div class="card-header">
+          <div class="card-title">React Performance Audit</div>
+          <div class="card-tag">React</div>
+        </div>
+        <div class="prompt-text">Audit this React component for performance issues. Check for: unnecessary re-renders, missing useMemo/useCallback, stale closures in effects, improper key usage in lists, missing Suspense boundaries, and prop drilling that should use context or state management.
+
+<span class="placeholder">[paste component]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="category-label">Node.js & Backend</div>
+
+      <div class="prompt-card js-theme">
+        <div class="card-header">
+          <div class="card-title">REST → tRPC Migration</div>
+          <div class="card-tag">API</div>
+        </div>
+        <div class="prompt-text">Convert this REST API endpoint to tRPC procedure. Add: input validation with Zod, proper error handling with TRPCError, middleware for auth, and generate the matching client-side hook. Keep the business logic identical.
+
+<span class="placeholder">[paste REST handler]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="prompt-card js-theme">
+        <div class="card-header">
+          <div class="card-title">Node.js Security Checklist</div>
+          <div class="card-tag">Security</div>
+        </div>
+        <div class="prompt-text">Review this Node.js/Express API for security vulnerabilities: SQL/NoSQL injection, XSS via response headers, missing rate limiting, insecure JWT handling, path traversal, prototype pollution, SSRF, and dependency vulnerabilities. Provide fixes for each.
+
+<span class="placeholder">[paste route handlers or middleware]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="prompt-card js-theme">
+        <div class="card-header">
+          <div class="card-title">Bundle Size Optimization</div>
+          <div class="card-tag">Perf</div>
+        </div>
+        <div class="prompt-text">Analyze this webpack/vite config and imports for bundle size issues. Identify: tree-shaking failures, missing code splitting, large dependencies with smaller alternatives, missing lazy loading for routes, and unnecessary polyfills. Suggest concrete changes with estimated savings.
+
+<span class="placeholder">[paste config + main imports]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="prompt-card js-theme">
+        <div class="card-header">
+          <div class="card-title">Vitest Unit Tests</div>
+          <div class="card-tag">Testing</div>
+        </div>
+        <div class="prompt-text">Write Vitest unit tests for this module. Mock external dependencies with vi.mock(). Cover: happy path, error states, async edge cases, and boundary conditions. Use describe blocks for grouping and add test.each for parameterized cases. Target 90%+ branch coverage.
+
+<span class="placeholder">[paste module]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Python -->
+  <div class="section py-theme" id="py">
+    <div class="section-intro py-theme">
+      Prompts for Python engineers across data engineering, backend APIs, scripting, ML pipelines, and infrastructure automation — emphasizing Pythonic style and production readiness.
+    </div>
+    <div class="prompts-grid">
+
+      <div class="category-label">Code Quality</div>
+
+      <div class="prompt-card py-theme">
+        <div class="card-header">
+          <div class="card-title">Pythonic Refactor</div>
+          <div class="card-tag">Quality</div>
+        </div>
+        <div class="prompt-text">Refactor this Python code to be idiomatic. Use: list/dict/generator comprehensions appropriately, context managers, dataclasses or attrs for data structures, pathlib instead of os.path, f-strings, walrus operator where it clarifies intent, and proper unpacking.
+
+<span class="placeholder">[paste code]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="prompt-card py-theme">
+        <div class="card-header">
+          <div class="card-title">Type Hints + mypy Compliance</div>
+          <div class="card-tag">Types</div>
+        </div>
+        <div class="prompt-text">Add comprehensive type hints to this Python code to make it mypy --strict compliant. Use: Protocol for duck typing, TypeVar for generics, TypedDict for structured dicts, Literal types for enums, and Optional/Union correctly. Add overload decorators where needed.
+
+<span class="placeholder">[paste code]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="category-label">Performance & Scale</div>
+
+      <div class="prompt-card py-theme">
+        <div class="card-header">
+          <div class="card-title">Async Python Migration</div>
+          <div class="card-tag">Async</div>
+        </div>
+        <div class="prompt-text">Convert this synchronous Python code to async using asyncio. Replace blocking I/O with async equivalents (aiohttp, aiofiles, asyncpg). Use asyncio.gather() for concurrency, proper semaphores for rate limiting, and async context managers. Keep sync fallback.
+
+<span class="placeholder">[paste code]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="prompt-card py-theme">
+        <div class="card-header">
+          <div class="card-title">Pandas → Polars Migration</div>
+          <div class="card-tag">Data</div>
+        </div>
+        <div class="prompt-text">Migrate this Pandas data pipeline to Polars for better performance. Translate: groupby/agg operations, apply() calls to expressions, merge operations, and rolling/window functions. Use lazy evaluation (LazyFrame) where possible. Note any behavioral differences.
+
+<span class="placeholder">[paste pandas code]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="category-label">APIs & Infrastructure</div>
+
+      <div class="prompt-card py-theme">
+        <div class="card-header">
+          <div class="card-title">FastAPI Endpoint Design</div>
+          <div class="card-tag">API</div>
+        </div>
+        <div class="prompt-text">Design a FastAPI endpoint for: <span class="placeholder">[describe feature]</span>. Include: Pydantic v2 models with validators, dependency injection for DB/auth, background tasks if needed, proper HTTP status codes, OpenAPI examples, and pytest fixtures for testing. Follow 12-factor app principles.</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="prompt-card py-theme">
+        <div class="card-header">
+          <div class="card-title">Error Handling Strategy</div>
+          <div class="card-tag">Robustness</div>
+        </div>
+        <div class="prompt-text">Add production-grade error handling to this Python code. Create a custom exception hierarchy, add structured logging with context (structlog/loguru), implement retry logic with tenacity, add circuit breaker patterns for external services, and ensure all errors are observable.
+
+<span class="placeholder">[paste code]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="prompt-card py-theme">
+        <div class="card-header">
+          <div class="card-title">pytest Test Suite</div>
+          <div class="card-tag">Testing</div>
+        </div>
+        <div class="prompt-text">Write a comprehensive pytest test suite for this Python module. Use: fixtures with appropriate scope, parametrize for data-driven tests, pytest-mock for dependencies, hypothesis for property-based tests where applicable, and freezegun for time-dependent logic.
+
+<span class="placeholder">[paste module]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="prompt-card py-theme">
+        <div class="card-header">
+          <div class="card-title">CLI Tool with Typer</div>
+          <div class="card-tag">Tooling</div>
+        </div>
+        <div class="prompt-text">Build a production-ready CLI tool using Typer for: <span class="placeholder">[describe tool purpose]</span>. Include: subcommands, rich output formatting, progress bars for long operations, config file support (TOML), proper --help docs, shell completion, and a Dockerfile for distribution.</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- AI Agent Dev -->
+  <div class="section ai-theme" id="ai">
+    <div class="section-intro ai-theme">
+      Prompts for engineers building LLM-powered agents, RAG systems, tool-use pipelines, and AI infrastructure — covering prompt engineering, eval, and reliability patterns.
+    </div>
+    <div class="prompts-grid">
+
+      <div class="category-label">Prompt Engineering</div>
+
+      <div class="prompt-card ai-theme">
+        <div class="card-header">
+          <div class="card-title">System Prompt Optimizer</div>
+          <div class="card-tag">Prompting</div>
+        </div>
+        <div class="prompt-text">Critique and improve this system prompt. Make it: more specific about the agent's persona and constraints, use XML tags for structure, add few-shot examples, clarify what the agent should NOT do, add output format instructions, and reduce ambiguity that causes hallucination.
+
+<span class="placeholder">[paste current system prompt]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="prompt-card ai-theme">
+        <div class="card-header">
+          <div class="card-title">Tool/Function Schema Designer</div>
+          <div class="card-tag">Tool Use</div>
+        </div>
+        <div class="prompt-text">Design a JSON Schema for an AI tool that: <span class="placeholder">[describe tool purpose]</span>. Make parameters: clearly named with descriptions the LLM can reason about, properly typed with enums where applicable, with required vs optional distinction clear. Add an example invocation and explain the design choices.</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="category-label">RAG & Retrieval</div>
+
+      <div class="prompt-card ai-theme">
+        <div class="card-header">
+          <div class="card-title">RAG Pipeline Review</div>
+          <div class="card-tag">RAG</div>
+        </div>
+        <div class="prompt-text">Review this RAG implementation for common failure modes: chunking strategy (is chunk size appropriate for the content?), embedding model choice vs retrieval use case, reranking absence, missing metadata filtering, context window stuffing, and lack of citation/grounding in the final prompt.
+
+<span class="placeholder">[paste RAG pipeline code or description]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="prompt-card ai-theme">
+        <div class="card-header">
+          <div class="card-title">Chunking Strategy Advisor</div>
+          <div class="card-tag">RAG</div>
+        </div>
+        <div class="prompt-text">Recommend the optimal chunking strategy for this document type and retrieval use case. Consider: semantic chunking vs fixed-size, overlap %, parent-child chunking, sentence-window retrieval, and metadata to attach per chunk. Content type: <span class="placeholder">[describe docs]</span>. Query type: <span class="placeholder">[describe expected queries]</span>.</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="category-label">Agent Architecture</div>
+
+      <div class="prompt-card ai-theme">
+        <div class="card-header">
+          <div class="card-title">Multi-Agent Workflow Design</div>
+          <div class="card-tag">Architecture</div>
+        </div>
+        <div class="prompt-text">Design a multi-agent system to accomplish: <span class="placeholder">[describe task]</span>. Define: agent roles and responsibilities, communication protocol between agents, when to use parallel vs sequential execution, shared memory/state approach, error recovery and retry strategy, and human-in-the-loop checkpoints.</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="prompt-card ai-theme">
+        <div class="card-header">
+          <div class="card-title">LLM Eval Suite Builder</div>
+          <div class="card-tag">Evals</div>
+        </div>
+        <div class="prompt-text">Create an evaluation suite for this AI feature. Define: success metrics (accuracy, latency, cost, hallucination rate), test case categories (happy path, edge cases, adversarial), ground truth generation approach, automated scoring rubric using LLM-as-judge, and regression detection thresholds.
+
+Feature: <span class="placeholder">[describe feature]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="prompt-card ai-theme">
+        <div class="card-header">
+          <div class="card-title">Hallucination Mitigation</div>
+          <div class="card-tag">Reliability</div>
+        </div>
+        <div class="prompt-text">This AI feature is producing hallucinations in these cases: <span class="placeholder">[describe failure cases]</span>. Diagnose root causes and suggest mitigations: prompt constraints, output schema enforcement, retrieval grounding, confidence scoring, self-critique loops, and fallback to deterministic logic where appropriate.</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="prompt-card ai-theme">
+        <div class="card-header">
+          <div class="card-title">Cost & Latency Optimizer</div>
+          <div class="card-tag">Efficiency</div>
+        </div>
+        <div class="prompt-text">Optimize this LLM pipeline for cost and latency. Analyze: prompt token count reduction opportunities, model tier selection (is GPT-4o needed or will Haiku/Sonnet suffice?), caching strategies (prompt prefix caching, semantic cache), batching opportunities, and streaming UX improvements.
+
+<span class="placeholder">[paste pipeline code or architecture]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Tech Manager -->
+  <div class="section mgr-theme" id="mgr">
+    <div class="section-intro mgr-theme">
+      Prompts for technical managers — covering architecture decisions, code reviews, technical writing, hiring, incident management, and team communication without losing engineering credibility.
+    </div>
+    <div class="prompts-grid">
+
+      <div class="category-label">Architecture & Decisions</div>
+
+      <div class="prompt-card mgr-theme">
+        <div class="card-header">
+          <div class="card-title">RFC / Design Doc Writer</div>
+          <div class="card-tag">Docs</div>
+        </div>
+        <div class="prompt-text">Write a technical RFC for: <span class="placeholder">[describe proposal]</span>. Structure: Problem Statement, Goals & Non-Goals, Proposed Solution, Alternatives Considered (with tradeoffs), Security & Privacy Impact, Scalability Analysis, Rollout Plan, and Open Questions. Use precise, engineering-grade language.</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="prompt-card mgr-theme">
+        <div class="card-header">
+          <div class="card-title">Build vs Buy Analysis</div>
+          <div class="card-tag">Decision</div>
+        </div>
+        <div class="prompt-text">Give me a structured build vs buy analysis for: <span class="placeholder">[describe capability]</span>. Consider: total cost of ownership (3-year), engineering time to build & maintain, vendor lock-in risk, customization requirements, compliance/security constraints, team expertise, and strategic differentiation. Conclude with a recommendation.</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="prompt-card mgr-theme">
+        <div class="card-header">
+          <div class="card-title">Tech Debt Prioritization</div>
+          <div class="card-tag">Planning</div>
+        </div>
+        <div class="prompt-text">Help me create a tech debt prioritization framework. Score each item by: user/business impact if left unfixed, engineering velocity drag, risk of outage/incident, effort to fix (T-shirt sizes), and dependency on upcoming roadmap. Output a prioritized list with justifications for stakeholder communication.
+
+Debt items: <span class="placeholder">[list items]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="category-label">Team & Communication</div>
+
+      <div class="prompt-card mgr-theme">
+        <div class="card-header">
+          <div class="card-title">Code Review Feedback Translator</div>
+          <div class="card-tag">Leadership</div>
+        </div>
+        <div class="prompt-text">Rewrite this code review feedback to be: direct but constructive, focused on the code not the person, educational (explain the why), and include a suggested fix. Distinguish between blocking issues and style nits. Keep engineering precision but improve psychological safety.
+
+Original feedback: <span class="placeholder">[paste feedback]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="prompt-card mgr-theme">
+        <div class="card-header">
+          <div class="card-title">Incident Post-Mortem Writer</div>
+          <div class="card-tag">Incidents</div>
+        </div>
+        <div class="prompt-text">Write a blameless post-mortem for this incident: <span class="placeholder">[describe incident]</span>. Include: Executive Summary, Timeline of Events, Root Cause Analysis (5-Whys), Contributing Factors, Impact Assessment, Action Items with owners/dates, and systemic improvements. Tone: factual, blameless, forward-looking.</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="prompt-card mgr-theme">
+        <div class="card-header">
+          <div class="card-title">Technical Interview Question Set</div>
+          <div class="card-tag">Hiring</div>
+        </div>
+        <div class="prompt-text">Create a structured interview question set for a <span class="placeholder">[role/level]</span> engineer. Include: 2 system design scenarios with evaluation rubric, 3 coding problem prompts (easy/medium/hard) with expected signals, 4 behavioral questions using STAR format, and red flags to watch for per question.</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="category-label">Reporting & Stakeholders</div>
+
+      <div class="prompt-card mgr-theme">
+        <div class="card-header">
+          <div class="card-title">Engineering → Business Translator</div>
+          <div class="card-tag">Communication</div>
+        </div>
+        <div class="prompt-text">Translate this technical update into an executive summary for non-technical stakeholders. Remove jargon, frame in business impact (revenue, risk, user experience, cost), highlight decisions needed from leadership, and keep it under 200 words. Preserve technical accuracy.
+
+Technical update: <span class="placeholder">[paste update]</span></div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+      <div class="prompt-card mgr-theme">
+        <div class="card-header">
+          <div class="card-title">Sprint / Quarter Planning</div>
+          <div class="card-tag">Planning</div>
+        </div>
+        <div class="prompt-text">Help me structure a <span class="placeholder">[sprint/quarter]</span> plan for my team. Given these goals: <span class="placeholder">[list goals]</span> and team capacity: <span class="placeholder">[headcount and constraints]</span> — break into deliverables, identify risks and dependencies, suggest sequencing, flag what to cut if capacity is tight, and define success criteria.</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">copy</button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Tab switching
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  // Copy to clipboard
+  function copyPrompt(btn) {
+    const promptEl = btn.previousElementSibling;
+    const text = promptEl.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+</script>
+</body>
+</html>

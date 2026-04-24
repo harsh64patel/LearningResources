@@ -1,0 +1,1829 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI Agent Prompt Toolkit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root[data-theme="dark"] {
+    --bg: #0a0c12;
+    --bg2: #111420;
+    --bg3: #181c2e;
+    --card: #1a1f32;
+    --card-hover: #202540;
+    --border: #2a2f4a;
+    --accent: #f5a623;
+    --accent2: #e06cff;
+    --accent3: #4fffff;
+    --text: #e8ecf4;
+    --text2: #9aa0bb;
+    --text3: #5a607a;
+    --tag-bg: #1e2340;
+    --tag-text: #7b84b0;
+    --copy-bg: #1e2340;
+    --shadow: 0 8px 40px rgba(0,0,0,0.6);
+    --glow: 0 0 24px rgba(245,166,35,0.15);
+    --search-bg: #141828;
+  }
+  :root[data-theme="light"] {
+    --bg: #f4f6fb;
+    --bg2: #eaecf5;
+    --bg3: #e0e4f0;
+    --card: #ffffff;
+    --card-hover: #f0f3ff;
+    --border: #d0d5ea;
+    --accent: #c47a00;
+    --accent2: #8b2fc9;
+    --accent3: #007c8c;
+    --text: #1a1f3a;
+    --text2: #4a5070;
+    --text3: #8890aa;
+    --tag-bg: #e8eaf6;
+    --tag-text: #5566aa;
+    --copy-bg: #eef0fa;
+    --shadow: 0 8px 40px rgba(0,0,0,0.1);
+    --glow: 0 0 24px rgba(196,122,0,0.08);
+    --search-bg: #eef0fb;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: center; gap: 1.2rem;
+    height: 64px;
+    backdrop-filter: blur(12px);
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1.2rem;
+    color: var(--text);
+    white-space: nowrap;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .logo span { color: var(--accent); }
+  .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
+
+  .search-wrap {
+    flex: 1; max-width: 520px; position: relative;
+  }
+  .search-wrap svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text3); pointer-events: none; }
+  #searchInput {
+    width: 100%; padding: 10px 16px 10px 42px;
+    background: var(--search-bg); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text); font-size: 0.9rem;
+    font-family: 'DM Sans', sans-serif;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  #searchInput:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(245,166,35,0.12); }
+  #searchInput::placeholder { color: var(--text3); }
+  #clearSearch {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: var(--text3); cursor: pointer;
+    font-size: 1.1rem; display: none; padding: 2px 6px; border-radius: 4px;
+  }
+  #clearSearch:hover { color: var(--text); }
+
+  .header-right { display: flex; align-items: center; gap: 0.8rem; margin-left: auto; }
+
+  #resultCount {
+    font-size: 0.8rem; color: var(--text3);
+    white-space: nowrap;
+  }
+
+  .theme-btn {
+    background: var(--tag-bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 12px; cursor: pointer;
+    color: var(--text2); font-size: 0.85rem;
+    display: flex; align-items: center; gap: 6px;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .theme-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── LAYOUT ── */
+  .layout { display: flex; min-height: calc(100vh - 64px); }
+
+  /* ── SIDEBAR ── */
+  aside {
+    width: 230px; flex-shrink: 0;
+    padding: 1.5rem 1rem;
+    border-right: 1px solid var(--border);
+    position: sticky; top: 64px; height: calc(100vh - 64px);
+    overflow-y: auto; background: var(--bg2);
+  }
+  .sidebar-label {
+    font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--text3);
+    padding: 0 0.5rem; margin-bottom: 0.5rem;
+  }
+  .cat-btn {
+    display: flex; align-items: center; gap: 0.6rem;
+    width: 100%; padding: 9px 12px;
+    border-radius: 8px; border: none;
+    background: none; color: var(--text2);
+    font-size: 0.85rem; cursor: pointer;
+    text-align: left; transition: all 0.15s;
+    margin-bottom: 2px;
+  }
+  .cat-btn:hover { background: var(--card); color: var(--text); }
+  .cat-btn.active { background: var(--card); color: var(--accent); font-weight: 500; }
+  .cat-btn .cat-icon { font-size: 1rem; width: 20px; text-align: center; }
+  .cat-count {
+    margin-left: auto; font-size: 0.72rem;
+    background: var(--tag-bg); color: var(--tag-text);
+    border-radius: 20px; padding: 2px 8px; font-weight: 500;
+  }
+  .fav-section { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+
+  /* ── MAIN ── */
+  main { flex: 1; padding: 2rem; min-width: 0; }
+
+  .section-header {
+    display: flex; align-items: center; gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.5rem; font-weight: 700;
+    color: var(--text);
+  }
+  .section-divider { flex: 1; height: 1px; background: var(--border); }
+
+  .category-block { margin-bottom: 3rem; }
+  .cat-heading {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem; font-weight: 700;
+    color: var(--text2); text-transform: uppercase;
+    letter-spacing: 0.08em; margin-bottom: 1.2rem;
+    display: flex; align-items: center; gap: 0.6rem;
+  }
+  .cat-heading-icon { font-size: 1.1rem; }
+
+  /* ── PROMPT CARDS ── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1rem;
+  }
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.2rem;
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    position: relative; display: flex; flex-direction: column;
+    gap: 0.8rem;
+  }
+  .card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--glow); }
+
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem; font-weight: 700;
+    color: var(--text); line-height: 1.4;
+    flex: 1;
+  }
+  .card-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .action-btn {
+    background: var(--copy-bg); border: 1px solid var(--border);
+    border-radius: 7px; padding: 5px 9px;
+    cursor: pointer; color: var(--text3); font-size: 0.8rem;
+    transition: all 0.15s; display: flex; align-items: center; gap: 4px;
+  }
+  .action-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .action-btn.fav-active { color: #f5a623; border-color: #f5a623; background: rgba(245,166,35,0.1); }
+  .action-btn.copied { color: #4fffb0; border-color: #4fffb0; background: rgba(79,255,176,0.1); }
+
+  .card-desc {
+    font-size: 0.84rem; color: var(--text2); line-height: 1.6;
+  }
+
+  .prompt-box {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem; color: var(--text2);
+    line-height: 1.7; white-space: pre-wrap;
+    word-break: break-word; position: relative;
+    max-height: 220px; overflow: hidden;
+    transition: max-height 0.3s;
+  }
+  .prompt-box.expanded { max-height: 2000px; }
+  .prompt-fade {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 60px;
+    background: linear-gradient(transparent, var(--bg3));
+    border-radius: 0 0 10px 10px; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .prompt-box.expanded .prompt-fade { opacity: 0; }
+
+  .keyword {
+    display: inline-block; background: rgba(245,166,35,0.15);
+    color: var(--accent); border-radius: 3px; padding: 0 3px;
+    font-weight: 500;
+  }
+
+  .card-footer { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .tag {
+    font-size: 0.72rem; padding: 3px 10px;
+    background: var(--tag-bg); color: var(--tag-text);
+    border-radius: 20px; font-weight: 500;
+    cursor: pointer; transition: all 0.15s;
+    border: 1px solid transparent;
+  }
+  .tag:hover { border-color: var(--accent); color: var(--accent); }
+
+  .expand-btn {
+    margin-left: auto; background: none; border: none;
+    color: var(--accent); font-size: 0.78rem; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-weight: 500;
+    padding: 2px 0;
+  }
+  .expand-btn:hover { text-decoration: underline; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center; padding: 4rem 2rem;
+    display: none;
+  }
+  .empty-state.visible { display: block; }
+  .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .empty-title { font-family: 'Syne', sans-serif; font-size: 1.2rem; color: var(--text2); }
+  .empty-sub { color: var(--text3); font-size: 0.9rem; margin-top: 0.5rem; }
+
+  /* ── HERO BANNER ── */
+  .hero {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 2rem;
+    margin-bottom: 2rem;
+    display: flex; gap: 2rem; align-items: center;
+    overflow: hidden; position: relative;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -40px; right: -40px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(245,166,35,0.12), transparent 70%);
+    pointer-events: none;
+  }
+  .hero-text h1 {
+    font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800;
+    line-height: 1.3; margin-bottom: 0.6rem;
+  }
+  .hero-text h1 span { color: var(--accent); }
+  .hero-text p { color: var(--text2); font-size: 0.9rem; line-height: 1.7; max-width: 600px; }
+  .hero-stats { display: flex; gap: 2rem; margin-top: 1.2rem; flex-wrap: wrap; }
+  .stat { text-align: center; }
+  .stat-num { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; color: var(--accent); }
+  .stat-label { font-size: 0.75rem; color: var(--text3); margin-top: 2px; }
+
+  /* ── HIGHLIGHT ── */
+  mark { background: rgba(245,166,35,0.3); color: var(--text); border-radius: 2px; padding: 0 2px; }
+
+  /* ── SCROLL TO TOP ── */
+  #scrollTop {
+    position: fixed; bottom: 2rem; right: 2rem;
+    background: var(--accent); color: #000;
+    border: none; border-radius: 50%; width: 44px; height: 44px;
+    font-size: 1.2rem; cursor: pointer; display: none;
+    align-items: center; justify-content: center;
+    box-shadow: 0 4px 20px rgba(245,166,35,0.4);
+    transition: transform 0.2s; z-index: 99;
+  }
+  #scrollTop:hover { transform: scale(1.1); }
+  #scrollTop.visible { display: flex; }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed; bottom: 5rem; right: 2rem;
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--text); padding: 10px 18px;
+    border-radius: 10px; font-size: 0.85rem;
+    box-shadow: var(--shadow); z-index: 200;
+    transform: translateY(10px); opacity: 0;
+    transition: all 0.3s; pointer-events: none;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ── SEARCH HIGHLIGHT ── */
+  .card.hidden { display: none; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    aside { display: none; }
+    .cards-grid { grid-template-columns: 1fr; }
+    header { padding: 0 1rem; }
+    main { padding: 1rem; }
+    .hero { flex-direction: column; padding: 1.5rem; }
+  }
+
+  /* ── TRANSITIONS ── */
+  .card { animation: fadeIn 0.3s ease both; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+  /* ── FAVORITES PANEL ── */
+  .fav-badge {
+    position: absolute; top: -4px; right: -4px;
+    background: var(--accent); color: #000;
+    border-radius: 50%; width: 16px; height: 16px;
+    font-size: 0.65rem; font-weight: 700;
+    display: none; align-items: center; justify-content: center;
+  }
+  .fav-badge.visible { display: flex; }
+  .fav-btn-wrap { position: relative; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo"><span class="logo-dot"></span> Agent<span>Prompts</span></div>
+  <div class="search-wrap">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input id="searchInput" type="text" placeholder="Search prompts by keyword, tool, or topic…" autocomplete="off"/>
+    <button id="clearSearch" title="Clear">✕</button>
+  </div>
+  <div class="header-right">
+    <span id="resultCount"></span>
+    <button class="theme-btn" onclick="toggleTheme()">
+      <span id="themeIcon">☀️</span> <span id="themeLabel">Light</span>
+    </button>
+  </div>
+</header>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div class="sidebar-label">Categories</div>
+  <button class="cat-btn active" onclick="filterCat('all', this)">
+    <span class="cat-icon">🏠</span> All Prompts <span class="cat-count" id="cnt-all">0</span>
+  </button>
+  <button class="cat-btn" onclick="filterCat('concepts', this)">
+    <span class="cat-icon">🧠</span> Core Concepts <span class="cat-count" id="cnt-concepts">0</span>
+  </button>
+  <button class="cat-btn" onclick="filterCat('planning', this)">
+    <span class="cat-icon">📐</span> Planning <span class="cat-count" id="cnt-planning">0</span>
+  </button>
+  <button class="cat-btn" onclick="filterCat('langchain', this)">
+    <span class="cat-icon">🔗</span> LangChain <span class="cat-count" id="cnt-langchain">0</span>
+  </button>
+  <button class="cat-btn" onclick="filterCat('langgraph', this)">
+    <span class="cat-icon">🕸️</span> LangGraph <span class="cat-count" id="cnt-langgraph">0</span>
+  </button>
+  <button class="cat-btn" onclick="filterCat('tools', this)">
+    <span class="cat-icon">🔧</span> Tools & APIs <span class="cat-count" id="cnt-tools">0</span>
+  </button>
+  <button class="cat-btn" onclick="filterCat('prompts', this)">
+    <span class="cat-icon">✍️</span> Prompt Engineering <span class="cat-count" id="cnt-prompts">0</span>
+  </button>
+  <button class="cat-btn" onclick="filterCat('memory', this)">
+    <span class="cat-icon">💾</span> Memory & State <span class="cat-count" id="cnt-memory">0</span>
+  </button>
+  <button class="cat-btn" onclick="filterCat('logic', this)">
+    <span class="cat-icon">⚙️</span> Agent Logic <span class="cat-count" id="cnt-logic">0</span>
+  </button>
+  <button class="cat-btn" onclick="filterCat('multiagent', this)">
+    <span class="cat-icon">🤝</span> Multi-Agent <span class="cat-count" id="cnt-multiagent">0</span>
+  </button>
+  <button class="cat-btn" onclick="filterCat('testing', this)">
+    <span class="cat-icon">🧪</span> Testing & Debug <span class="cat-count" id="cnt-testing">0</span>
+  </button>
+  <button class="cat-btn" onclick="filterCat('safety', this)">
+    <span class="cat-icon">🛡️</span> Safety <span class="cat-count" id="cnt-safety">0</span>
+  </button>
+  <button class="cat-btn" onclick="filterCat('deploy', this)">
+    <span class="cat-icon">🚀</span> Deployment <span class="cat-count" id="cnt-deploy">0</span>
+  </button>
+  <button class="cat-btn" onclick="filterCat('ux', this)">
+    <span class="cat-icon">🎨</span> UX & Experience <span class="cat-count" id="cnt-ux">0</span>
+  </button>
+
+  <div class="fav-section">
+    <div class="sidebar-label">Saved</div>
+    <button class="cat-btn" onclick="filterCat('favorites', this)">
+      <span class="cat-icon">⭐</span> Favorites
+      <span class="cat-count" id="cnt-fav">0</span>
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main id="main">
+
+  <div class="hero" id="hero">
+    <div class="hero-text">
+      <h1>AI Agent <span>Prompt Toolkit</span> for Beginners</h1>
+      <p>A curated collection of detailed, beginner-friendly prompts covering the complete lifecycle of building AI agents — from understanding concepts to deploying production-ready systems with LangChain, LangGraph, and more.</p>
+      <div class="hero-stats">
+        <div class="stat"><div class="stat-num" id="total-count">0</div><div class="stat-label">Total Prompts</div></div>
+        <div class="stat"><div class="stat-num">14</div><div class="stat-label">Categories</div></div>
+        <div class="stat"><div class="stat-num">5+</div><div class="stat-label">Frameworks</div></div>
+        <div class="stat"><div class="stat-num" id="fav-count-hero">0</div><div class="stat-label">Saved</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="promptContainer"></div>
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">🔍</div>
+    <div class="empty-title">No prompts found</div>
+    <div class="empty-sub">Try a different keyword or clear your search.</div>
+  </div>
+
+</main>
+</div>
+
+<!-- SCROLL TO TOP -->
+<button id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+const PROMPTS = [
+  // ── CORE CONCEPTS ──
+  {
+    id: 1, cat: 'concepts',
+    title: 'Explain AI Agents to a Complete Beginner',
+    desc: 'Use this when you want to understand what AI agents actually are before writing any code.',
+    tags: ['beginner','concept','overview'],
+    prompt: `I am completely new to AI and programming. Please explain what an AI agent is in very simple terms.
+
+I want to understand:
+1. What makes something an "AI agent" vs a simple chatbot?
+2. How does an agent "think" and decide what to do next?
+3. What real-world problems can AI agents solve? Give me 3 everyday examples.
+4. What are the main parts that every AI agent has?
+5. What is the difference between a reactive agent and a planning agent?
+
+Please use simple analogies (like comparing an agent to a human employee) and avoid technical jargon. At the end, give me a simple diagram or ASCII art showing how an agent works.`
+  },
+  {
+    id: 2, cat: 'concepts',
+    title: 'Explain the ReAct Pattern (Reason + Act)',
+    desc: 'ReAct is the core loop behind most modern agents. Learn it before writing any code.',
+    tags: ['ReAct','reasoning','loop','beginner'],
+    prompt: `Explain the ReAct (Reasoning + Acting) pattern to me as a beginner with no ML background.
+
+Please cover:
+1. What is the Thought → Action → Observation loop?
+2. Walk me through a real example step-by-step (e.g., an agent that looks up the weather and books a calendar event).
+3. Why is ReAct better than just asking an LLM a question directly?
+4. What are the limits of ReAct? When does it fail?
+5. Show me a simple pseudo-code or Python-like example (just 10-15 lines) of how this loop runs.
+6. What frameworks (LangChain, LangGraph, etc.) implement ReAct and how?
+
+Use simple language and add code comments explaining every line.`
+  },
+  {
+    id: 3, cat: 'concepts',
+    title: 'Understand Tools, Functions, and Plugins',
+    desc: 'Tools are what give agents their superpowers. Understand them before building.',
+    tags: ['tools','functions','plugins','concept'],
+    prompt: `Explain what "tools" are in the context of AI agents, in beginner-friendly terms.
+
+I need to understand:
+1. What exactly is a "tool" in an AI agent? (Give 5 examples: web search, calculator, email sender, etc.)
+2. How does the LLM "decide" which tool to use and when?
+3. What is the difference between: Tool, Function Call, Plugin, and API?
+4. How do I write my first custom tool? Show me a complete Python example of a simple tool (e.g., a "get_current_time" tool) with full code comments.
+5. What are common mistakes beginners make when writing tools?
+6. How do I tell the agent what each tool does? (tool descriptions/schemas)
+
+Keep the code very simple. No advanced libraries needed for the example.`
+  },
+
+  // ── PLANNING & ARCHITECTURE ──
+  {
+    id: 4, cat: 'planning',
+    title: 'Plan an AI Agent Architecture from Scratch',
+    desc: 'Start here when you have an idea for an agent and want to plan it properly.',
+    tags: ['architecture','design','beginner','planning'],
+    prompt: `I want to build an AI agent that does [DESCRIBE YOUR TASK HERE]. Help me plan the architecture step by step.
+
+Please give me:
+1. A simple breakdown of what this agent needs to do (input → process → output)
+2. What tools/capabilities does this agent need? List them with a one-line purpose for each.
+3. What information does the agent need to remember between steps? (state/memory)
+4. Draw a simple ASCII flowchart of how the agent would work.
+5. What LLM should I use for this? (GPT-4, Claude, etc.) and why?
+6. What framework do you recommend: LangChain, LangGraph, AutoGen, or CrewAI? Explain in beginner terms.
+7. What are the top 3 challenges I will face building this and how to avoid them?
+8. What is the minimal version (MVP) I should build first?
+
+Replace [DESCRIBE YOUR TASK HERE] with your use case before sending.`
+  },
+  {
+    id: 5, cat: 'planning',
+    title: 'Choose the Right AI Agent Framework',
+    desc: 'Not sure which framework to use? Get a clear comparison tailored to your use case.',
+    tags: ['framework','comparison','LangChain','LangGraph','AutoGen','CrewAI'],
+    prompt: `I am a beginner trying to build an AI agent. Help me choose the right framework.
+
+My use case is: [DESCRIBE YOUR USE CASE]
+My programming experience: [BEGINNER / INTERMEDIATE]
+My preferred language: Python
+
+Please compare these frameworks for my specific use case:
+1. LangChain — what is it best for? Pros and cons.
+2. LangGraph — what is it best for? How is it different from LangChain?
+3. AutoGen (Microsoft) — what problems does it solve?
+4. CrewAI — when would I use this over others?
+5. LlamaIndex — how is it different from the above?
+
+For each framework, tell me:
+- Difficulty level (1–5) for a beginner
+- Best use cases
+- One-liner summary: "Use this if you want to..."
+- Installation command
+- A 5-line hello-world example
+
+End with your recommendation for MY specific use case and explain why.`
+  },
+  {
+    id: 6, cat: 'planning',
+    title: 'Design a Multi-Step Agent Workflow',
+    desc: 'Turn a complex task into a clean, step-by-step agent workflow.',
+    tags: ['workflow','planning','steps','pipeline'],
+    prompt: `I want to build an agent that can handle this complex task: [DESCRIBE TASK]
+
+Help me break it down into a proper multi-step workflow.
+
+1. Decompose the task: List each individual step the agent must take in order.
+2. For each step, tell me:
+   - What input does this step receive?
+   - What does the agent do in this step? (think, use a tool, call an API)
+   - What output does this step produce?
+   - What can go wrong here and how to handle it?
+3. Identify which steps can run in parallel vs must be sequential.
+4. Draw this as an ASCII flowchart with decision branches.
+5. Where does the agent need human approval before continuing?
+6. How does the agent know when it's "done"? (stopping condition)
+7. Write this workflow as Python pseudocode (just comments and function names, no complex logic).
+
+This is for a beginner so please keep explanations simple.`
+  },
+
+  // ── LANGCHAIN ──
+  {
+    id: 7, cat: 'langchain',
+    title: 'LangChain Complete Beginner Setup',
+    desc: 'Get LangChain installed and your first agent running from zero.',
+    tags: ['LangChain','setup','installation','beginner','hello-world'],
+    prompt: `I am a complete beginner. Help me set up LangChain and run my very first AI agent from scratch.
+
+Please give me:
+1. Prerequisites: What do I need installed? (Python version, pip, etc.)
+2. Step-by-step installation commands with explanations.
+3. How to get an OpenAI API key and set it up safely (environment variables).
+4. My first "Hello World" LangChain agent — complete working code with a comment explaining every single line.
+5. How to run it and what output I should expect.
+6. What is a "chain" in LangChain? Simple explanation with a visual.
+7. What is a "prompt template"? Show me a simple example.
+8. What is an "LLM" object in LangChain and how does it connect to OpenAI?
+9. Common errors beginners hit and how to fix them.
+10. What to learn next after the hello world works.
+
+Use Python. Assume I know basic Python but nothing about AI frameworks.`
+  },
+  {
+    id: 8, cat: 'langchain',
+    title: 'Build a LangChain Agent with Tools',
+    desc: 'Add real tools (web search, calculator) to your LangChain agent.',
+    tags: ['LangChain','tools','agent','search','calculator'],
+    prompt: `Help me build a LangChain agent that can use multiple tools. I am a beginner.
+
+Specifically, I want an agent that can:
+- Search the web (using DuckDuckGo or Tavily)
+- Do math calculations
+- Get the current date and time
+
+Please provide:
+1. Full working Python code with every line commented.
+2. Explanation: How does LangChain decide which tool to use?
+3. How to define a custom tool from scratch (step-by-step).
+4. What is the AgentExecutor and how does it work?
+5. How do I see the agent's reasoning (what it's "thinking")?
+6. How do I limit how many steps the agent can take? (avoid infinite loops)
+7. How do I handle errors when a tool fails?
+8. Test the agent with 3 sample inputs and show the expected output.
+9. How do I add my own custom Python function as a tool?
+
+Assume I have LangChain and OpenAI installed already. Use langchain>=0.1.0 syntax.`
+  },
+  {
+    id: 9, cat: 'langchain',
+    title: 'LangChain Chains vs Agents — Know the Difference',
+    desc: 'Many beginners confuse chains and agents. Get clarity and know when to use each.',
+    tags: ['LangChain','chains','agents','comparison','beginner'],
+    prompt: `Explain the difference between LangChain Chains and LangChain Agents for a beginner.
+
+I want to understand:
+1. What is a Chain in LangChain? Show a simple example with code.
+2. What is an Agent in LangChain? Show a simple example with code.
+3. The main differences — when should I use a Chain vs an Agent?
+4. What is LCEL (LangChain Expression Language)? Show me a simple pipe (|) example.
+5. What types of chains exist? (LLMChain, SequentialChain, RouterChain) — one-liner for each.
+6. Can I mix chains and agents? Show me a practical example.
+7. Performance: Which is faster/cheaper — chain or agent?
+8. Build me a decision guide: "Use a chain when... Use an agent when..."
+9. What mistakes do beginners make choosing between the two?
+
+Use working Python code examples. Keep all examples under 20 lines.`
+  },
+  {
+    id: 10, cat: 'langchain',
+    title: 'LangChain with Retrieval Augmented Generation (RAG)',
+    desc: 'Build an agent that can read your own documents and answer questions about them.',
+    tags: ['LangChain','RAG','documents','vector','embeddings','beginner'],
+    prompt: `Teach me how to build a LangChain RAG (Retrieval-Augmented Generation) agent from scratch. I am a beginner.
+
+I want to build an agent that can answer questions about my own PDF or text files.
+
+Please explain:
+1. What is RAG and why is it needed? (Simple analogy)
+2. What are embeddings? Explain without math.
+3. What is a vector store / vector database? (Chroma, FAISS, Pinecone)
+4. Step-by-step RAG pipeline with a diagram:
+   Load Document → Split → Embed → Store → Retrieve → Answer
+5. Complete working code using:
+   - PyPDF2 or pypdf for loading a PDF
+   - OpenAI embeddings
+   - Chroma as a local vector store
+   - LangChain RetrievalQA chain
+6. Comment every single line of code.
+7. How do I improve retrieval quality? (chunk size, overlap, top-k)
+8. How to add memory so the agent remembers previous questions in the conversation?
+9. Common errors and how to fix them.
+
+Make the code simple enough for a beginner to understand and run.`
+  },
+
+  // ── LANGGRAPH ──
+  {
+    id: 11, cat: 'langgraph',
+    title: 'LangGraph for Beginners — Core Concepts',
+    desc: 'LangGraph brings graph-based control flow to agents. Start here to understand it.',
+    tags: ['LangGraph','beginner','graph','nodes','edges','state'],
+    prompt: `Explain LangGraph to me as a complete beginner. I know basic Python but nothing about graphs or AI frameworks.
+
+Please cover:
+1. What problem does LangGraph solve that regular LangChain cannot?
+2. What is a "graph" in LangGraph? (nodes, edges — explain like I'm 12)
+3. What is "state" in LangGraph? Why is it important?
+4. How is LangGraph different from LangChain AgentExecutor?
+5. Install LangGraph — give me the exact pip command.
+6. My first LangGraph program: A graph with 3 nodes (start → process → end) with complete code and line-by-line comments.
+7. What is StateGraph vs MessageGraph? When to use each?
+8. How does LangGraph handle cycles/loops in the graph?
+9. How do I visualize my LangGraph graph? (mermaid diagram)
+10. When should a beginner choose LangGraph over regular LangChain agents?
+
+Use diagrams (ASCII) and simple Python code. Assume LangGraph 0.1.x or later.`
+  },
+  {
+    id: 12, cat: 'langgraph',
+    title: 'Build a LangGraph Agent with Conditional Edges',
+    desc: 'Learn how to make your graph branch differently based on conditions — the key power of LangGraph.',
+    tags: ['LangGraph','conditional','edges','routing','branching'],
+    prompt: `Help me build a LangGraph agent that uses conditional edges to make decisions. I am a beginner.
+
+Build a practical example: A customer support agent that:
+- Reads a customer message
+- Decides: Is this a billing question, a technical issue, or a general inquiry?
+- Routes to the appropriate handler node
+- Generates a response and ends
+
+Please provide:
+1. Full working Python code with every line explained in comments.
+2. What is add_conditional_edges()? How does it work?
+3. How do I write a "router" function that returns which node to go to next?
+4. How to define the State (TypedDict) properly — what fields do I need?
+5. ASCII diagram of the graph showing all nodes and conditional paths.
+6. How to compile and run the graph (graph.compile() → graph.invoke())
+7. How to stream output step-by-step so I can see what the agent is doing?
+8. How to add error handling if a node fails?
+9. Common beginner mistakes with LangGraph and how to avoid them.
+
+This should be a complete, runnable example a beginner can follow.`
+  },
+  {
+    id: 13, cat: 'langgraph',
+    title: 'LangGraph with Human-in-the-Loop',
+    desc: 'Add human approval checkpoints to your agent — critical for safe, real-world agents.',
+    tags: ['LangGraph','human-in-loop','interrupt','approval','safety'],
+    prompt: `Show me how to add Human-in-the-Loop (HITL) checkpoints to a LangGraph agent. I am a beginner building my first production agent.
+
+Use case: An email drafting agent that:
+1. Researches a topic
+2. Drafts an email
+3. PAUSES and asks the human: "Do you approve this draft? (yes/no/edit)"
+4. If approved → sends email
+5. If rejected → rewrites and asks again
+
+Please provide:
+1. Full working Python code with comments on every line.
+2. What is interrupt_before / interrupt_after in LangGraph?
+3. How do I pass human feedback back into the graph?
+4. What is a Checkpointer and why do I need it for HITL?
+5. How to use MemorySaver as a simple checkpointer.
+6. How does the graph "resume" after the human responds?
+7. ASCII diagram of the full graph with HITL checkpoint marked.
+8. How to test this without a real email server? (use print instead of send)
+9. What are the best practices for HITL in production agents?`
+  },
+  {
+    id: 14, cat: 'langgraph',
+    title: 'LangGraph State Management Deep Dive',
+    desc: 'State is the heart of LangGraph. Learn how to design it properly.',
+    tags: ['LangGraph','state','TypedDict','Annotated','memory'],
+    prompt: `Teach me how to design and manage State in LangGraph properly. I am a beginner who just learned the basics.
+
+Please cover:
+1. What is State in LangGraph and why is it the most important concept?
+2. How to define State using TypedDict — complete example.
+3. What is Annotated[list, operator.add] and why do I use it for message history?
+4. The difference between:
+   - Overwriting a state field (state["x"] = new_value)
+   - Appending to a state field (using reducers)
+5. How to add custom fields to state: messages, context, user_data, error_count.
+6. How to read state values inside a node function.
+7. How to update state from inside a node function (return dict pattern).
+8. Persistent state: How to save state to disk so it survives restarts (SQLite checkpointer).
+9. How to pass state between different graphs (subgraphs).
+10. Real-world state design example for: A research agent that gathers info from 3 sources.
+
+Show all examples in working Python code with comments.`
+  },
+
+  // ── TOOLS & APIS ──
+  {
+    id: 15, cat: 'tools',
+    title: 'Write Your First Custom Tool from Scratch',
+    desc: 'Build a tool your agent can use — no library knowledge needed to start.',
+    tags: ['tools','custom','@tool','function','beginner'],
+    prompt: `Help me write my first custom tool for an AI agent from scratch. I am a complete beginner.
+
+I want to create a tool that [DESCRIBE WHAT YOUR TOOL SHOULD DO — e.g., "fetches the current weather for a city"].
+
+Please provide:
+1. The complete Python code for the tool with every line commented.
+2. How to use the @tool decorator in LangChain to register it.
+3. How to write a good tool description (this is how the LLM knows when to use it).
+4. The tool's input schema — how to define parameters properly.
+5. Error handling — what happens if the tool fails? How do I return an error message?
+6. How to test my tool in isolation (without the full agent) — unit test example.
+7. How to add this tool to my LangChain or LangGraph agent.
+8. How to make a tool that calls a real API (step-by-step with requests library).
+9. What makes a "good" tool description vs a "bad" one? Show examples.
+10. The 5 most common tool mistakes beginners make.
+
+Keep the code simple and heavily commented. Replace [DESCRIBE WHAT YOUR TOOL SHOULD DO] with your idea.`
+  },
+  {
+    id: 16, cat: 'tools',
+    title: 'Connect Your Agent to a REST API',
+    desc: 'Give your agent the ability to call any real-world API.',
+    tags: ['tools','REST','API','requests','HTTP','integration'],
+    prompt: `Show me how to connect my AI agent to a REST API. I am a beginner.
+
+Use a real example: an agent that fetches live weather data from OpenWeatherMap API.
+
+Please cover:
+1. What is a REST API? Simple explanation for a beginner.
+2. How to get a free OpenWeatherMap API key.
+3. How to make an API call in Python using the requests library.
+4. How to wrap this API call as an agent tool (complete code, fully commented).
+5. How to handle API errors:
+   - Network timeout
+   - Invalid API key (401 error)
+   - City not found (404 error)
+6. How to parse the JSON response and extract only useful data.
+7. How to keep my API key secret (environment variables, .env file, python-dotenv).
+8. How to add rate limiting so the agent doesn't spam the API.
+9. How to mock the API in tests so I don't use real API calls every time.
+10. How to generalize this pattern for any REST API (a template I can reuse).
+
+Fully working code with comments. No advanced knowledge required.`
+  },
+  {
+    id: 17, cat: 'tools',
+    title: 'Build a Web Search Tool for Your Agent',
+    desc: 'Give your agent the ability to search the web in real-time.',
+    tags: ['tools','web search','Tavily','DuckDuckGo','Serper','search'],
+    prompt: `Help me give my AI agent the ability to search the web. I am a beginner.
+
+Please compare these search options for beginners:
+1. Tavily Search API — how to set up and use (recommended for agents)
+2. DuckDuckGo Search (duckduckgo-search library) — free, no API key needed
+3. SerpAPI — Google results via API
+4. Serper.dev — fast Google results
+
+For each option:
+- Cost (free tier?)
+- How to install
+- Simple code example
+- Best use case
+
+Then build a complete working example using Tavily:
+1. Install and configure Tavily
+2. Write a search tool that returns the top 3 results with title + URL + snippet
+3. Add this tool to a LangChain agent
+4. Test it: "What happened in AI news this week?"
+5. How to filter out irrelevant results
+6. How to summarize search results before returning them to the agent
+
+Fully commented code. Include how to get a free Tavily API key.`
+  },
+
+  // ── PROMPT ENGINEERING ──
+  {
+    id: 18, cat: 'prompts',
+    title: 'Write a Great System Prompt for Your Agent',
+    desc: 'The system prompt is the most important thing you write for any agent. Get it right.',
+    tags: ['system prompt','prompt engineering','persona','instructions','beginner'],
+    prompt: `Help me write an excellent system prompt for my AI agent. I am a beginner.
+
+My agent's job is: [DESCRIBE WHAT YOUR AGENT DOES]
+
+Please give me:
+1. What is a system prompt and why does it matter so much?
+2. The anatomy of a great agent system prompt (what sections to include):
+   - Role & persona
+   - Goals & objectives
+   - Available tools (and when to use them)
+   - Constraints & what NOT to do
+   - Output format instructions
+   - Tone and communication style
+3. Write a complete system prompt for my agent using the above structure.
+4. What are "guardrails" and how do I add them to the system prompt?
+5. How to tell the agent to ask for clarification when the user's request is unclear.
+6. How to tell the agent to stay on topic and refuse off-topic requests.
+7. Common system prompt mistakes beginners make (with bad → good examples).
+8. How do I test if my system prompt is working well? (3 test methods)
+9. How to update the system prompt based on the agent's mistakes.
+
+Replace [DESCRIBE WHAT YOUR AGENT DOES] with your use case.`
+  },
+  {
+    id: 19, cat: 'prompts',
+    title: 'Reduce Hallucinations in Your Agent',
+    desc: 'Agents can make things up. Learn how to minimize this with better prompts and design.',
+    tags: ['hallucination','accuracy','reliability','prompts','grounding'],
+    prompt: `My AI agent is making up information (hallucinating). Help me fix this as a beginner.
+
+Please cover:
+1. What is hallucination in LLMs? Why does it happen?
+2. The top 5 causes of hallucination in AI agents specifically.
+3. Prompt-level fixes (things I can add to my system prompt):
+   - "Only answer from the provided context"
+   - "If you don't know, say you don't know"
+   - "Always cite your source"
+   - Show me the exact prompt language to use.
+4. Architecture-level fixes:
+   - RAG (retrieve real data before answering)
+   - Grounding responses with tool output
+   - Fact-checking with a second LLM call
+5. How to detect hallucinations in my agent's output (programmatically).
+6. Temperature settings — how does lowering temperature help?
+7. How to test my agent for hallucination? (Red-teaming basics)
+8. Give me before/after examples: hallucinating agent vs grounded agent.
+9. What NOT to use agents for (tasks where hallucination risk is too high).
+
+Practical code examples where relevant.`
+  },
+  {
+    id: 20, cat: 'prompts',
+    title: 'Few-Shot Prompting for Consistent Agent Behavior',
+    desc: 'Show your agent examples of what good output looks like and get consistent results.',
+    tags: ['few-shot','examples','prompting','consistency','output format'],
+    prompt: `Teach me how to use few-shot prompting to improve my AI agent's behavior. I am a beginner.
+
+I want my agent to [DESCRIBE THE TASK — e.g., "classify customer emails into categories"].
+
+Please cover:
+1. What is few-shot prompting? Simple explanation with analogy.
+2. How many examples do I need? (1-shot, 3-shot, 5-shot — when to use which)
+3. How to structure examples: input → reasoning → output
+4. Write 3 high-quality few-shot examples for my agent's task.
+5. Where do I put these examples in my prompt? (system message vs user message)
+6. How do I choose GOOD examples vs BAD examples?
+7. Dynamic few-shot: How to automatically select the most relevant examples using a vector store.
+8. How to format structured output consistently (JSON, bullet list, markdown):
+   - Bad example (inconsistent output)
+   - Good example (consistent format after few-shot)
+9. How to test if my few-shot examples are helping.
+10. When few-shot is NOT enough and I need fine-tuning instead.
+
+Replace [DESCRIBE THE TASK] with your use case. Show working LangChain code.`
+  },
+
+  // ── MEMORY & STATE ──
+  {
+    id: 21, cat: 'memory',
+    title: 'Add Conversation Memory to Your Agent',
+    desc: 'Give your agent the ability to remember what was said earlier in the conversation.',
+    tags: ['memory','conversation','history','context','beginner'],
+    prompt: `Help me add memory to my AI agent so it can remember the conversation. I am a beginner.
+
+Please cover:
+1. Why does an LLM "forget" previous messages? (context window explanation)
+2. Types of memory in LangChain:
+   - ConversationBufferMemory (keep all messages)
+   - ConversationSummaryMemory (summarize old messages)
+   - ConversationBufferWindowMemory (keep only last N messages)
+   - VectorStoreRetrieverMemory (semantic search over past messages)
+   When to use each?
+3. Complete code example: Add ConversationBufferMemory to a simple agent.
+4. Complete code example: Add ConversationSummaryMemory for long conversations.
+5. How does memory change when I use LangGraph? (different approach)
+6. How to persist memory to disk so it survives between sessions (JSON file / SQLite).
+7. How to give the agent memory of a specific user (multi-user memory).
+8. How to clear/reset the agent's memory.
+9. Memory + RAG: How to combine conversation memory with document retrieval.
+10. Common memory bugs beginners hit and how to fix them.
+
+Fully working Python code with line-by-line comments.`
+  },
+  {
+    id: 22, cat: 'memory',
+    title: 'Design Long-Term Memory for Production Agents',
+    desc: 'Production agents need memory that persists across sessions. Build it right.',
+    tags: ['memory','long-term','persistence','vector store','production'],
+    prompt: `Help me design a long-term memory system for a production AI agent. I am learning to build agents.
+
+My use case: An agent that assists the same user over multiple sessions and should remember:
+- User preferences (name, preferred language, past decisions)
+- Key facts from past conversations
+- Previous tasks and their results
+
+Please cover:
+1. Architecture overview: How is long-term memory structured? (diagram)
+2. Vector database options for memory:
+   - Chroma (local, free)
+   - Pinecone (cloud, scalable)
+   - Weaviate
+   Compare them for a beginner.
+3. How to write a memory: What to store, when to store it, and how.
+4. How to read/retrieve memories: Semantic search vs exact lookup.
+5. Complete Python code: Store and retrieve memories using Chroma + OpenAI embeddings.
+6. How to avoid storing irrelevant information (memory quality control).
+7. How to handle memory from multiple users without mixing them up.
+8. Memory privacy: Should I encrypt stored memories? How?
+9. When to delete old memories (memory expiry).
+10. LangGraph + persistent memory: How to use SqliteSaver for session persistence.
+
+Working code with comments. Keep it practical for a beginner.`
+  },
+
+  // ── AGENT LOGIC ──
+  {
+    id: 23, cat: 'logic',
+    title: 'Build a ReAct Agent Loop from Scratch',
+    desc: 'Build the core thinking loop that powers most agents, without relying on a framework.',
+    tags: ['ReAct','loop','reasoning','scratch','core'],
+    prompt: `Help me build a ReAct (Reasoning + Acting) agent loop from scratch in Python. I am a beginner.
+
+I want to understand what frameworks do under the hood by building it myself first.
+
+Please provide:
+1. The complete ReAct loop in under 50 lines of Python — fully commented.
+2. Walkthrough: Explain what happens in each iteration of the loop.
+3. How the agent decides to "stop" (detecting the final answer).
+4. How to pass tool results back to the LLM as observations.
+5. How to limit the maximum number of steps (prevent infinite loop).
+6. How to handle the case where the LLM calls a tool that doesn't exist.
+7. Logging: How to print each step (Thought, Action, Observation) so I can follow the agent's reasoning.
+8. Run a complete example: "What is 5 factorial? Then square that result."
+   - Show every step the agent takes.
+9. How does my scratch implementation compare to LangChain's AgentExecutor?
+10. What improvements would I need to make it production-ready?
+
+Use only standard Python + openai library. No LangChain needed.`
+  },
+  {
+    id: 24, cat: 'logic',
+    title: 'Handle Agent Errors and Retry Logic',
+    desc: 'Agents fail. Learn how to make yours resilient with proper error handling.',
+    tags: ['error handling','retry','resilience','exceptions','fallback'],
+    prompt: `Help me add proper error handling and retry logic to my AI agent. I am a beginner.
+
+My agent sometimes fails because:
+- A tool returns an error (API down, rate limit hit)
+- The LLM returns a badly formatted response
+- The agent gets stuck in a loop
+
+Please cover:
+1. The most common agent failures and their root causes.
+2. Python try/except patterns for agent tools — complete examples.
+3. How to implement exponential backoff for API retries:
+   - Retry 3 times with delays: 1s, 2s, 4s
+   - Show the code pattern (or use tenacity library).
+4. How to handle LLM output parsing errors (when the LLM doesn't follow the format).
+5. Fallback strategy: What should the agent do when ALL retries fail?
+   - Return a helpful error message to the user
+   - Escalate to a human
+6. Loop detection: How to detect and break infinite loops in the agent.
+7. Graceful degradation: How to complete partial tasks when one step fails.
+8. How to log errors properly for debugging later.
+9. How to write a wrapper that adds retry logic to ANY tool automatically.
+10. LangGraph-specific: How to add error edges that route to a recovery node.
+
+Working Python code with comments.`
+  },
+  {
+    id: 25, cat: 'logic',
+    title: 'Make Your Agent Ask Clarifying Questions',
+    desc: 'A good agent knows when it needs more information before acting.',
+    tags: ['clarification','user input','interaction','UX','dialogue'],
+    prompt: `Help me make my AI agent smart enough to ask clarifying questions before taking action. I am a beginner.
+
+Use case: A task-planning agent that should NOT assume — it should ask when unsure.
+
+Please cover:
+1. How to instruct the agent (via system prompt) to ask before assuming.
+2. How to detect ambiguous user requests (prompt technique).
+3. Write a system prompt section that teaches the agent WHEN to ask vs WHEN to proceed.
+4. How to structure the clarifying question (what makes a good clarifying question?).
+5. Multi-turn interaction: How to continue the conversation and incorporate the answer.
+6. Code example: Agent that asks "Did you mean X or Y?" when input is ambiguous.
+7. How to avoid asking too many questions (annoying the user).
+8. What is the "minimal information needed" principle for agent decisions?
+9. LangGraph: How to model a clarification loop as a graph node.
+10. Test: Give me 3 ambiguous inputs and show how the agent handles each.
+
+Working code examples in Python (LangChain or LangGraph). Beginner-friendly.`
+  },
+
+  // ── MULTI-AGENT ──
+  {
+    id: 26, cat: 'multiagent',
+    title: 'Build Your First Multi-Agent System',
+    desc: 'Multiple specialized agents working together to solve complex problems.',
+    tags: ['multi-agent','team','supervisor','CrewAI','LangGraph','collaboration'],
+    prompt: `Help me build my first multi-agent system. I am a beginner.
+
+Use case: A research and writing team with 3 agents:
+1. Researcher — searches the web for information
+2. Writer — turns research into a draft article
+3. Editor — reviews and improves the draft
+
+Please cover:
+1. What is a multi-agent system and why use one instead of a single agent?
+2. Two approaches to multi-agent coordination:
+   a) Supervisor pattern (one agent manages others)
+   b) Pipeline pattern (agents pass output to the next)
+3. Build this using LangGraph:
+   - Define each agent as a node
+   - Show how output flows from one agent to the next
+   - Full working code with comments
+4. How do agents communicate? (shared state, message passing)
+5. How does the supervisor decide which agent to call next?
+6. How do I prevent agents from contradicting each other?
+7. How to use CrewAI for this same use case (compare approaches).
+8. Testing: How to test each agent individually before connecting them?
+9. Cost: Multi-agent systems make more LLM calls. How to manage cost?
+10. ASCII diagram of the full system showing agent relationships.
+
+Working Python code. Beginner-friendly explanations.`
+  },
+  {
+    id: 27, cat: 'multiagent',
+    title: 'CrewAI Setup and First Crew',
+    desc: 'CrewAI makes multi-agent systems easy. Build your first crew from zero.',
+    tags: ['CrewAI','multi-agent','roles','tasks','crew','beginner'],
+    prompt: `Help me get started with CrewAI and build my first crew of agents. I am a complete beginner.
+
+Please provide:
+1. What is CrewAI? How is it different from LangChain/LangGraph?
+2. Key concepts in CrewAI (explain each simply):
+   - Agent (role, goal, backstory)
+   - Task (description, expected_output, agent)
+   - Crew (agents, tasks, process)
+   - Process (sequential vs hierarchical)
+3. Installation: pip install crewai crewai-tools
+4. Build a complete working example — a "Market Research Crew" with:
+   - Researcher agent: Searches for info about a product
+   - Analyst agent: Analyzes the data
+   - Reporter agent: Writes a summary report
+5. Full code with comments on every line.
+6. How to add tools (web search, file read/write) to CrewAI agents.
+7. How to see what each agent is doing in real-time (verbose mode).
+8. How to save the crew's output to a file.
+9. Common CrewAI errors for beginners and fixes.
+10. When to use CrewAI vs LangGraph? Decision guide.
+
+Use the latest CrewAI version. Working Python code.`
+  },
+
+  // ── TESTING & DEBUGGING ──
+  {
+    id: 28, cat: 'testing',
+    title: 'Test Your AI Agent Like a Pro',
+    desc: 'Learn how to write tests for agents — very different from testing regular code.',
+    tags: ['testing','pytest','evaluation','QA','reliability','beginner'],
+    prompt: `Help me write proper tests for my AI agent. I am a beginner developer learning agent testing.
+
+My agent does: [DESCRIBE YOUR AGENT]
+
+Please cover:
+1. Why is testing AI agents harder than testing regular code?
+2. Types of agent tests:
+   - Unit tests (test individual tools in isolation)
+   - Integration tests (test the full agent flow)
+   - Behavioral tests (test that the agent makes correct decisions)
+3. How to mock LLM calls in tests (so I don't spend money on API calls every test).
+4. Complete pytest example: Test a tool that searches the web (mocked).
+5. Complete pytest example: Test that the agent routes correctly (chooses the right tool).
+6. How to test for hallucinations and wrong answers automatically.
+7. LangSmith: What is it? How to use it to trace and evaluate agent runs.
+8. How to write an eval dataset: A set of input → expected output pairs.
+9. How to measure: correctness, latency, cost per run.
+10. CI/CD: How to run agent tests automatically in GitHub Actions.
+
+Replace [DESCRIBE YOUR AGENT] with your use case. Working code examples with pytest.`
+  },
+  {
+    id: 29, cat: 'testing',
+    title: 'Debug Your Agent Step by Step',
+    desc: 'Your agent is behaving wrong. Here is a systematic way to find and fix the problem.',
+    tags: ['debugging','tracing','LangSmith','verbose','logging','troubleshoot'],
+    prompt: `My AI agent is not working correctly. Help me debug it step by step. I am a beginner.
+
+The problem I'm seeing is: [DESCRIBE THE WRONG BEHAVIOR]
+
+Please give me:
+1. A systematic debugging checklist for AI agents (step-by-step).
+2. How to turn on verbose logging in LangChain to see every agent step:
+   - What the agent is thinking
+   - Which tool it called and with what input
+   - What the tool returned
+3. How to use LangSmith for visual tracing:
+   - Setup (free tier available)
+   - How to read a trace
+   - How to identify where the agent went wrong
+4. Common agent bugs and their symptoms:
+   - Agent loops forever → cause and fix
+   - Agent ignores tools → cause and fix
+   - Agent calls wrong tool → cause and fix
+   - Agent gives wrong final answer → cause and fix
+   - Agent crashes with parsing error → cause and fix
+5. How to add debug print statements without breaking the agent.
+6. How to reproduce the bug reliably (deterministic testing with seed).
+7. The "rubber duck" method for agents: How to trace reasoning manually.
+8. How to fix a broken tool call by checking the tool schema.
+9. How to fix a broken system prompt by testing it separately.
+
+Replace [DESCRIBE THE WRONG BEHAVIOR] with your actual issue.`
+  },
+  {
+    id: 30, cat: 'testing',
+    title: 'Evaluate Agent Output Quality',
+    desc: 'Measuring whether your agent gives good answers is as important as building it.',
+    tags: ['evaluation','evals','quality','LLM-as-judge','metrics','benchmarks'],
+    prompt: `Help me set up evaluation (evals) for my AI agent to measure output quality. I am a beginner.
+
+Please cover:
+1. What is an "eval" in the context of AI agents? Why does it matter?
+2. Manual evaluation: How to create a golden test set (input + expected output pairs).
+3. Automated evaluation methods:
+   a) Exact match (for factual questions)
+   b) LLM-as-judge (use another LLM to grade the agent's answer)
+   c) Embedding similarity (semantic comparison)
+4. Complete code: LLM-as-judge evaluation for my agent.
+   - Grade the answer on: Correctness, Completeness, Tone (1-5 scale)
+5. Key metrics to track:
+   - Answer correctness rate
+   - Tool call accuracy
+   - Latency (response time)
+   - Cost per query
+6. How to use LangSmith's built-in evaluation features.
+7. How to run evals in a loop over 50+ test cases automatically.
+8. How to create a regression suite (tests that catch when new code breaks old behavior).
+9. How to improve the agent based on failed evals.
+10. Dashboard: How to visualize eval results over time.
+
+Working Python code. Assume LangChain + LangSmith.`
+  },
+
+  // ── SAFETY ──
+  {
+    id: 31, cat: 'safety',
+    title: 'Add Safety Guardrails to Your Agent',
+    desc: 'Protect users and your system from harmful or unwanted agent behavior.',
+    tags: ['safety','guardrails','content filter','moderation','input validation'],
+    prompt: `Help me add safety guardrails to my AI agent. I am a beginner.
+
+I want to make sure my agent:
+- Never generates harmful or offensive content
+- Stays on topic (doesn't go off-task)
+- Doesn't reveal sensitive system information
+- Handles abusive or adversarial user inputs gracefully
+
+Please cover:
+1. What are guardrails? Types:
+   - Input guardrails (check before processing)
+   - Output guardrails (check before returning to user)
+2. How to use OpenAI's Moderation API to check for harmful content.
+3. How to write a topic restriction in the system prompt (stay on topic).
+4. Input validation: How to check user input before the agent processes it.
+5. How to detect and handle prompt injection attacks (beginner-friendly explanation).
+6. How to prevent the agent from leaking its system prompt.
+7. Using the Guardrails AI library — what it is and how to set it up.
+8. NeMo Guardrails — what it is and when to use it.
+9. Complete code: Add an input safety check to a LangChain agent.
+10. How to test your guardrails (red-teaming basics for beginners).
+
+Working Python code with comments. Practical examples of safe vs unsafe inputs.`
+  },
+  {
+    id: 32, cat: 'safety',
+    title: 'Prevent Prompt Injection in Your Agent',
+    desc: 'Prompt injection is the #1 security risk for agents. Understand and prevent it.',
+    tags: ['prompt injection','security','attack','vulnerability','protection'],
+    prompt: `Explain prompt injection attacks and how to protect my AI agent from them. I am a beginner.
+
+Please cover:
+1. What is prompt injection? Simple analogy (like SQL injection but for AI).
+2. Types of prompt injection:
+   - Direct injection (user tries to override system prompt)
+   - Indirect injection (malicious content in a webpage/document the agent reads)
+3. Show me 5 real examples of prompt injection attacks (attack strings) so I understand what they look like.
+4. Why is prompt injection especially dangerous for agents with tools?
+   (Example: agent with email access getting injected → sends spam)
+5. Defense strategies:
+   a) Input sanitization — what to filter and how
+   b) Privilege separation — limit what tools the agent can use
+   c) Output monitoring — check what the agent is about to do
+   d) Instruction hierarchy — making system prompt "higher authority" than user
+6. Complete code: An input sanitizer that detects and blocks common injection attempts.
+7. How to use a separate "security" LLM call to check for injection before the main call.
+8. Principle of least privilege: Only give the agent access to what it truly needs.
+9. How to test your defenses (a small red-team exercise).
+10. Recommended reading / tools for agent security.`
+  },
+
+  // ── DEPLOYMENT ──
+  {
+    id: 33, cat: 'deploy',
+    title: 'Deploy Your Agent as a FastAPI Service',
+    desc: 'Turn your agent into a real web service that anyone can call.',
+    tags: ['deployment','FastAPI','API','web service','backend','production'],
+    prompt: `Help me deploy my AI agent as a REST API using FastAPI. I am a beginner.
+
+My agent is built with LangChain/LangGraph in Python.
+
+Please provide:
+1. What is FastAPI? Why use it for AI agents?
+2. Installation: pip install fastapi uvicorn
+3. Complete working code: A FastAPI app with 3 endpoints:
+   - POST /chat — send a message, get agent response
+   - GET /history — get conversation history
+   - DELETE /clear — clear the conversation
+4. Comment every line of code.
+5. How to run it locally: uvicorn app:app --reload
+6. How to test the API using curl and Python requests.
+7. How to add authentication (API key in header) — simple version.
+8. How to handle streaming responses (agent typing in real-time).
+9. Async: Should I use async/await with FastAPI + LangChain? How?
+10. Free deployment options for beginners:
+    - Railway.app (step-by-step)
+    - Render.com
+    - Hugging Face Spaces
+11. Environment variables: How to manage API keys in production.
+12. How to add CORS headers so a browser frontend can call this API.
+
+Fully working code, beginner-friendly.`
+  },
+  {
+    id: 34, cat: 'deploy',
+    title: 'Docker-ize Your AI Agent',
+    desc: 'Package your agent in Docker so it runs the same everywhere.',
+    tags: ['Docker','container','deployment','Dockerfile','production'],
+    prompt: `Help me package my AI agent in Docker. I am a beginner who has never used Docker before.
+
+Please cover:
+1. What is Docker and why should I use it for AI agents? (Simple analogy)
+2. Install Docker Desktop — give me the link and basic check command.
+3. Write a Dockerfile for my Python AI agent (FastAPI + LangChain):
+   - Every line explained with a comment
+4. Write a docker-compose.yml that runs:
+   - My agent service
+   - A Redis container (for caching)
+   Every line explained.
+5. How to build the Docker image: docker build command.
+6. How to run the container: docker run command with correct port mapping.
+7. How to pass environment variables (API keys) safely to the container.
+8. How to view logs from the running container.
+9. Common Docker errors for beginners (image not found, port conflict, etc.) and fixes.
+10. How to push my image to Docker Hub.
+11. How to deploy my Docker container to:
+    - Fly.io (free tier, beginner-friendly)
+    - Google Cloud Run (step-by-step)
+
+Beginner-friendly language. All commands explained.`
+  },
+  {
+    id: 35, cat: 'deploy',
+    title: 'Monitor Your Agent in Production',
+    desc: 'Once deployed, you need to know if your agent is working correctly.',
+    tags: ['monitoring','logging','LangSmith','metrics','production','observability'],
+    prompt: `Help me set up monitoring for my AI agent in production. I am a beginner.
+
+I need to know when my agent:
+- Returns a wrong answer
+- Fails with an error
+- Runs slowly (high latency)
+- Gets too expensive (too many tokens)
+- Gets attacked or abused
+
+Please cover:
+1. What is "observability" for AI agents? The 3 pillars: Logs, Metrics, Traces.
+2. LangSmith setup for production tracing:
+   - How to add it to my existing LangChain agent (2 lines of code)
+   - What data it captures automatically
+   - How to read the dashboard
+3. What metrics should I track? Give me the essential 7:
+   - Latency, cost, error rate, token usage, user satisfaction, tool call rate, retry rate
+4. How to add simple Python logging to my agent (log every request + response).
+5. Alert setup: How to get an email/Slack alert when the error rate spikes.
+6. How to detect when my agent is being abused (rate limiting basics).
+7. Cost monitoring: How to set a budget limit and get alerted when approaching it.
+8. How to do A/B testing: Compare two agent versions to see which is better.
+9. Simple dashboard: How to build a basic monitoring dashboard (Streamlit or Grafana).
+10. Weekly review: What to check every week to keep the agent healthy.
+
+Practical code examples. Beginner-friendly.`
+  },
+
+  // ── UX & EXPERIENCE ──
+  {
+    id: 36, cat: 'ux',
+    title: 'Build a Chat UI for Your Agent with Streamlit',
+    desc: 'Create a beautiful web interface for your agent in under 30 lines of code.',
+    tags: ['Streamlit','UI','frontend','chat','interface','beginner'],
+    prompt: `Help me build a chat interface for my AI agent using Streamlit. I am a beginner.
+
+Please provide:
+1. What is Streamlit? Why is it perfect for AI agent demos?
+2. Installation: pip install streamlit
+3. Complete working chat UI code:
+   - Chat input box at the bottom
+   - Message history displayed above (user messages right, agent messages left)
+   - Loading spinner while agent is thinking
+   - Clear chat button
+   Every line commented.
+4. How to connect my LangChain or LangGraph agent to this Streamlit UI.
+5. How to display agent's tool calls (show what the agent is doing step-by-step).
+6. How to add a sidebar with settings:
+   - LLM model selector (GPT-3.5 vs GPT-4)
+   - Temperature slider
+   - System prompt text area
+7. How to run it: streamlit run app.py
+8. How to deploy it free on Streamlit Community Cloud.
+9. How to add user authentication (login page) — simple version.
+10. Making it look nicer: CSS customization tips for Streamlit.
+
+Full working code. Beginner-friendly.`
+  },
+  {
+    id: 37, cat: 'ux',
+    title: 'Design a Great User Experience for Agent Interactions',
+    desc: 'Good UX can make or break your agent. Learn what makes users love (or hate) AI agents.',
+    tags: ['UX','user experience','design','chatbot','interaction design'],
+    prompt: `Help me design a great user experience for my AI agent. I am a developer learning UX basics.
+
+My agent does: [DESCRIBE YOUR AGENT]
+
+Please cover:
+1. The top 5 UX mistakes developers make with AI agents (and how to avoid them).
+2. Loading & latency UX:
+   - How to show typing indicators while the agent is thinking
+   - How to stream responses word-by-word (instead of waiting for full response)
+   - What to show during tool calls ("Searching the web…", "Calculating…")
+3. Error message UX: What to say when the agent fails (friendly, helpful messages).
+4. Onboarding: How to explain what the agent can and can't do in the first message.
+5. Suggested prompts: Show users example questions so they know where to start.
+6. How to handle misunderstandings gracefully (agent says "I don't understand" correctly).
+7. Feedback collection: Add 👍👎 buttons to collect user feedback on agent answers.
+8. Conversation context: When to summarize and reset vs keep full history.
+9. Accessibility: Basic tips for making agent UIs usable by everyone.
+10. Mobile-first: What to think about when your agent runs on mobile.
+
+Replace [DESCRIBE YOUR AGENT] with your use case. Include code snippets for Streamlit.`
+  },
+  {
+    id: 38, cat: 'ux',
+    title: 'Stream Agent Output in Real-Time',
+    desc: 'Show users the agent\'s response word by word instead of making them wait.',
+    tags: ['streaming','real-time','UX','tokens','async','FastAPI'],
+    prompt: `Help me add real-time streaming to my AI agent so users see the response word-by-word. I am a beginner.
+
+Please cover:
+1. What is streaming and why does it dramatically improve user experience?
+2. How streaming works at the token level (LLM returns tokens one at a time).
+3. How to enable streaming in LangChain:
+   - StreamingStdOutCallbackHandler (print to console)
+   - Custom streaming callback
+   Complete code examples.
+4. How to stream LangGraph agent output step by step:
+   - Stream each node's output as it runs
+   - Show tool call events
+5. Streaming in FastAPI:
+   - How to use StreamingResponse
+   - How to send Server-Sent Events (SSE)
+   - Complete working code
+6. Streaming in Streamlit:
+   - How to use st.write_stream() (new Streamlit feature)
+   - How to show partial responses in the chat UI
+7. How to stream tool call updates ("🔍 Searching…", "📄 Reading document…").
+8. Error handling during streaming: What to do if the stream breaks mid-response.
+9. How to show a "Stop generating" button to cancel the stream.
+10. Testing streams: How to test streaming APIs without a frontend.
+
+Working code for FastAPI + Streamlit + LangChain. Beginner-friendly.`
+  },
+  {
+    id: 39, cat: 'ux',
+    title: 'Collect User Feedback and Improve Your Agent',
+    desc: 'Set up a feedback loop so your agent gets better over time based on real user input.',
+    tags: ['feedback','improvement','thumbs up','RLHF','iteration','quality'],
+    prompt: `Help me set up a user feedback loop to continuously improve my AI agent. I am a beginner.
+
+Please cover:
+1. Why is user feedback the most valuable data for improving AI agents?
+2. Types of feedback to collect:
+   - 👍👎 thumbs (implicit signal)
+   - 1-5 star rating
+   - Free-text comment ("What was wrong with this answer?")
+   - Correction input ("The right answer should have been…")
+3. Add thumbs up/down to a Streamlit chat interface — complete code.
+4. How to store feedback in a simple SQLite database (schema + code).
+5. How to link feedback to the specific agent run (using LangSmith run ID).
+6. Using LangSmith's annotation queue to review bad responses manually.
+7. How to analyze feedback data:
+   - What % of responses are thumbs down?
+   - Which question types get the most negative feedback?
+   - Which tools cause the most errors?
+8. How to use feedback to improve the agent:
+   - Update the system prompt
+   - Add more few-shot examples
+   - Fix broken tools
+9. The feedback improvement cycle: collect → analyze → fix → test → deploy.
+10. How to A/B test improvements to prove they actually help.
+
+Working Python code. Practical and beginner-friendly.`
+  },
+  // ── ADDITIONAL HIGH-VALUE PROMPTS ──
+  {
+    id: 40, cat: 'langchain',
+    title: 'LangChain with OpenAI Function Calling',
+    desc: 'Use OpenAI\'s native function calling to make tool use more reliable.',
+    tags: ['LangChain','function calling','OpenAI','tools','JSON'],
+    prompt: `Explain and show me how to use OpenAI function calling with LangChain. I am a beginner.
+
+Please cover:
+1. What is OpenAI function calling? How is it different from basic prompt-based tool use?
+2. Why is function calling more reliable than telling the LLM to output JSON in the prompt?
+3. How to define a function schema in JSON format — structure and required fields.
+4. Complete example: An agent with 3 functions (get_weather, send_email, search_web) using OpenAI function calling.
+5. How LangChain's bind_tools() wraps function calling.
+6. How to handle the function call response: parse it and call the actual Python function.
+7. Parallel function calling: How to call multiple functions in one LLM request.
+8. Forced function calling: How to force the LLM to always use a specific function.
+9. How to validate function arguments before calling the real function.
+10. The difference between functions (deprecated) and tools (current) in OpenAI API.
+11. Show a complete working agent loop using function calling without any LangChain.
+
+Fully commented Python code. Use openai>=1.0.0 syntax.`
+  },
+  {
+    id: 41, cat: 'planning',
+    title: 'Estimate Cost Before Building Your Agent',
+    desc: 'AI agents can get expensive fast. Plan your costs before you start building.',
+    tags: ['cost','tokens','budget','pricing','optimization','planning'],
+    prompt: `Help me estimate and plan the cost of running my AI agent. I am a beginner.
+
+My agent does: [DESCRIBE YOUR AGENT]
+Expected usage: [e.g., 100 queries per day]
+
+Please cover:
+1. How is LLM cost calculated? (input tokens vs output tokens, pricing per 1K tokens)
+2. Current pricing for:
+   - GPT-3.5-turbo
+   - GPT-4o
+   - GPT-4o-mini
+   - Claude 3 Haiku / Sonnet
+   - Gemini Flash
+   (Show cost per 1M tokens, input and output separately)
+3. How to estimate token usage for my agent:
+   - System prompt tokens
+   - Average user message tokens
+   - Tool descriptions tokens
+   - Average agent reasoning tokens
+   - Tool results tokens
+4. Calculate the estimated monthly cost for my use case (show the math).
+5. Cost optimization techniques:
+   - Use cheaper models for simple steps
+   - Shorten system prompts
+   - Limit conversation history
+   - Cache frequent responses
+6. How to track real token usage in code (LangChain callback).
+7. How to set a hard spending limit and stop the agent when exceeded.
+8. When to move from OpenAI to an open-source model (Llama 3, Mistral) to save cost.
+
+Replace [DESCRIBE YOUR AGENT] with your use case.`
+  },
+  {
+    id: 42, cat: 'multiagent',
+    title: 'Design an Agent Supervisor Pattern',
+    desc: 'Learn how to build a boss agent that coordinates a team of specialist agents.',
+    tags: ['supervisor','orchestrator','multi-agent','LangGraph','routing'],
+    prompt: `Help me build a Supervisor agent pattern in LangGraph. I am a beginner.
+
+The supervisor agent should coordinate 3 specialist agents:
+- Data Agent: queries a database
+- Web Agent: searches the web
+- Writer Agent: writes reports from research
+
+Please provide:
+1. What is the supervisor pattern? How is it different from a pipeline?
+2. How the supervisor decides which agent to call (routing logic).
+3. Full LangGraph code with supervisor + 3 worker agents — every line commented.
+4. How to define the supervisor's decision prompt.
+5. How to pass context between the supervisor and worker agents via shared state.
+6. How the supervisor knows when the task is fully complete (termination).
+7. How to handle the case where a worker agent fails.
+8. How to prevent the supervisor from calling the same agent in a loop.
+9. ASCII diagram of the full supervisor graph.
+10. How to add a maximum-step limit to prevent runaway costs.
+11. Real example run: "Research the latest trends in solar energy and write a 3-paragraph report."
+    Show step-by-step what each agent does.
+
+Complete working LangGraph code. Beginner-friendly.`
+  }
+];
+
+// ── Build UI ──
+const container = document.getElementById('promptContainer');
+const categories = {};
+
+PROMPTS.forEach(p => {
+  if (!categories[p.cat]) categories[p.cat] = [];
+  categories[p.cat].push(p);
+});
+
+const catMeta = {
+  concepts:    { label: 'Core Concepts', icon: '🧠' },
+  planning:    { label: 'Planning & Architecture', icon: '📐' },
+  langchain:   { label: 'LangChain', icon: '🔗' },
+  langgraph:   { label: 'LangGraph', icon: '🕸️' },
+  tools:       { label: 'Tools & APIs', icon: '🔧' },
+  prompts:     { label: 'Prompt Engineering', icon: '✍️' },
+  memory:      { label: 'Memory & State', icon: '💾' },
+  logic:       { label: 'Agent Logic & Control Flow', icon: '⚙️' },
+  multiagent:  { label: 'Multi-Agent Systems', icon: '🤝' },
+  testing:     { label: 'Testing & Debugging', icon: '🧪' },
+  safety:      { label: 'Safety & Guardrails', icon: '🛡️' },
+  deploy:      { label: 'Deployment', icon: '🚀' },
+  ux:          { label: 'UX & User Experience', icon: '🎨' },
+};
+
+let favorites = JSON.parse(localStorage.getItem('agentPromptFavs') || '[]');
+
+function buildCards() {
+  container.innerHTML = '';
+  let total = 0;
+
+  Object.entries(catMeta).forEach(([catKey, meta]) => {
+    const prompts = categories[catKey] || [];
+    if (!prompts.length) return;
+
+    const block = document.createElement('div');
+    block.className = 'category-block';
+    block.dataset.cat = catKey;
+
+    block.innerHTML = `<div class="cat-heading"><span class="cat-heading-icon">${meta.icon}</span>${meta.label}</div>
+    <div class="cards-grid" id="grid-${catKey}"></div>`;
+    container.appendChild(block);
+
+    const grid = document.getElementById(`grid-${catKey}`);
+    prompts.forEach(p => {
+      grid.appendChild(makeCard(p));
+      total++;
+    });
+
+    const cnt = document.getElementById(`cnt-${catKey}`);
+    if (cnt) cnt.textContent = prompts.length;
+  });
+
+  document.getElementById('cnt-all').textContent = total;
+  document.getElementById('total-count').textContent = total;
+  updateFavCount();
+}
+
+function makeCard(p) {
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.dataset.id = p.id;
+  div.dataset.cat = p.cat;
+  div.dataset.search = (p.title + ' ' + p.desc + ' ' + p.prompt + ' ' + p.tags.join(' ')).toLowerCase();
+
+  const isFav = favorites.includes(p.id);
+
+  div.innerHTML = `
+    <div class="card-top">
+      <div class="card-title">${p.title}</div>
+      <div class="card-actions">
+        <button class="action-btn fav-btn ${isFav ? 'fav-active' : ''}" onclick="toggleFav(${p.id}, this)" title="Save to favorites">
+          ${isFav ? '⭐' : '☆'}
+        </button>
+        <button class="action-btn copy-btn" onclick="copyPrompt(${p.id}, this)" title="Copy prompt">
+          📋 Copy
+        </button>
+      </div>
+    </div>
+    <div class="card-desc">${p.desc}</div>
+    <div class="prompt-box" id="pb-${p.id}">
+<div class="prompt-fade"></div>${escapeHtml(p.prompt)}</div>
+    <div class="card-footer">
+      ${p.tags.map(t => `<span class="tag" onclick="searchTag('${t}')">${t}</span>`).join('')}
+      <button class="expand-btn" onclick="expandPrompt(${p.id}, this)">Show more ↓</button>
+    </div>`;
+
+  return div;
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function expandPrompt(id, btn) {
+  const pb = document.getElementById(`pb-${id}`);
+  const expanded = pb.classList.toggle('expanded');
+  btn.textContent = expanded ? 'Show less ↑' : 'Show more ↓';
+}
+
+function copyPrompt(id, btn) {
+  const p = PROMPTS.find(x => x.id === id);
+  if (!p) return;
+  navigator.clipboard.writeText(p.prompt).then(() => {
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    showToast('Prompt copied to clipboard!');
+    setTimeout(() => { btn.textContent = '📋 Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function toggleFav(id, btn) {
+  if (favorites.includes(id)) {
+    favorites = favorites.filter(x => x !== id);
+    btn.textContent = '☆';
+    btn.classList.remove('fav-active');
+    showToast('Removed from favorites');
+  } else {
+    favorites.push(id);
+    btn.textContent = '⭐';
+    btn.classList.add('fav-active');
+    showToast('Saved to favorites!');
+  }
+  localStorage.setItem('agentPromptFavs', JSON.stringify(favorites));
+  updateFavCount();
+}
+
+function updateFavCount() {
+  const cnt = document.getElementById('cnt-fav');
+  const hero = document.getElementById('fav-count-hero');
+  if (cnt) cnt.textContent = favorites.length;
+  if (hero) hero.textContent = favorites.length;
+}
+
+function searchTag(tag) {
+  document.getElementById('searchInput').value = tag;
+  handleSearch();
+}
+
+// ── SEARCH ──
+let currentCat = 'all';
+
+function handleSearch() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  document.getElementById('clearSearch').style.display = q ? 'block' : 'none';
+
+  const cards = document.querySelectorAll('.card');
+  let visible = 0;
+
+  cards.forEach(card => {
+    const matchSearch = !q || card.dataset.search.includes(q);
+    const matchCat = currentCat === 'all'
+      ? true
+      : currentCat === 'favorites'
+        ? favorites.includes(Number(card.dataset.id))
+        : card.dataset.cat === currentCat;
+
+    const show = matchSearch && matchCat;
+    card.classList.toggle('hidden', !show);
+    if (show) visible++;
+
+    // highlight search
+    if (q) {
+      const titleEl = card.querySelector('.card-title');
+      const descEl = card.querySelector('.card-desc');
+      [titleEl, descEl].forEach(el => {
+        if (!el) return;
+        el.innerHTML = el.textContent.replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'), '<mark>$1</mark>');
+      });
+    } else {
+      card.querySelector('.card-title').innerHTML = PROMPTS.find(p=>p.id==card.dataset.id)?.title || '';
+      card.querySelector('.card-desc').innerHTML = PROMPTS.find(p=>p.id==card.dataset.id)?.desc || '';
+    }
+  });
+
+  // show/hide category blocks
+  document.querySelectorAll('.category-block').forEach(block => {
+    const hasVisible = [...block.querySelectorAll('.card')].some(c => !c.classList.contains('hidden'));
+    block.style.display = hasVisible ? '' : 'none';
+  });
+
+  document.getElementById('resultCount').textContent = q ? `${visible} results` : '';
+  document.getElementById('emptyState').classList.toggle('visible', visible === 0);
+  document.getElementById('hero').style.display = (q || currentCat !== 'all') ? 'none' : '';
+}
+
+document.getElementById('searchInput').addEventListener('input', handleSearch);
+document.getElementById('clearSearch').addEventListener('click', () => {
+  document.getElementById('searchInput').value = '';
+  handleSearch();
+});
+
+function filterCat(cat, btn) {
+  currentCat = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  handleSearch();
+}
+
+// ── THEME ──
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️';
+  document.getElementById('themeLabel').textContent = isDark ? 'Dark' : 'Light';
+  localStorage.setItem('agentPromptTheme', isDark ? 'light' : 'dark');
+}
+
+// Restore theme
+const savedTheme = localStorage.getItem('agentPromptTheme');
+if (savedTheme) {
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  if (savedTheme === 'light') {
+    document.getElementById('themeIcon').textContent = '🌙';
+    document.getElementById('themeLabel').textContent = 'Dark';
+  }
+}
+
+// ── SCROLL TO TOP ──
+window.addEventListener('scroll', () => {
+  document.getElementById('scrollTop').classList.toggle('visible', window.scrollY > 400);
+});
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── KEYBOARD SHORTCUT ──
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    document.getElementById('searchInput').focus();
+  }
+});
+
+// Init
+buildCards();
+</script>
+</body>
+</html>

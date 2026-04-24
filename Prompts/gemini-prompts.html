@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Engineering Prompt Vault</title>
+    <style>
+        :root {
+            --bg-color: #0a0c10;
+            --card-bg: #161b22;
+            --border: #30363d;
+            --text-main: #c9d1d9;
+            --text-dim: #8b949e;
+            --accent: #58a6ff;
+            --cpp-color: #f34b7d;
+            --js-color: #f1e05a;
+            --py-color: #3572A5;
+            --ai-color: #a371f7;
+            --tm-color: #3fb950;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container { max-width: 1100px; width: 100%; }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 { font-size: 2.5rem; color: var(--accent); margin-bottom: 10px; }
+        p.subtitle { color: var(--text-dim); font-size: 1.1rem; }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin: 40px 0 20px 0;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+            gap: 25px;
+        }
+
+        @media (max-width: 600px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            transition: border-color 0.3s ease;
+        }
+
+        .card:hover { border-color: var(--accent); }
+
+        .badge {
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            padding: 4px 8px;
+            border-radius: 4px;
+            width: fit-content;
+            margin-bottom: 12px;
+        }
+
+        .card h3 { margin: 0 0 10px 0; color: #fff; font-size: 1.2rem; }
+        .card p { font-size: 0.9rem; color: var(--text-dim); margin-bottom: 20px; }
+
+        .prompt-area {
+            background: #000;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85rem;
+            color: #d1d5db;
+            line-height: 1.5;
+            flex-grow: 1;
+            white-space: pre-wrap;
+            border: 1px solid #21262d;
+        }
+
+        .copy-btn {
+            margin-top: 15px;
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .copy-btn:hover { opacity: 0.9; }
+
+        /* Category Colors */
+        .badge.cpp { background: var(--cpp-color); color: #fff; }
+        .badge.js { background: var(--js-color); color: #000; }
+        .badge.py { background: var(--py-color); color: #fff; }
+        .badge.ai { background: var(--ai-color); color: #fff; }
+        .badge.tm { background: var(--tm-color); color: #fff; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Engineering Prompt Vault</h1>
+        <p class="subtitle">Replace StackOverflow with high-context, architectural LLM steering.</p>
+    </header>
+
+    <div class="section-title">🛠️ IC Engineer Mega-Prompts</div>
+    <div class="grid">
+        
+        <div class="card">
+            <span class="badge cpp">C++ / Systems</span>
+            <h3>The Deep Memory Auditor</h3>
+            <p>For fixing segfaults, race conditions, and UB.</p>
+            <div class="prompt-area" id="p1">"Act as a Principal Systems Engineer. Analyze this code for: 1. Undefined Behavior 2. Thread-safety violations (data races) 3. Memory leaks using RAII principles. 
+    
+Provide a 'Fixed' version using Modern C++ (C++20/23) features. Finally, explain the impact on the vtable or stack/heap allocation for this specific change.
+
+[CODE_SNIPPET]"</div>
+            <button class="copy-btn" onclick="copy('p1')">Copy Prompt</button>
+        </div>
+
+        <div class="card">
+            <span class="badge js">JS / TS</span>
+            <h3>Async & Memory Profiler</h3>
+            <p>Resolve memory leaks in Node.js or complex React re-renders.</p>
+            <div class="prompt-area" id="p2">"Review this JavaScript/TypeScript implementation. Identify: 1. Potential memory leaks (detached DOM nodes, unclosed observers/intervals) 2. Bottlenecks in the Event Loop 3. Optimization of the 'Critical Rendering Path'.
+
+Suggest a version that uses Web Workers or non-blocking logic if necessary. Provide a set of Unit Tests using Vitest/Jest for the edge cases identified.
+
+[CODE_SNIPPET]"</div>
+            <button class="copy-btn" onclick="copy('p2')">Copy Prompt</button>
+        </div>
+
+        <div class="card">
+            <span class="badge py">Python</span>
+            <h3>The Pythonic Performance Refactor</h3>
+            <p>Replacing slow loops with vectorized or concurrent logic.</p>
+            <div class="prompt-area" id="p3">"Analyze this Python code for performance bottlenecks. 1. Suggest a vectorized approach using NumPy/Pandas if applicable. 2. Evaluate if Multi-threading vs Multi-processing is better for this specific I/O or CPU bound task. 3. Ensure the code follows strict PEP8 and Type Hinting (mypy). 
+
+Highlight where the GIL might be a bottleneck here and how to circumvent it.
+
+[CODE_SNIPPET]"</div>
+            <button class="copy-btn" onclick="copy('p3')">Copy Prompt</button>
+        </div>
+
+        <div class="card">
+            <span class="badge ai">AI Agent Dev</span>
+            <h3>Agentic Loop & Tool Architect</h3>
+            <p>Designing tools, error recovery, and prompt steering.</p>
+            <div class="prompt-area" id="p4">"I am designing an AI Agent tool-calling loop. Provide: 1. A JSON Schema for the tool '[TOOL_NAME]'. 2. A System Prompt that uses 'Chain of Thought' to verify tool outputs before final response. 3. A robust error-handling logic (Retry with Backoff) if the LLM produces a malformed tool call.
+
+Focus on minimizing token usage and preventing 'Agent Looping' where it repeats the same action.
+
+[CONTEXT_OR_GOAL]"</div>
+            <button class="copy-btn" onclick="copy('p4')">Copy Prompt</button>
+        </div>
+    </div>
+
+    <div class="section-title">👔 Technical Manager Mega-Prompts</div>
+    <div class="grid">
+        
+        <div class="card">
+            <span class="badge tm">Tech Manager</span>
+            <h3>Architecture 'Pre-Mortem'</h3>
+            <p>Identify risks before they hit production.</p>
+            <div class="prompt-area" id="p5">"I am reviewing a proposal for [SYSTEM_DESCRIPTION]. Act as a cynical Staff Engineer and identify: 1. The most likely 'Single Point of Failure'. 2. How this architecture will fail at 10x current scale. 3. Hidden technical debt being introduced. 
+
+Give me 5 hard questions to ask the lead developer to test the robustness of this design."</div>
+            <button class="copy-btn" onclick="copy('p5')">Copy Prompt</button>
+        </div>
+
+        <div class="card">
+            <span class="badge tm">Tech Manager</span>
+            <h3>The Blameless Post-Mortem Drafter</h3>
+            <p>Convert incident logs into a high-quality doc.</p>
+            <div class="prompt-area" id="p6">"Using these raw incident logs/Slack snippets, draft a formal Post-Mortem. 1. Identify the 'Trigger' vs 'Root Cause' (5 Whys). 2. Categorize the impact (Customer vs Internal). 3. Propose 3 engineering tasks and 1 process change to prevent this. 
+
+The tone must be 'Blameless' and focused on systemic improvement.
+
+[LOGS/DETAILS]"</div>
+            <button class="copy-btn" onclick="copy('p6')">Copy Prompt</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function copy(id) {
+        const text = document.getElementById(id).innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Prompt copied to clipboard!');
+        });
+    }
+</script>
+
+</body>
+</html>

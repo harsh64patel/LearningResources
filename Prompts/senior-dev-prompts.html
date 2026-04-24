@@ -1,0 +1,2011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Senior Dev Prompt Arsenal</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,400&display=swap');
+
+:root {
+  --bg: #060608;
+  --surface: #0d0d12;
+  --surface2: #12121a;
+  --border: #1a1a26;
+  --border2: #222230;
+  --cpp: #38bdf8;
+  --js: #fbbf24;
+  --py: #34d399;
+  --lc: #f472b6;
+  --lg: #fb923c;
+  --ai: #a78bfa;
+  --mgr: #4ade80;
+  --text: #cbd5e1;
+  --text2: #94a3b8;
+  --muted: #475569;
+  --white: #f1f5f9;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-size: 13px;
+}
+
+/* Grid background */
+body::after {
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events:none;
+  z-index:0;
+}
+
+/* Header */
+header {
+  position: relative;
+  z-index: 2;
+  padding: 52px 48px 36px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.header-left {}
+
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(32px, 5vw, 58px);
+  font-weight: 900;
+  color: var(--white);
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+h1 em {
+  font-style: italic;
+  color: var(--muted);
+  font-weight: 300;
+  font-size: 0.5em;
+  display: block;
+  margin-top: 8px;
+  letter-spacing: 0;
+}
+
+.header-stats {
+  display: flex;
+  gap: 32px;
+  padding-bottom: 4px;
+}
+
+.stat {
+  text-align: right;
+}
+
+.stat-num {
+  font-family: 'Fraunces', serif;
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--white);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* Search bar */
+.search-bar {
+  position: relative;
+  z-index: 2;
+  padding: 16px 48px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(6,6,8,0.9);
+  backdrop-filter: blur(12px);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.search-icon {
+  color: var(--muted);
+  font-size: 12px;
+  flex-shrink:0;
+}
+
+.search-input {
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  flex: 1;
+  caret-color: var(--js);
+}
+
+.search-input::placeholder { color: var(--muted); }
+
+.search-count {
+  font-size: 11px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+/* Tabs */
+.tabs-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(6,6,8,0.96);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+
+.tabs {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 0 48px;
+}
+
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab {
+  padding: 16px 24px;
+  background: none;
+  border: none;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  position: relative;
+  white-space: nowrap;
+  transition: color 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.4;
+  transition: opacity 0.15s;
+}
+
+.tab.active .tab-dot { opacity: 1; }
+
+.tab::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 0; right: 0;
+  height: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.2s cubic-bezier(.4,0,.2,1);
+}
+
+.tab.active::after { transform: scaleX(1); }
+.tab:hover { color: var(--text); }
+
+.tab[data-color="cpp"] { --tc: var(--cpp); }
+.tab[data-color="js"]  { --tc: var(--js); }
+.tab[data-color="py"]  { --tc: var(--py); }
+.tab[data-color="lc"]  { --tc: var(--lc); }
+.tab[data-color="lg"]  { --tc: var(--lg); }
+.tab[data-color="ai"]  { --tc: var(--ai); }
+.tab[data-color="mgr"] { --tc: var(--mgr); }
+.tab.active { color: var(--tc); }
+
+/* Content */
+.content {
+  position: relative;
+  z-index: 2;
+  padding: 40px 48px;
+  max-width: 1600px;
+}
+
+.section { display: none; }
+.section.active {
+  display: block;
+  animation: fadeUp 0.25s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity:0; transform: translateY(8px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+.section-intro {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 20px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 36px;
+  border-left: 3px solid var(--section-color, var(--cpp));
+}
+
+.intro-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.intro-text {
+  font-size: 12px;
+  line-height: 1.9;
+  color: var(--text2);
+}
+
+.intro-text strong { color: var(--white); font-weight: 600; }
+
+/* Category */
+.category-block { margin-bottom: 48px; }
+
+.category-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.category-name {
+  font-size: 10px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--section-color, var(--cpp));
+}
+
+.category-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.category-count {
+  font-size: 10px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* Prompt grid */
+.prompts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
+  gap: 16px;
+}
+
+/* Card */
+.prompt-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+
+.prompt-card:hover {
+  border-color: var(--border2);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.prompt-card.hidden { display: none; }
+
+.card-top {
+  padding: 18px 20px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.card-title-area {}
+
+.card-title {
+  font-family: 'Fraunces', serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1.3;
+  margin-bottom: 6px;
+}
+
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  font-size: 9px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  opacity: 0.6;
+}
+
+.tag-lib   { color: var(--section-color, var(--cpp)); }
+.tag-hard  { color: #f87171; }
+.tag-med   { color: var(--js); }
+.tag-easy  { color: var(--mgr); }
+
+.card-badge {
+  font-size: 9px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Prompt body */
+.card-body {
+  padding: 14px 20px 16px;
+}
+
+.prompt-preview {
+  font-size: 11.5px;
+  line-height: 1.85;
+  color: var(--text2);
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 8px;
+  padding: 14px 16px;
+  position: relative;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 160px;
+  overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(.4,0,.2,1);
+}
+
+.prompt-preview.expanded {
+  max-height: 1000px;
+}
+
+.prompt-preview::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 40px;
+  background: linear-gradient(transparent, rgba(13,13,18,0.97));
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.prompt-preview.expanded::after { opacity: 0; }
+
+.ph {
+  color: var(--section-color, var(--cpp));
+  font-style: italic;
+  opacity: 0.85;
+}
+
+/* Card footer */
+.card-footer {
+  padding: 0 20px 16px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-transform: uppercase;
+  border: 1px solid var(--border2);
+  background: rgba(255,255,255,0.04);
+  color: var(--muted);
+}
+
+.btn:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+
+.btn-copy.success { color: var(--mgr); border-color: rgba(74,222,128,0.3); }
+
+.btn-expand {
+  margin-left: auto;
+  color: var(--muted);
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--muted);
+  display: none;
+}
+
+.empty-state.visible { display: block; }
+
+@media (max-width: 700px) {
+  header, .search-bar, .tabs, .content { padding-left: 20px; padding-right: 20px; }
+  .prompts-grid { grid-template-columns: 1fr; }
+  .header-stats { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="eyebrow">// senior-engineer · prompt-arsenal · v2.0</div>
+    <h1>Prompt Arsenal<em>For Senior Engineers & Tech Leads</em></h1>
+  </div>
+  <div class="header-stats">
+    <div class="stat"><div class="stat-num" id="total-count">0</div><div class="stat-label">Prompts</div></div>
+    <div class="stat"><div class="stat-num">7</div><div class="stat-label">Domains</div></div>
+  </div>
+</header>
+
+<div class="search-bar">
+  <span class="search-icon">⌕</span>
+  <input class="search-input" id="searchInput" placeholder="Search prompts across all categories..." autocomplete="off" />
+  <span class="search-count" id="searchCount"></span>
+</div>
+
+<div class="tabs-wrapper">
+  <nav class="tabs">
+    <button class="tab active" data-tab="cpp" data-color="cpp"><span class="tab-dot"></span>C++</button>
+    <button class="tab" data-tab="js"  data-color="js"><span class="tab-dot"></span>JavaScript</button>
+    <button class="tab" data-tab="py"  data-color="py"><span class="tab-dot"></span>Python</button>
+    <button class="tab" data-tab="lc"  data-color="lc"><span class="tab-dot"></span>LangChain</button>
+    <button class="tab" data-tab="lg"  data-color="lg"><span class="tab-dot"></span>LangGraph</button>
+    <button class="tab" data-tab="ai"  data-color="ai"><span class="tab-dot"></span>AI Agents</button>
+    <button class="tab" data-tab="mgr" data-color="mgr"><span class="tab-dot"></span>Tech Lead</button>
+  </nav>
+</div>
+
+<div class="content">
+
+<!-- ═══════════════════ C++ ═══════════════════ -->
+<div class="section active" id="cpp" style="--section-color: var(--cpp)">
+  <div class="section-intro">
+    <div class="intro-icon">⚙️</div>
+    <div class="intro-text"><strong>Senior C++ Engineer prompts</strong> — tuned for C++17/20/23 in production systems: game engines, embedded firmware, HFT, real-time systems, and large-scale backend infrastructure. Emphasis on ABI stability, memory models, compiler internals, and zero-overhead principles.</div>
+  </div>
+
+  <div class="category-block">
+    <div class="category-header"><span class="category-name">Memory & Safety</span><div class="category-line"></div><span class="category-count">3 prompts</span></div>
+    <div class="prompts-grid">
+
+      <div class="prompt-card" data-tags="memory safety audit asan valgrind">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Deep Memory Safety Audit</div>
+            <div class="card-tags"><span class="tag tag-lib">RAII</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">Safety</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Perform a senior-level memory safety audit on this C++ code. Go beyond surface issues:
+
+1. **Ownership semantics**: Are raw pointers used where unique_ptr/shared_ptr should be? Are shared_ptr cycles creating leaks?
+2. **Lifetime hazards**: Dangling references from temporaries, iterator invalidation after container mutations, return-by-reference from locals.
+3. **RAII gaps**: Resources (file handles, sockets, mutexes) not wrapped in RAII types.
+4. **Move semantics**: Missing noexcept on move constructors breaking standard library optimizations. Accidental copies of heavy objects.
+5. **std::string_view/std::span pitfalls**: Views outliving their underlying data.
+6. **Custom allocator issues** if present.
+7. **Sanitizer recommendations**: Which ASan/MSan/UBSan flags would catch each bug?
+
+For each issue: show the exact line, explain the failure mode, give the fixed version.
+
+<span class="ph">[paste code]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="undefined behavior ub sanitizer strict aliasing">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Undefined Behavior Deep Dive</div>
+            <div class="card-tags"><span class="tag tag-lib">UBSan</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">UB</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Analyze this C++ code for undefined behavior at a compiler-expert level. Cover:
+
+1. **Integer UB**: Signed overflow, shift-past-width, shift-of-negative — identify if the optimizer will exploit these.
+2. **Strict aliasing violations**: Accessing memory through incompatible pointer types. Flag any `reinterpret_cast` and explain if it's legal.
+3. **Sequenced-before violations**: Unsequenced modifications in expressions (e.g., `a[i++] = i`).
+4. **Pointer arithmetic UB**: One-past-end pointer dereference, null+0 assumptions.
+5. **Object lifetime UB**: Accessing objects before construction or after destruction, placement new misuse.
+6. **Compiler optimization traps**: Show which UBs will cause the compiler to generate surprising code under -O2.
+7. **Suggested compiler flags**: `-fsanitize=undefined,address` invocations to catch each.
+
+Map each finding to the exact paragraph in the C++20 standard.
+
+<span class="ph">[paste code]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="exception safety strong guarantee noexcept">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Exception Safety Guarantees Audit</div>
+            <div class="card-tags"><span class="tag tag-lib">noexcept</span><span class="tag tag-med">Medium</span></div>
+          </div>
+          <div class="card-badge">Safety</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Audit this C++ code for exception safety guarantees:
+
+1. Classify each function: no-throw / strong / basic / no guarantee. Justify the classification.
+2. Identify functions that should be `noexcept` but aren't — flag how this prevents vector reallocation optimization.
+3. Find operations that should use the copy-and-swap idiom to achieve strong guarantee.
+4. Locate `new` calls not immediately wrapped in smart pointers — these are basic/no-guarantee.
+5. Flag destructors that can throw (undefined behavior if exception propagates during stack unwinding).
+6. Identify RAII wrappers that could be added to upgrade from basic → strong guarantee.
+7. Rewrite the most critical function with strong exception guarantee using explicit rollback or copy-and-swap.
+
+<span class="ph">[paste code]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="category-block">
+    <div class="category-header"><span class="category-name">Performance & Optimization</span><div class="category-line"></div><span class="category-count">4 prompts</span></div>
+    <div class="prompts-grid">
+
+      <div class="prompt-card" data-tags="cache performance data oriented design hot cold split">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Cache Efficiency & Data-Oriented Design</div>
+            <div class="card-tags"><span class="tag tag-lib">DoD</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">Perf</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Redesign this C++ data structure and access patterns for cache efficiency:
+
+1. **Hot/cold split**: Separate frequently-accessed fields from rarely-used ones into separate structs. Show the new layout and estimate cache line utilization.
+2. **SoA vs AoS**: If this is Array-of-Structs, rewrite as Struct-of-Arrays for SIMD-friendly iteration. Benchmark estimate?
+3. **False sharing**: Identify struct fields accessed by different threads that share a cache line. Fix with `alignas(64)` or padding.
+4. **Pointer chasing elimination**: Replace pointer-based trees/lists with flat arrays + index indirection.
+5. **Prefetch hints**: Where should `__builtin_prefetch` be inserted for predictable access patterns?
+6. **Memory layout verification**: Add `static_assert` for struct size and alignment expectations.
+7. Estimate L1/L2 cache miss reduction from these changes.
+
+Context: <span class="ph">[describe workload — game loop / server tick / numerical sim]</span>
+
+<span class="ph">[paste data structures + hot loop code]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="template metaprogramming CRTP compile time constexpr">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Compile-Time Computation Maximizer</div>
+            <div class="card-tags"><span class="tag tag-lib">constexpr</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">TMP</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Move as much computation as possible to compile time in this C++ code:
+
+1. **constexpr/consteval**: Identify functions that operate on constant inputs and can be `consteval`. Show the upgraded version.
+2. **if constexpr chains**: Replace runtime type dispatch or tag dispatch with `if constexpr` on `type_traits`.
+3. **CRTP elimination of vtable**: If there's virtual dispatch on a fixed class hierarchy, rewrite with CRTP to eliminate vtable overhead. Show assembly delta conceptually.
+4. **Template parameter lifting**: Lift runtime configuration values to template parameters where they're known at compile time (buffer sizes, strategy selection).
+5. **std::integral_constant and type lists**: Use for zero-runtime policy selection.
+6. **C++20 concepts**: Replace SFINAE-based overloads with requires clauses. Show the cleaner version.
+7. **Verify with**: `static_assert` all computed values, `std::is_constant_evaluated()` guards.
+
+<span class="ph">[paste code]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="lock free atomic memory order concurrent wait free">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Lock-Free Algorithm Design & Review</div>
+            <div class="card-tags"><span class="tag tag-lib">atomics</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">Concurrency</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Review/design this lock-free C++ data structure at expert level:
+
+1. **Memory order audit**: For every `std::atomic` operation, is the memory order correct? Flag any `memory_order_relaxed` where `acquire/release` is needed. Explain the happens-before chain.
+2. **ABA problem**: Does this algorithm suffer from ABA? If so, show the fix (tagged pointers, hazard pointers, RCU, epoch-based reclamation).
+3. **Progress guarantee**: Is this wait-free, lock-free, or obstruction-free? If lock-free, identify the CAS retry loops and their worst-case behavior.
+4. **Memory reclamation**: How are removed nodes reclaimed safely? Flag deferred-delete hazards.
+5. **False sharing in atomics**: Are atomic variables on the same cache line, causing unnecessary coherence traffic? Fix with `alignas(64)`.
+6. **Compiler/CPU reordering**: Which operations need `std::atomic_thread_fence` vs being in the atomic operation itself?
+7. Write a stress-test harness using multiple threads to validate linearizability.
+
+<span class="ph">[paste lock-free code or describe the structure to design]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="simd vectorization avx intrinsics auto-vectorization">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">SIMD Vectorization Analysis</div>
+            <div class="card-tags"><span class="tag tag-lib">AVX2/NEON</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">SIMD</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Analyze this C++ loop for SIMD vectorization potential and maximize throughput:
+
+1. **Auto-vectorization blockers**: Identify aliasing issues (`__restrict__`), non-contiguous memory access, function calls, or data-dependent branches preventing auto-vectorization. Fix each.
+2. **Manual intrinsics**: If auto-vectorization is insufficient, write the equivalent using AVX2 / SSE4.2 / NEON intrinsics (specify target: <span class="ph">[x86-64 / ARM]</span>).
+3. **Alignment**: Ensure data is 32-byte aligned for AVX2. Add `alignas(32)` and show aligned allocation.
+4. **Loop peeling**: Handle prologue/epilogue for non-multiple-of-8 sizes.
+5. **Horizontal reductions**: Replace scalar reductions with `_mm256_hadd_ps` or equivalent.
+6. **Compile flags**: Which `-march` / `-mfpu` flags enable this on the target CPU?
+7. Estimate theoretical throughput improvement (ops/cycle) vs scalar version.
+
+<span class="ph">[paste the hot loop]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="category-block">
+    <div class="category-header"><span class="category-name">Modern C++ & Architecture</span><div class="category-line"></div><span class="category-count">3 prompts</span></div>
+    <div class="prompts-grid">
+
+      <div class="prompt-card" data-tags="C++20 C++23 concepts ranges coroutines modules modernize">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">C++20/23 Full Modernization</div>
+            <div class="card-tags"><span class="tag tag-lib">C++23</span><span class="tag tag-med">Medium</span></div>
+          </div>
+          <div class="card-badge">Modernize</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Modernize this legacy C++ codebase section to idiomatic C++20/23:
+
+1. **Concepts**: Replace all SFINAE / `enable_if` / tag dispatch with named concepts and `requires` clauses.
+2. **Ranges & Views**: Replace raw iterator loops with `std::ranges::` algorithms and lazy views (`filter_view`, `transform_view`, `zip_view` C++23). Explain which are zero-allocation.
+3. **std::expected<T,E>**: Replace exception-throwing functions and error code returns with `std::expected`. Show monadic chaining with `.and_then()` / `.transform()`.
+4. **Coroutines**: Identify async/generator patterns that should use `co_await` / `co_yield`. Provide the coroutine type implementation.
+5. **std::format**: Replace `printf` / `ostringstream` / `boost::format`.
+6. **Deduction guides & CTAD**: Remove redundant template arguments.
+7. **Modules (C++20)**: Show how to split this header into a module interface unit.
+
+Maintain ABI compatibility with the existing codebase where flagged: <span class="ph">[yes/no]</span>
+
+<span class="ph">[paste code]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="cmake build system vcpkg conan dependency management">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Production CMake Build System</div>
+            <div class="card-tags"><span class="tag tag-lib">CMake 3.28</span><span class="tag tag-med">Medium</span></div>
+          </div>
+          <div class="card-badge">Tooling</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Design a production-grade CMake build system for this project:
+
+Project: <span class="ph">[describe: lib/app/plugin, deps, platforms]</span>
+
+1. **Modern target-based design**: All dependencies via `target_link_libraries` with correct PUBLIC/PRIVATE/INTERFACE. No global `include_directories`.
+2. **CMakePresets.json**: Define presets for Debug/RelWithDebInfo/Release, with sanitizer preset (ASan+UBSan), fuzzing preset, and cross-compile preset.
+3. **Dependency management**: `find_package` with version constraints + vcpkg/Conan fallback via `FetchContent`. Show `vcpkg.json` manifest.
+4. **Compiler hardening flags**: `-fstack-protector-strong`, `-D_FORTIFY_SOURCE=2`, `-Wformat-security`, MSVC equivalents. Abstracted via a `hardened_compile_options` interface target.
+5. **CTest + CDash**: Test discovery, parallel test execution, valgrind/ASan test variants.
+6. **Install rules**: Proper `GNUInstallDirs`, `CMakePackageConfigHelpers` for downstream `find_package` support.
+7. **CI integration**: GitHub Actions matrix for Linux/macOS/Windows.
+
+<span class="ph">[paste existing CMakeLists.txt if upgrading]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="embedded firmware bare metal interrupt RTOS">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Embedded C++ Hardware Abstraction Layer</div>
+            <div class="card-tags"><span class="tag tag-lib">Embedded</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">Embedded</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Design an embedded C++ HAL for this peripheral/MCU:
+
+Target: <span class="ph">[MCU: STM32/ESP32/RP2040 | RTOS: FreeRTOS/Zephyr/bare-metal]</span>
+Peripheral: <span class="ph">[SPI/I2C/UART/ADC/PWM/CAN]</span>
+
+1. **Zero-overhead abstraction**: Use policy-based design (template parameters for pin numbers, DMA channels) so everything resolves at compile time with no vtable.
+2. **Register access**: Typed register access using `volatile` structs or CMSIS-style, with bitfield safety (flag UB in bitfield manipulation).
+3. **Interrupt safety**: ISR-safe ring buffer design. Show memory barrier placement for Cortex-M. Identify what must be `volatile` vs what should use atomics.
+4. **DMA integration**: Non-blocking transfers with completion callbacks. Buffer ownership transfer protocol.
+5. **Error handling without exceptions**: Use `std::expected` or error codes — no heap, no exceptions in ISR context.
+6. **Power management hooks**: Suspend/resume interface for low-power modes.
+7. **Unit testability**: Dependency injection seam so the HAL can be mocked on a host PC with Google Mock.
+
+<span class="ph">[paste existing driver code if refactoring]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ JavaScript ═══════════════════ -->
+<div class="section" id="js" style="--section-color: var(--js)">
+  <div class="section-intro">
+    <div class="intro-icon">⚡</div>
+    <div class="intro-text"><strong>Senior JavaScript / TypeScript prompts</strong> — covering advanced type system patterns, runtime performance, Node.js internals, micro-frontend architecture, and production-grade testing. Assumes mastery of async primitives and modern bundler toolchains.</div>
+  </div>
+
+  <div class="category-block">
+    <div class="category-header"><span class="category-name">TypeScript Advanced Patterns</span><div class="category-line"></div><span class="category-count">3 prompts</span></div>
+    <div class="prompts-grid">
+
+      <div class="prompt-card" data-tags="typescript advanced types generics conditional mapped infer">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Advanced Type System Design</div>
+            <div class="card-tags"><span class="tag tag-lib">TypeScript 5.x</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">Types</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Design production-grade TypeScript types for this module:
+
+1. **Branded types**: Add nominal typing to prevent `userId` / `orderId` mix-ups using opaque type brands.
+2. **Discriminated unions**: Replace boolean flags with exhaustive discriminated unions. Add `assertNever` for compile-time exhaustiveness.
+3. **Conditional types + infer**: Extract deep nested types using conditional types. Build a `DeepReadonly<T>`, `DeepPartial<T>`, and `FlattenPromise<T>`.
+4. **Template literal types**: Build type-safe event names (e.g., `on${Capitalize<EventName>}`) and route parameter extractors.
+5. **Variadic tuple types**: Type-safe pipe/compose function with inferred input/output chain.
+6. **const assertion + satisfies**: Use `satisfies` operator for config objects that need inference + type checking.
+7. **Declaration merging / module augmentation**: Show how to extend third-party library types without forking.
+8. Enable `strictNullChecks`, `noUncheckedIndexedAccess`, and `exactOptionalPropertyTypes` — fix all resulting errors.
+
+<span class="ph">[paste code or describe the domain model]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="runtime validation zod valibot schema api contract">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Runtime Type Safety Architecture</div>
+            <div class="card-tags"><span class="tag tag-lib">Zod</span><span class="tag tag-med">Medium</span></div>
+          </div>
+          <div class="card-badge">Validation</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Architect a complete runtime type safety layer for this API boundary:
+
+1. **Zod schema design**: Write schemas for request/response. Use `.transform()` for data coercion (e.g., date strings → Date objects). Use `.refine()` for cross-field validation. Use `z.discriminatedUnion` for polymorphic responses.
+2. **Type inference**: Derive all TypeScript types from Zod schemas (`z.infer<typeof schema>`) — single source of truth.
+3. **Safe parse pattern**: Use `safeParse` with structured error reporting; never `parse` in production paths.
+4. **Error formatting**: Map `ZodError` to user-facing messages and structured API error responses.
+5. **OpenAPI generation**: Show how to generate OpenAPI spec from Zod schemas using `zod-to-json-schema`.
+6. **Contract testing**: Write a contract test that validates real API responses against the schema.
+7. **Performance**: For high-throughput paths, show where to cache compiled schemas.
+
+<span class="ph">[paste API response shapes or existing interfaces]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="react architecture state management signals performance patterns">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">React Architecture & State Design</div>
+            <div class="card-tags"><span class="tag tag-lib">React 19</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">Architecture</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Review and redesign the state management and component architecture for this React feature:
+
+Feature: <span class="ph">[describe]</span>
+
+1. **State colocation audit**: Identify state lifted too high (causing unnecessary re-renders) and state too low (causing prop drilling). Draw the optimal tree.
+2. **Server state vs client state**: Separate data fetching state (use TanStack Query) from UI state (local) from global app state (Zustand/Jotai).
+3. **React 19 features**: Use Server Actions, `useOptimistic`, `use()` for promise suspension, and `useFormStatus` where applicable.
+4. **Re-render profiling**: Add `React.memo`, `useMemo`, and `useCallback` only where profiling justifies it — explain each decision.
+5. **Concurrent features**: Use `useTransition` for non-urgent updates. `useDeferredValue` for expensive filtered lists.
+6. **Error boundaries**: Place error boundaries at the right granularity with meaningful fallback UI.
+7. **Testing strategy**: React Testing Library tests that assert behavior, not implementation. MSW for API mocking.
+
+<span class="ph">[paste components]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="category-block">
+    <div class="category-header"><span class="category-name">Node.js & Backend</span><div class="category-line"></div><span class="category-count">3 prompts</span></div>
+    <div class="prompts-grid">
+
+      <div class="prompt-card" data-tags="nodejs event loop performance profiling libuv memory leak">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Node.js Event Loop & Memory Profiling</div>
+            <div class="card-tags"><span class="tag tag-lib">Node.js</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">Perf</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Diagnose and fix Node.js performance issues in this service:
+
+Symptoms: <span class="ph">[high latency / memory growth / event loop lag / CPU saturation]</span>
+
+1. **Event loop blocking**: Identify synchronous operations in hot paths (large JSON.parse, crypto, regex on big strings). Move to worker_threads or libuv threadpool.
+2. **Memory leak patterns**: Identify: growing EventEmitter listeners, closures capturing large objects in timers/intervals, global caches without eviction (use LRU-cache), `WeakRef`/`FinalizationRegistry` opportunities.
+3. **Async iterator misuse**: Flag unhandled promise rejections, missing `await` in critical paths, uncontrolled Promise.all fan-out (add `p-limit` for concurrency control).
+4. **libuv threadpool starvation**: DNS lookups + file I/O contending with `UV_THREADPOOL_SIZE`. Show how to tune.
+5. **Cluster vs worker_threads**: Recommend architecture for the described workload.
+6. **Profiling commands**: Exact `node --prof`, `clinic.js flame`, and `0x` invocations to reproduce analysis.
+7. Provide fix + before/after latency estimate.
+
+<span class="ph">[paste server code or describe the endpoint]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="api design REST graphql versioning pagination rate limiting">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Production API Design Review</div>
+            <div class="card-tags"><span class="tag tag-lib">REST/GraphQL</span><span class="tag tag-med">Medium</span></div>
+          </div>
+          <div class="card-badge">API</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Review this API design for production readiness:
+
+1. **Idempotency**: Which mutating endpoints need idempotency keys? Show implementation with Redis deduplication.
+2. **Pagination design**: Is cursor-based pagination used for large sets? Replace offset/limit with opaque cursors. Add `has_next_page` and total count (conditionally expensive).
+3. **Versioning strategy**: Evaluate URL versioning vs header versioning vs GraphQL schema evolution. Recommend for this use case.
+4. **Rate limiting**: Token bucket vs leaky bucket? Per-user vs per-IP vs per-API-key? Show middleware implementation with Redis sliding window.
+5. **Async operations**: Long-running operations should return 202 Accepted + job ID. Show polling and webhook patterns.
+6. **Error contract**: Standardize on RFC 9457 (Problem Details for HTTP APIs). Show error type hierarchy.
+7. **Observability**: Request ID propagation, structured logging on every request, OpenTelemetry span creation.
+
+<span class="ph">[paste routes / GraphQL schema]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="security OWASP injection auth JWT CSRF XSS security headers">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Full-Stack Security Hardening</div>
+            <div class="card-tags"><span class="tag tag-lib">OWASP</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">Security</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Perform a senior security review of this full-stack JS application:
+
+1. **Injection attacks**: NoSQL injection in MongoDB queries, SQL injection via query builders, command injection in `child_process.exec` calls. Show parameterized/safe alternatives.
+2. **Authentication/Authorization**: JWT secret rotation strategy, refresh token rotation with theft detection, RBAC vs ABAC model fit, missing `sub` claim validation.
+3. **CSRF**: Which endpoints need CSRF protection? SameSite cookie vs Double Submit Cookie vs custom header pattern — recommend for this SPA architecture.
+4. **XSS**: DOMPurify sanitization gaps, dangerous `dangerouslySetInnerHTML`, CSP policy design (nonce-based vs hash-based), `Trusted Types` API integration.
+5. **Security headers**: Generate a complete `helmet.js` config with Content-Security-Policy, HSTS, CORP/COEP for SharedArrayBuffer, Permissions-Policy.
+6. **Dependency audit**: Identify `npm audit` triage strategy for critical vs moderate vulns. Suggest `socket.dev` or Snyk integration.
+7. **Secrets management**: Flag any hardcoded secrets. Show `.env` → Vault/AWS Secrets Manager migration pattern.
+
+<span class="ph">[paste code or describe the tech stack]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ Python ═══════════════════ -->
+<div class="section" id="py" style="--section-color: var(--py)">
+  <div class="section-intro">
+    <div class="intro-icon">🐍</div>
+    <div class="intro-text"><strong>Senior Python Engineer prompts</strong> — covering advanced async patterns, type system depth, high-throughput data pipelines, production FastAPI/Django services, and Python internals (GIL, memory model, C extensions). Assumes fluency with the scientific and data ecosystem.</div>
+  </div>
+
+  <div class="category-block">
+    <div class="category-header"><span class="category-name">Async & Concurrency</span><div class="category-line"></div><span class="category-count">3 prompts</span></div>
+    <div class="prompts-grid">
+
+      <div class="prompt-card" data-tags="asyncio advanced patterns semaphore backpressure trio">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Advanced asyncio Architecture</div>
+            <div class="card-tags"><span class="tag tag-lib">asyncio</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">Async</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Redesign this async Python service for production reliability:
+
+1. **Structured concurrency**: Replace bare `asyncio.create_task()` with `asyncio.TaskGroup` (Python 3.11+) for proper cancellation propagation and error grouping.
+2. **Backpressure**: Identify unbounded `asyncio.Queue` usage. Add bounded queues with producer/consumer rate matching. Show `asyncio.Semaphore` for external API rate limiting.
+3. **Cancellation safety**: Audit every `await` for `CancelledError` handling. Which cleanup operations must use `asyncio.shield()`?
+4. **Error propagation**: Tasks that silently swallow exceptions. Add `task.add_done_callback` for unhandled exception logging.
+5. **Event loop blocking**: Use `loop.run_in_executor()` for CPU-bound/blocking I/O. Size the ThreadPoolExecutor correctly.
+6. **Connection pool tuning**: `aiohttp.TCPConnector` / `asyncpg.Pool` — `limit`, `keepalive_timeout`, `max_size` for the expected concurrency.
+7. **Observability**: `asyncio.current_task().get_name()` for tracing, OpenTelemetry async context propagation.
+
+<span class="ph">[paste async service code]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="python GIL multiprocessing threading cpu bound worker pool">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">GIL-Aware Parallelism Strategy</div>
+            <div class="card-tags"><span class="tag tag-lib">multiprocessing</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">Concurrency</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Design a parallelism strategy for this Python workload:
+
+Workload: <span class="ph">[CPU-bound numerical / I/O-bound network / mixed]</span>
+
+1. **GIL analysis**: Profile which operations release the GIL (NumPy ops, I/O syscalls, C extensions) vs hold it. Use `py-spy` / `austin` to show GIL contention.
+2. **multiprocessing vs threading**: Choose based on the GIL profile. For CPU-bound: `ProcessPoolExecutor` with correct `chunksize` for `map()`. Show pickle overhead mitigation using `shared_memory`.
+3. **Python 3.13 free-threaded mode**: If applicable, assess code readiness for `--disable-gil` build. Flag non-thread-safe CPython internals used.
+4. **Joblib integration**: For scikit-learn pipelines, show `Parallel(n_jobs=-1, prefer='threads'/'processes')` selection.
+5. **Inter-process communication**: `multiprocessing.Queue` vs `Pipe` vs `shared_memory` vs Redis for the data size and pattern.
+6. **Worker pool lifecycle**: Proper pool cleanup, timeout handling, and zombie process prevention.
+7. **Profiling commands**: `py-spy record`, `scalene`, `cProfile` + `snakeviz` invocations.
+
+<span class="ph">[paste the computation code]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="pydantic v2 fastapi dependency injection middleware production">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">FastAPI Production Architecture</div>
+            <div class="card-tags"><span class="tag tag-lib">FastAPI + Pydantic v2</span><span class="tag tag-med">Medium</span></div>
+          </div>
+          <div class="card-badge">API</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Architect this FastAPI service for production scale:
+
+1. **Dependency injection graph**: Design a proper DI tree — DB sessions via `AsyncSession` dependency, auth principal extraction, feature flags. Show `yield` dependencies with cleanup guarantees.
+2. **Pydantic v2 model design**: Use `model_validator(mode='before'/'after')`, `field_validator`, `computed_field`, and `model_serializer`. Configure `model_config` for strict mode and frozen models.
+3. **Middleware stack**: Request ID injection (structlog `bind_contextvars`), timing middleware, correlation ID propagation for distributed tracing, trusted host validation.
+4. **Background tasks vs Celery**: For <span class="ph">[describe task]</span>, decide between `BackgroundTasks`, `asyncio.create_task`, and Celery/ARQ worker. Show the right choice with reasoning.
+5. **Lifespan management**: Use `@asynccontextmanager` lifespan for DB pool, HTTP client, Redis pool startup/shutdown. Replace deprecated `startup`/`shutdown` events.
+6. **Response caching**: `fastapi-cache2` with Redis backend, cache key design, invalidation strategy.
+7. **Load testing**: `locust` or `k6` script for the critical endpoint. Target: <span class="ph">[RPS / p99 latency SLO]</span>.
+
+<span class="ph">[paste existing FastAPI app]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="category-block">
+    <div class="category-header"><span class="category-name">Data Engineering & ML Pipelines</span><div class="category-line"></div><span class="category-count">3 prompts</span></div>
+    <div class="prompts-grid">
+
+      <div class="prompt-card" data-tags="polars dask spark big data streaming pipeline">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">High-Throughput Data Pipeline Design</div>
+            <div class="card-tags"><span class="tag tag-lib">Polars / DuckDB</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">Data</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Design a high-throughput Python data pipeline for:
+
+Source: <span class="ph">[S3 Parquet / Kafka / Postgres / API]</span> → Transform → Sink: <span class="ph">[warehouse / feature store / downstream API]</span>
+Volume: <span class="ph">[rows/day, GB/day]</span>
+
+1. **Tool selection**: Polars LazyFrame (single-node, &lt;500GB) vs DuckDB (analytical SQL, &lt;1TB) vs Dask/Ray (distributed). Justify for the stated volume.
+2. **Polars optimization**: Predicate pushdown, projection pushdown, streaming mode for out-of-core processing. Show `scan_parquet` + `lazy()` + `sink_parquet` pipeline.
+3. **DuckDB integration**: Direct S3 Parquet scanning, window functions, ASOF joins, export to Arrow for zero-copy handoff.
+4. **Schema evolution**: Handle Parquet schema drift without failing. Show `strict=False` reading + migration logic.
+5. **Idempotency & checkpointing**: Exactly-once semantics. Watermarks for streaming. Partition-based checkpointing for batch.
+6. **Observability**: Row count validation at each stage, data quality checks with `great_expectations` or `pandera`.
+7. **Orchestration**: Prefect / Airflow DAG for the pipeline with retry, alerting, and backfill support.
+
+<span class="ph">[paste existing pipeline code if refactoring]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="python extension C extension Cython numba cffi ctypes">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Python Performance Extension Strategy</div>
+            <div class="card-tags"><span class="tag tag-lib">Cython/Numba/Rust</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">Perf</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Select and implement the right performance extension strategy for this Python bottleneck:
+
+Bottleneck: <span class="ph">[describe hot function, data types, input size]</span>
+
+1. **Profiling first**: Show `scalene` + `line_profiler` output interpretation to confirm the bottleneck.
+2. **Numba JIT**: Apply `@numba.jit(nopython=True, cache=True, parallel=True)`. Flag unsupported Python features. Show `@numba.vectorize` for ufunc creation.
+3. **Cython annotation**: Write `.pyx` file. Use `cython -a` HTML annotation to find Python/C boundary crossings. Add typed memoryviews for array operations.
+4. **PyO3/Rust extension**: For complex logic, scaffold a Rust extension with PyO3 + maturin. Show data type mapping (Python list → Rust Vec, NumPy → ndarray).
+5. **ctypes/cffi for existing C libs**: If a C library exists, choose between ctypes (no compile) and cffi (type-safe, ABI/API modes).
+6. **NumPy vectorization**: Before native extensions, show the fully vectorized NumPy version — often sufficient and zero-dependency.
+7. Benchmark framework: `pytest-benchmark` comparing all versions.
+
+<span class="ph">[paste the slow Python function]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="pytest testing hypothesis property based fixtures mocking advanced">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Senior-Level Python Test Architecture</div>
+            <div class="card-tags"><span class="tag tag-lib">pytest + hypothesis</span><span class="tag tag-med">Medium</span></div>
+          </div>
+          <div class="card-badge">Testing</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Build a senior-level test architecture for this Python codebase:
+
+1. **Fixture hierarchy**: Design session/module/function-scoped fixtures. Show `conftest.py` hierarchy for shared fixtures. Database fixture with transaction rollback per test using `asyncpg` or SQLAlchemy.
+2. **Property-based testing**: Apply `hypothesis` `@given` strategies to find edge cases. Use `st.builds()` for domain objects. Add `@settings(max_examples=500, deriving=...)` for CI.
+3. **Contract testing**: Use `pact-python` to define consumer-driven contracts for this API client/server. Generate and verify pact files.
+4. **Mutation testing**: Run `mutmut` on the codebase. Interpret surviving mutants and write tests that kill them.
+5. **Time/async testing**: `freezegun` for time-dependent logic. `pytest-asyncio` with `asyncio_mode = "auto"`. `anyio` for trio/asyncio-agnostic tests.
+6. **Test doubles strategy**: When to use `unittest.mock.patch`, `pytest-mock`, `responses` (HTTP), or `respx` (httpx). Show the right tool per case.
+7. **Coverage ratchet**: `pytest-cov` with `--cov-fail-under=90`. Branch coverage. Exclude vendored code. Add to CI with enforcement.
+
+<span class="ph">[paste module or describe the testing gaps]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ LangChain ═══════════════════ -->
+<div class="section" id="lc" style="--section-color: var(--lc)">
+  <div class="section-intro">
+    <div class="intro-icon">🔗</div>
+    <div class="intro-text"><strong>LangChain prompts</strong> — deep-dive into LCEL (LangChain Expression Language), retrieval chains, custom tools, memory systems, callbacks, LangSmith observability, and production deployment patterns. Covers LangChain v0.3+ patterns.</div>
+  </div>
+
+  <div class="category-block">
+    <div class="category-header"><span class="category-name">LCEL — Chain Architecture</span><div class="category-line"></div><span class="category-count">3 prompts</span></div>
+    <div class="prompts-grid">
+
+      <div class="prompt-card" data-tags="langchain LCEL chain pipe operator runnable composable">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">LCEL Chain Design & Optimization</div>
+            <div class="card-tags"><span class="tag tag-lib">LCEL</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">LangChain</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Design and optimize a production LangChain LCEL pipeline for:
+
+Task: <span class="ph">[describe the AI task — summarization / QA / extraction / routing]</span>
+
+1. **Runnable composition**: Build using `|` pipe operator with `RunnablePassthrough`, `RunnableParallel`, `RunnableLambda`, and `RunnableBranch`. Show the full chain as a diagram in comments.
+2. **Parallel execution**: Identify sub-tasks that can run concurrently with `RunnableParallel`. Example: fetch context from multiple retrievers simultaneously.
+3. **Fallback chains**: Add `.with_fallbacks([backup_chain])` for model failures. Show retry with `RunnableRetry` and exponential backoff.
+4. **Streaming**: Make the full chain streamable with `.stream()` and `.astream()`. Identify which Runnables break streaming and how to fix them.
+5. **Input/output schema**: Define `input_schema` and `output_schema` using Pydantic for type safety and LangServe compatibility.
+6. **Batching**: Use `.batch()` with `max_concurrency` for throughput. Show async `.abatch()` for I/O-bound chains.
+7. **LangSmith tracing**: Add `with_config({"run_name": "...", "tags": [...], "metadata": {...}})` for observability.
+
+<span class="ph">[paste existing chain code or describe from scratch]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="langchain structured output json extraction pydantic tool calling">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Structured Output & Extraction Chain</div>
+            <div class="card-tags"><span class="tag tag-lib">with_structured_output</span><span class="tag tag-med">Medium</span></div>
+          </div>
+          <div class="card-badge">Extraction</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Build a robust structured extraction chain with LangChain:
+
+Extract: <span class="ph">[describe entities/schema to extract from documents]</span>
+
+1. **`.with_structured_output()`**: Use `llm.with_structured_output(MyPydanticModel, method='function_calling')`. Compare `json_mode` vs `function_calling` for this model (GPT-4o / Claude / Gemini).
+2. **Nested & optional fields**: Handle missing fields with `Optional` types and `Field(default=None)`. Add `Field(description=...)` to guide the LLM for each field.
+3. **Multi-entity extraction**: Use `List[MyEntity]` output with a prompt that handles 0-to-many entities per document.
+4. **Validation & retry**: Wrap with `OutputFixingParser` or `RetryWithErrorOutputParser` for malformed outputs. Show a `PydanticOutputFunctionsParser` chain.
+5. **Chunked document extraction**: For long documents, extract per chunk then merge/deduplicate results. Show the map-reduce extraction pattern.
+6. **Confidence scoring**: Add a `confidence: float` field to the output schema and prompt the LLM to self-assess.
+7. **Evaluation**: Build a small labeled dataset and measure extraction F1 using LangSmith evaluation.
+
+<span class="ph">[paste Pydantic schema or describe the extraction target]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="langchain routing conditional chain multi-step planning">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Dynamic Chain Routing & Branching</div>
+            <div class="card-tags"><span class="tag tag-lib">RunnableBranch</span><span class="tag tag-med">Medium</span></div>
+          </div>
+          <div class="card-badge">Routing</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Build a dynamic routing chain that sends queries to specialized sub-chains:
+
+Routes needed: <span class="ph">[e.g., SQL query / document QA / calculation / general chat / API call]</span>
+
+1. **Intent classification**: Use a fast, cheap model (GPT-3.5/Haiku) to classify intent into route labels. Return structured output with `route: Literal["sql", "docs", "calc", "chat"]`.
+2. **RunnableBranch**: Wire classified intent to specialized chains using `RunnableBranch`. Include a default/fallback branch.
+3. **Semantic router alternative**: Show `SemanticRouter` from the `semantic-router` library as an embedding-based alternative (faster, no LLM call for routing).
+4. **Context passing**: Use `RunnablePassthrough.assign()` to thread the original query + route decision + sub-chain output through the pipeline without re-fetching.
+5. **Timeout per branch**: Set different `timeout_seconds` per route — SQL might need 30s, chat 5s.
+6. **Tracing**: Each branch should emit a distinct `run_name` in LangSmith for per-route latency analysis.
+7. **Testing**: Show how to unit test each branch in isolation and integration-test the routing logic.
+
+<span class="ph">[paste current chain or describe the routing logic]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="category-block">
+    <div class="category-header"><span class="category-name">RAG — Retrieval Architecture</span><div class="category-line"></div><span class="category-count">3 prompts</span></div>
+    <div class="prompts-grid">
+
+      <div class="prompt-card" data-tags="langchain RAG retriever vectorstore advanced hybrid search reranking">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Advanced RAG Pipeline with Hybrid Search</div>
+            <div class="card-tags"><span class="tag tag-lib">RAG + Reranking</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">RAG</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Upgrade this basic RAG pipeline to advanced retrieval:
+
+Current: <span class="ph">[describe: vectorstore type, embedding model, chunk size, k]</span>
+Document corpus: <span class="ph">[describe: domain, size, document types]</span>
+
+1. **Hybrid retrieval**: Combine dense (embeddings) + sparse (BM25/TF-IDF) retrieval using `EnsembleRetriever` with `weights=[0.6, 0.4]`. Tune weights for your domain.
+2. **Reranking**: Add `CohereRerank` or `cross-encoder/ms-marco-MiniLM` reranker via `ContextualCompressionRetriever`. Show top-k before vs after reranking.
+3. **Multi-query retrieval**: `MultiQueryRetriever` generates 3-5 alternative phrasings and unions results — handles vocabulary mismatch.
+4. **Parent-child chunking**: Index small chunks (128 tokens) for precision retrieval, return parent chunks (512 tokens) for context. Implement with `ParentDocumentRetriever`.
+5. **Metadata filtering**: Pre-filter by document date, source, category before vector search. Show Chroma/Pinecone/Weaviate metadata filter syntax.
+6. **Hypothetical Document Embeddings (HyDE)**: Generate a hypothetical answer, embed it, use for retrieval. Show LCEL implementation.
+7. **RAG evaluation**: Use `RAGAs` metrics — faithfulness, answer relevancy, context precision, context recall. Build a test set and show evaluation loop.
+
+<span class="ph">[paste existing retrieval chain]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="langchain memory conversation history summarization buffer window">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Conversational Memory Architecture</div>
+            <div class="card-tags"><span class="tag tag-lib">Memory</span><span class="tag tag-med">Medium</span></div>
+          </div>
+          <div class="card-badge">Memory</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Design a production conversational memory system for this chatbot:
+
+Use case: <span class="ph">[customer support / coding assistant / tutoring / research assistant]</span>
+Session length: <span class="ph">[short <10 turns / long >50 turns / very long >200 turns]</span>
+
+1. **Memory type selection**: Compare `ConversationBufferMemory` (full history), `ConversationBufferWindowMemory` (sliding window, k=<span class="ph">[N]</span>), `ConversationSummaryMemory` (LLM-compressed), `ConversationSummaryBufferMemory` (hybrid). Recommend for this use case with token budget analysis.
+2. **External persistence**: Store memory in Redis (short-term) + PostgreSQL (long-term) using `RedisChatMessageHistory` / `SQLChatMessageHistory`. Show session ID management.
+3. **Entity memory**: Use `ConversationEntityMemory` to track named entities (users, products, concepts) across turns. Show entity extraction prompt.
+4. **Vector memory**: Store past turns in a vectorstore, retrieve relevant memories semantically. Implement with `VectorStoreRetrieverMemory`.
+5. **Memory injection**: Show multiple LCEL patterns for injecting memory into prompts — `MessagesPlaceholder`, history-as-system-message, summarized context.
+6. **Privacy & TTL**: Memory expiration, PII scrubbing before storage, per-user encryption strategy.
+7. **Token budget management**: Track cumulative token usage. Trigger summarization when approaching context window limit.
+
+<span class="ph">[paste current chatbot chain]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="langchain custom tools agent tool use function calling integration">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Custom Tool Design for LangChain Agents</div>
+            <div class="card-tags"><span class="tag tag-lib">Tool / BaseTool</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">Tools</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Design production-grade custom tools for a LangChain agent:
+
+Tools needed: <span class="ph">[e.g., SQL query executor / REST API caller / file system / calculator / web scraper]</span>
+
+1. **BaseTool subclass**: Implement each tool as a `BaseTool` subclass with typed `args_schema: Type[BaseModel]`, detailed `description` (the LLM reads this!), and both `_run()` and `_arun()` (async) methods.
+2. **Description engineering**: Write tool descriptions that tell the LLM WHEN to use the tool, WHAT inputs to provide, and WHAT it returns. Bad descriptions = wrong tool selection.
+3. **Input validation**: Use Pydantic validators in `args_schema` to sanitize inputs before execution. Prevent injection attacks in SQL/shell tools.
+4. **Error handling**: Return structured errors (don't raise exceptions) so the agent can recover. Use `ToolException` with `handle_tool_error=True`.
+5. **Async tools**: Implement `_arun()` for I/O-bound tools. Show how sync tools block the event loop and why this matters.
+6. **Tool output formatting**: Return concise, LLM-readable strings. Long outputs should be summarized. Show `return_direct=True` for terminal tools.
+7. **Tool testing**: Unit tests with mocked LLM, integration tests, and adversarial input tests (prompt injection via tool output).
+
+<span class="ph">[describe each tool's purpose and required integrations]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="category-block">
+    <div class="category-header"><span class="category-name">LangSmith & Production</span><div class="category-line"></div><span class="category-count">2 prompts</span></div>
+    <div class="prompts-grid">
+
+      <div class="prompt-card" data-tags="langsmith tracing evaluation dataset testing production observability">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">LangSmith Evaluation & CI Integration</div>
+            <div class="card-tags"><span class="tag tag-lib">LangSmith</span><span class="tag tag-med">Medium</span></div>
+          </div>
+          <div class="card-badge">Evals</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Set up a complete LangSmith evaluation pipeline for this LangChain application:
+
+Application: <span class="ph">[describe]</span>
+
+1. **Dataset creation**: Build a golden dataset in LangSmith with `client.create_dataset()`. Show how to harvest good examples from production traces and manually curate edge cases.
+2. **LLM-as-judge evaluators**: Write custom `RunEvaluator` classes for: correctness (vs ground truth), faithfulness (grounded in retrieved docs), conciseness, and tone. Use `load_evaluator("criteria")` for standard criteria.
+3. **Reference-free evaluators**: For tasks without ground truth, use `load_evaluator("score_string")` with a detailed rubric.
+4. **Regression testing in CI**: `client.run_on_dataset()` in GitHub Actions. Fail the build if score drops below threshold on any evaluator.
+5. **Trace annotation**: Show how to add manual feedback (`client.create_feedback()`) and use it to filter training data.
+6. **A/B testing**: Run two chain versions on the same dataset, compare aggregate metrics using `client.compare_runs()`.
+7. **Cost tracking**: Extract token usage from traces, compute cost per run, set budget alerts.
+
+<span class="ph">[paste the chain to evaluate]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="langserve deployment fastapi endpoint streaming langchain production">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">LangServe Production Deployment</div>
+            <div class="card-tags"><span class="tag tag-lib">LangServe</span><span class="tag tag-med">Medium</span></div>
+          </div>
+          <div class="card-badge">Deploy</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Deploy this LCEL chain as a production API using LangServe:
+
+1. **LangServe setup**: `add_routes(app, chain, path="/api/v1/chain")`. Configure `input_type`, `output_type`, `config_keys` (allow user-configurable temperature/model).
+2. **Streaming endpoint**: Enable SSE streaming via `/stream` and websocket via `/stream_log`. Show client-side consumption in Python and JavaScript.
+3. **Authentication middleware**: Add API key auth middleware before LangServe routes. Show how to pass auth context into the chain via `RunnableConfig`.
+4. **Per-request config**: Allow callers to override `configurable` fields (model choice, temperature) per request using `ConfigurableField`.
+5. **Rate limiting**: Token bucket per API key using Redis + `slowapi` middleware. Separate limits for `/invoke` (synchronous) vs `/stream`.
+6. **Health checks**: Liveness (`/health`) and readiness (`/ready`) endpoints that verify LLM connectivity and vectorstore availability.
+7. **Docker deployment**: Dockerfile with multi-stage build, `gunicorn + uvicorn` worker config, environment variable injection for secrets, and `docker-compose.yml` with Redis.
+
+<span class="ph">[paste the chain to deploy]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ LangGraph ═══════════════════ -->
+<div class="section" id="lg" style="--section-color: var(--lg)">
+  <div class="section-intro">
+    <div class="intro-icon">🕸️</div>
+    <div class="intro-text"><strong>LangGraph prompts</strong> — the most detailed section. Covers StateGraph design, node/edge architecture, checkpointing, human-in-the-loop, multi-agent supervisor patterns, streaming, and production deployment with the LangGraph Platform. For engineers building complex agentic workflows.</div>
+  </div>
+
+  <div class="category-block">
+    <div class="category-header"><span class="category-name">Graph Architecture & State Design</span><div class="category-line"></div><span class="category-count">3 prompts</span></div>
+    <div class="prompts-grid">
+
+      <div class="prompt-card" data-tags="langgraph state graph design TypedDict reducer annotations">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">StateGraph Architecture Design</div>
+            <div class="card-tags"><span class="tag tag-lib">StateGraph</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">LangGraph</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Design the complete StateGraph architecture for this agentic workflow:
+
+Workflow: <span class="ph">[describe the end-to-end task the agent performs]</span>
+
+1. **State schema design**: Define `TypedDict` state with proper field typing. Decide which fields use `Annotated[list, operator.add]` reducer (append-only: messages, tool results) vs last-write-wins (status, current_step). Add `MessagesState` inheritance if conversation-based.
+2. **Node decomposition**: Break the workflow into single-responsibility node functions. Each node: takes State, returns `dict` of state updates only. Map nodes to: planner, executor, critic, router, tool_caller, summarizer.
+3. **Conditional edges**: Design `should_continue()` edge functions using `Literal` return types mapped to node names. Handle: success → next_node, error → retry_node, max_retries_exceeded → END.
+4. **Subgraph composition**: Identify workflow segments that should be encapsulated as reusable subgraphs. Show how to compile a subgraph and `add_node(subgraph.compile())`.
+5. **Parallel node execution**: Use `Send()` API for fan-out — run N independent tool calls simultaneously. Show fan-in aggregation node.
+6. **Graph visualization**: `graph.get_graph().draw_mermaid_png()` — paste the Mermaid diagram in comments.
+7. **Compilation and invocation**: `graph.compile(checkpointer=...)`, `.invoke()`, `.stream()`, `.astream_events()` patterns.
+
+<span class="ph">[paste any existing workflow logic to convert]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="langgraph checkpointing persistence sqlite postgres resume interrupt">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Checkpointing & Long-Running Workflow Persistence</div>
+            <div class="card-tags"><span class="tag tag-lib">Checkpointer</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">Persistence</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Implement production checkpointing for this LangGraph workflow:
+
+1. **Checkpointer selection**: `MemorySaver` (dev/testing) vs `SqliteSaver` (single-node persistence) vs `AsyncPostgresSaver` (production, multi-node). Show connection setup and `with` context management.
+2. **Thread ID management**: Design `config = {"configurable": {"thread_id": user_id + session_id}}`. Show thread namespacing strategy for multi-tenant apps.
+3. **State snapshot inspection**: `graph.get_state(config)` to retrieve current state. `graph.get_state_history(config)` to list all checkpoints. Show how to display progress to users.
+4. **Resume from interrupt**: `graph.invoke(None, config)` to resume a paused graph. Show the full pause → user_action → resume loop.
+5. **State time-travel**: `graph.update_state(config, values, as_node="node_name")` to inject corrected state and re-run from a specific checkpoint. Use case: human correction of agent mistakes.
+6. **Checkpoint pruning**: For long-running agents, limit checkpoint history with `max_checkpoints_per_thread`. Archive old checkpoints to cold storage.
+7. **Cross-session memory**: Separate short-term (thread-scoped checkpointer) from long-term (user-scoped vectorstore) memory. Show how nodes read/write both.
+
+<span class="ph">[paste graph definition]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="langgraph human in the loop interrupt approval review breakpoint">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Human-in-the-Loop Interrupt Patterns</div>
+            <div class="card-tags"><span class="tag tag-lib">interrupt()</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">HITL</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Implement human-in-the-loop controls for this LangGraph agent:
+
+Approval points needed: <span class="ph">[e.g., before code execution / before sending emails / before DB writes / after plan generation]</span>
+
+1. **`interrupt()` function** (LangGraph 0.3+): Replace `interrupt_before`/`interrupt_after` on compile with `interrupt(value)` inside node functions. Show how the interrupted value becomes the input to `.invoke(Command(resume=...))`.
+2. **`Command` object**: Use `Command(resume=approval_decision, goto="approved_node")` to both resume AND reroute based on human decision (approve/reject/edit).
+3. **Approval workflow**: Node emits `interrupt({"action": action_summary, "requires_approval": True})`. API layer pauses, notifies user (webhook/Slack), receives response, calls `graph.invoke(Command(resume=user_response), config)`.
+4. **Timeout handling**: If no human response within N minutes, resume with a default action (cancel / proceed with caution). Show the async timeout wrapper.
+5. **Breakpoint patterns**: `compile(interrupt_before=["dangerous_tool_node"])` for blanket pre-execution review. When to use breakpoints vs `interrupt()`.
+6. **Multi-level approvals**: Different approval requirements per action risk level. Low risk → auto-approve. Medium → team lead. High → manager + audit log.
+7. **Audit trail**: Every interrupt/resume event logged to database with timestamp, user ID, decision, and state snapshot.
+
+<span class="ph">[paste the graph nodes that need human oversight]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="category-block">
+    <div class="category-header"><span class="category-name">Multi-Agent Patterns</span><div class="category-line"></div><span class="category-count">3 prompts</span></div>
+    <div class="prompts-grid">
+
+      <div class="prompt-card" data-tags="langgraph multi agent supervisor orchestrator subagent delegation">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Supervisor Multi-Agent Architecture</div>
+            <div class="card-tags"><span class="tag tag-lib">Supervisor Pattern</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">Multi-Agent</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Design a supervisor-based multi-agent system for:
+
+Overall task: <span class="ph">[describe the complex task requiring specialization]</span>
+Specialized agents needed: <span class="ph">[e.g., researcher / coder / critic / writer / data analyst]</span>
+
+1. **Supervisor node**: LLM-powered supervisor that routes to worker agents using structured output: `{"next": "agent_name", "instruction": "specific_task"}`. Use `create_react_agent` for workers.
+2. **Agent state isolation**: Each worker agent gets its own sub-state. Use `subgraph` compilation so worker state doesn't pollute supervisor state. Workers return only their output.
+3. **Worker agent design**: Each worker: dedicated system prompt, specialized tools, bounded context (only receives task-relevant state, not full conversation).
+4. **Result aggregation**: Supervisor node collects worker results, decides: delegate more / move to next stage / synthesize final answer.
+5. **Parallel agent execution**: Use `Send()` API to dispatch multiple independent workers simultaneously. Show fan-in aggregation.
+6. **Agent communication protocol**: Define a structured `AgentMessage` type for inter-agent communication. Avoid agents reading raw LLM outputs from other agents.
+7. **Termination conditions**: Max iterations guard, confidence threshold check, explicit FINISH signal from supervisor. Prevent infinite loops.
+
+<span class="ph">[paste current workflow or describe agent capabilities]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="langgraph react agent tool calling loop observation reflection">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">ReAct Agent with Advanced Tool Use</div>
+            <div class="card-tags"><span class="tag tag-lib">create_react_agent</span><span class="tag tag-med">Medium</span></div>
+          </div>
+          <div class="card-badge">ReAct</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Build a production ReAct agent using LangGraph's `create_react_agent`:
+
+Task domain: <span class="ph">[describe what the agent accomplishes]</span>
+Available tools: <span class="ph">[list tools]</span>
+
+1. **`create_react_agent` customization**: Pass `state_modifier` to inject dynamic context (user profile, retrieved memory, current date) into every LLM call without modifying tools.
+2. **Tool call validation**: Add pre-execution hooks that validate tool arguments before calling — catch hallucinated parameters, out-of-range values, missing required fields.
+3. **Reflection loop**: After tool execution, add a reflection node that evaluates: "Did this tool call advance the goal? Should I retry with different args?" Use structured reflection output to decide next action.
+4. **Error recovery**: Tool errors should be fed back as `ToolMessage` with the error. Show the retry logic with modified parameters (max 2 retries per tool call).
+5. **Context window management**: Track `total_tokens` in state. When approaching limit: summarize oldest messages, compress tool results to key findings only.
+6. **Streaming agent output**: Use `.astream_events()` to stream intermediate tool calls and LLM thinking to the UI. Show frontend consumption with SSE.
+7. **Agent benchmarking**: Run on a task benchmark (AgentBench / GAIA subset). Measure: task completion rate, tool call efficiency, avg tokens per task.
+
+<span class="ph">[paste tool definitions]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="langgraph plan execute critic self-correction loop reflection">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Plan-Execute-Reflect Agentic Loop</div>
+            <div class="card-tags"><span class="tag tag-lib">Plan & Execute</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">Architecture</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Implement a Plan-Execute-Reflect agentic workflow in LangGraph:
+
+Task type: <span class="ph">[long-horizon task requiring multi-step planning and self-correction]</span>
+
+Graph nodes to design:
+1. **Planner node**: Generates a structured plan `List[Step]` with `step_id`, `description`, `tool_to_use`, `expected_output`, `depends_on: List[step_id]`. Use `with_structured_output`.
+2. **Executor node**: Executes one step at a time. Updates `completed_steps` and `step_results` in state. Handles step-level errors.
+3. **Critic node**: After each step (or N steps), evaluates: plan still valid? Step output matches expected? Should replan? Returns `{"verdict": "continue"/"replan"/"abort", "reason": "..."}`.
+4. **Replanner node**: Triggered by critic's replan verdict. Takes original goal + completed steps + current results → generates revised remaining plan.
+5. **State design**: `plan: List[Step]`, `current_step_idx: int`, `step_results: dict`, `replan_count: int`, `final_answer: str`.
+6. **Conditional edges**: `critic_verdict` → `executor` (continue) / `replanner` (replan) / `END` (abort or success).
+7. **Max iterations & budget**: Hard stop at `max_steps=20`, `max_replans=3`, `max_tokens=100000`. Show graceful degradation (partial answer) when limits hit.
+
+<span class="ph">[describe the complex task this agent will solve]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="category-block">
+    <div class="category-header"><span class="category-name">Streaming, Deployment & Debugging</span><div class="category-line"></div><span class="category-count">2 prompts</span></div>
+    <div class="prompts-grid">
+
+      <div class="prompt-card" data-tags="langgraph streaming astream events SSE websocket real-time UI">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">LangGraph Streaming for Real-Time UIs</div>
+            <div class="card-tags"><span class="tag tag-lib">astream_events</span><span class="tag tag-med">Medium</span></div>
+          </div>
+          <div class="card-badge">Streaming</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Implement complete streaming for this LangGraph agent with real-time UI updates:
+
+1. **`astream_events()` consumption**: Filter event types — `on_chat_model_stream` (token-by-token), `on_tool_start`/`on_tool_end` (show tool progress), `on_chain_start`/`on_chain_end` (graph node transitions). Show the full event handler.
+2. **Custom stream events**: `adispatch_custom_event("progress_update", {"step": n, "total": N})` inside nodes for progress bars.
+3. **FastAPI SSE endpoint**: Wrap `astream_events()` in an SSE endpoint with `EventSourceResponse`. Handle client disconnection / cancellation with `asyncio.CancelledError`.
+4. **Frontend consumption**: JavaScript `EventSource` client that renders: streaming LLM tokens in real-time, tool call indicators, node transition breadcrumbs, and final structured output.
+5. **Partial state streaming**: Show how to surface intermediate state (e.g., "Plan created: 5 steps") before full completion using `stream_mode="values"`.
+6. **Websocket alternative**: When to use WebSocket vs SSE for LangGraph streaming. Show `websocket.receive_text()` → `graph.astream_events()` → `websocket.send_json()` loop.
+7. **Back-pressure handling**: If the client reads slowly, how does the SSE buffer behave? Show `asyncio.Queue` buffer with max size.
+
+<span class="ph">[paste graph and current API endpoint]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="langgraph debugging testing unit test graph node mock LangSmith">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">LangGraph Testing & Debugging Strategy</div>
+            <div class="card-tags"><span class="tag tag-lib">Testing</span><span class="tag tag-med">Medium</span></div>
+          </div>
+          <div class="card-badge">Testing</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Design a comprehensive testing strategy for this LangGraph agent:
+
+1. **Node unit tests**: Test each node function in isolation. Mock the LLM with deterministic responses using `langchain_core.messages` directly. Assert exact state dict updates returned.
+2. **Graph integration tests**: Compile graph with `MemorySaver`. Run full end-to-end with realistic inputs. Assert final state fields. Parameterize with `pytest.mark.parametrize` over scenario variants.
+3. **Conditional edge tests**: Test every branch of `should_continue()` functions. Feed crafted state dicts that trigger each path. Assert the returned `Literal` value.
+4. **LLM response mocking**: Use `langchain_core.callbacks.BaseCallbackHandler` or `with_config(callbacks=[MockLLMCallback()])` to inject fake LLM responses without API calls.
+5. **Checkpoint tests**: Verify graph can be interrupted and resumed. Test state time-travel — inject wrong state, correct it, re-run, assert correct output.
+6. **Adversarial testing**: Inject malformed tool outputs, empty LLM responses, tool timeout errors. Assert graceful error handling in state.
+7. **LangSmith integration tests**: Run the compiled graph on a LangSmith dataset. Assert pass rate ≥ threshold in CI. Use `@pytest.mark.langsmith` marker for opt-in.
+
+<span class="ph">[paste graph definition and nodes]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ AI Agents ═══════════════════ -->
+<div class="section" id="ai" style="--section-color: var(--ai)">
+  <div class="section-intro">
+    <div class="intro-icon">🤖</div>
+    <div class="intro-text"><strong>AI Agent Systems Engineer prompts</strong> — model-agnostic architecture patterns covering prompt engineering depth, RAG system design, evaluation pipelines, cost/latency optimization, safety layers, and production agent infrastructure beyond specific frameworks.</div>
+  </div>
+
+  <div class="category-block">
+    <div class="category-header"><span class="category-name">Prompt Engineering (Senior Level)</span><div class="category-line"></div><span class="category-count">3 prompts</span></div>
+    <div class="prompts-grid">
+
+      <div class="prompt-card" data-tags="prompt engineering system prompt optimization few-shot chain of thought xml">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Production System Prompt Engineering</div>
+            <div class="card-tags"><span class="tag tag-lib">Prompt Eng</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">Prompting</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Redesign this system prompt for production reliability and performance:
+
+Current prompt: <span class="ph">[paste]</span>
+Model target: <span class="ph">[GPT-4o / Claude 3.5 Sonnet / Gemini 1.5 Pro]</span>
+Task: <span class="ph">[describe]</span>
+
+1. **Structure with XML tags**: Wrap distinct sections in semantic XML tags (`<role>`, `<context>`, `<instructions>`, `<constraints>`, `<output_format>`, `<examples>`). This dramatically improves Claude's parsing.
+2. **Persona calibration**: Define persona with specific behavioral traits, not just "you are a helpful assistant". Include: expertise level, communication style, what to do when uncertain.
+3. **Chain-of-thought injection**: For reasoning tasks, add `<thinking>` scratchpad instruction before final answer. Specify: think step-by-step, consider alternatives, then conclude.
+4. **Negative examples**: Add `<bad_example>` alongside `<good_example>` — LLMs learn boundaries from both. Show the failure mode to avoid.
+5. **Output schema enforcement**: Specify exact JSON structure, field names, and types in the prompt. Add: "Return ONLY valid JSON. No prose. No markdown code fences."
+6. **Constraint hardening**: Add `<constraints>` section with explicit NEVER / ALWAYS rules. Be specific — vague constraints are ignored.
+7. **Token efficiency**: Audit for redundant instructions. Measure token count before/after. Use prompt caching (Anthropic/OpenAI) for the static portion.
+8. **Version control**: Add prompt version tag. Track changes in git. Use LangSmith prompt hub.
+
+<span class="ph">[paste current system prompt]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="guardrails safety input output moderation injection defense production">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">LLM Safety & Guardrails Layer</div>
+            <div class="card-tags"><span class="tag tag-lib">Guardrails</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">Safety</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Design a production safety layer for this LLM application:
+
+Application: <span class="ph">[describe the use case and risk profile]</span>
+
+1. **Input guardrails**: Prompt injection detection (check for instruction overriding patterns), PII detection before sending to LLM (`presidio-analyzer`), content moderation using `OpenAI Moderation API` or `LlamaGuard`.
+2. **Output guardrails**: `guardrails-ai` validators for: response format compliance, hallucination detection (NLI-based), PII leakage in responses, toxicity scoring.
+3. **Jailbreak defense**: Input classifier fine-tuned on adversarial prompts. Show `Llama-Guard-3` integration as a lightweight classifier.
+4. **Scope enforcement**: "Off-topic" detector for customer-facing agents — if user asks outside the permitted domain, redirect without exposing system prompt.
+5. **Rate limiting by content**: Detect and throttle repeated near-identical prompts (bot behavior). Semantic similarity check with sliding window.
+6. **Audit logging**: Log ALL inputs/outputs with user ID, timestamp, model version, guardrail decisions. NEVER log raw PII — hash/tokenize first.
+7. **Latency budget**: Guardrails add latency. Show async parallel execution of input checks. Target: guardrail overhead &lt;50ms p95.
+
+<span class="ph">[paste the pipeline to add guardrails to]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="LLM cost optimization token caching prompt compression fine tuning distillation">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">LLM Cost & Latency Optimization at Scale</div>
+            <div class="card-tags"><span class="tag tag-lib">Cost/Perf</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">Efficiency</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Optimize this LLM pipeline for cost and latency at production scale:
+
+Current spend: <span class="ph">[$/day]</span> | Current p99 latency: <span class="ph">[ms]</span> | Target: <span class="ph">[cost / latency goals]</span>
+
+1. **Prompt caching**: Identify the static prefix (system prompt, examples, RAG context) and enable Anthropic/OpenAI prompt caching. Show cache hit rate calculation and expected cost reduction.
+2. **Model routing**: Use a cheap fast model (Haiku/GPT-3.5) as a first-pass classifier. Route to expensive model only for complex queries. Build a confidence-based routing layer.
+3. **Semantic caching**: Hash+embed user queries. Return cached responses for semantically similar past queries (cosine sim > 0.97). Use `GPTCache` or Redis with vector search.
+4. **Output length control**: Add `max_tokens` budget per request type. Explicit prompt instruction: "Respond in ≤ N words." Measure token distribution and set P95 budget.
+5. **Batching**: Aggregate requests in 50ms windows, batch-process with `AsyncOpenAI` / Anthropic batch API. Show throughput vs latency tradeoff curve.
+6. **Fine-tuning decision**: At what request volume does fine-tuning a smaller model (Mistral 7B) on task-specific data become cheaper than GPT-4o? Show the break-even calculation.
+7. **Async pipeline**: Identify synchronous blocking points. Convert to async with connection pooling. Show `httpx.AsyncClient` with `limits=Limits(max_connections=50)`.
+
+<span class="ph">[paste current pipeline code]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ Tech Lead ═══════════════════ -->
+<div class="section" id="mgr" style="--section-color: var(--mgr)">
+  <div class="section-intro">
+    <div class="intro-icon">🎯</div>
+    <div class="intro-text"><strong>Tech Lead & Engineering Manager prompts</strong> — for senior ICs moving into staff/principal roles or EMs. Covers RFC writing, technical strategy, architecture reviews, difficult conversations, incident leadership, and communicating engineering to business stakeholders.</div>
+  </div>
+
+  <div class="category-block">
+    <div class="category-header"><span class="category-name">Architecture & Strategy</span><div class="category-line"></div><span class="category-count">3 prompts</span></div>
+    <div class="prompts-grid">
+
+      <div class="prompt-card" data-tags="RFC design doc technical writing proposal architecture">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Staff-Level RFC / Design Document</div>
+            <div class="card-tags"><span class="tag tag-lib">RFC</span><span class="tag tag-med">Medium</span></div>
+          </div>
+          <div class="card-badge">Docs</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Write a staff-engineer quality RFC for:
+
+Proposal: <span class="ph">[describe the system change / new capability]</span>
+Audience: <span class="ph">[IC team / cross-functional / exec review]</span>
+
+Structure:
+**Context & Motivation** — What breaks or becomes impossible without this change? Quantify the pain.
+**Goals & Explicit Non-Goals** — What this RFC will and will NOT solve. Non-goals prevent scope creep.
+**Proposed Design** — System diagram description, API contracts, data model changes, migration path.
+**Alternatives Considered** — 2-3 real alternatives with honest tradeoff analysis. Don't strawman them.
+**Security & Privacy Impact** — Threat model for new attack surfaces. Data classification changes.
+**Scalability & Reliability** — Back-of-envelope capacity calculation. Failure modes and mitigations.
+**Rollout Plan** — Feature flags, phased rollout, rollback procedure, success metrics at each stage.
+**Open Questions** — Genuinely unresolved decisions. Invite input on specific tradeoffs.
+**Appendix** — Benchmarks, spike results, reference implementations.
+
+Write in precise technical prose. No bullet-point padding. Cite real numbers where possible.
+
+<span class="ph">[share context, constraints, any prior spike work]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="technical debt strategy migration legacy modernization refactoring roadmap">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Technical Debt Reduction Strategy</div>
+            <div class="card-tags"><span class="tag tag-lib">Strategy</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">Planning</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Create a senior-level technical debt reduction strategy for:
+
+System: <span class="ph">[describe the system and its debt]</span>
+Business context: <span class="ph">[upcoming roadmap items that are blocked / velocity impact]</span>
+Team: <span class="ph">[size, seniority, capacity]</span>
+
+1. **Debt taxonomy**: Classify each debt item — design debt (wrong abstractions), code debt (unmaintained implementations), test debt (coverage gaps), infrastructure debt (outdated dependencies), documentation debt.
+2. **Impact scoring matrix**: Score each item: Velocity drag (1-5) × Reliability risk (1-5) × Remediation effort (T-shirt). Generate a priority-sorted backlog.
+3. **Boy Scout Rule vs dedicated sprints**: Which debts should be fixed opportunistically (Boy Scout)? Which require dedicated capacity? Show the decision criteria.
+4. **The Strangler Fig pattern**: For legacy system replacement — show how to route traffic incrementally, maintain backward compatibility, and measure migration progress.
+5. **Stakeholder narrative**: How to communicate debt investment to product/business. Frame as: "We are losing X engineering days/sprint to this. Fixing it returns Y capacity for features."
+6. **Success metrics**: Cycle time, deploy frequency, MTTR, incident rate, test coverage, static analysis scores — establish baselines and targets.
+7. **Team morale**: Balance debt work with new feature work to prevent burnout. Show the 20% capacity model and how to protect it.
+
+<span class="ph">[list the top debt items with a one-line description each]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="incident management postmortem blameless SRE on-call escalation">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Incident Commander Playbook</div>
+            <div class="card-tags"><span class="tag tag-lib">SRE</span><span class="tag tag-hard">Advanced</span></div>
+          </div>
+          <div class="card-badge">Incidents</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Write a blameless post-mortem and systemic improvement plan for this incident:
+
+Incident: <span class="ph">[describe: what happened, duration, user impact, revenue/SLA impact]</span>
+Timeline: <span class="ph">[key events with timestamps]</span>
+
+**Post-Mortem Structure:**
+1. **Executive Summary** (3 sentences): What, impact, key fix. C-suite readable.
+2. **Detailed Timeline**: Detection → Triage → Mitigation → Resolution. Include: who did what, what signals were missed, communication gaps.
+3. **Root Cause Analysis (5-Whys)**: Trace from symptom to root. Distinguish: root cause (why it happened) from triggering event (what triggered it) from contributing factors.
+4. **Impact Quantification**: Users affected, error rate during window, revenue impact if calculable, SLA breach assessment.
+5. **What Went Well**: Specific practices that contained/accelerated resolution. Reinforce these.
+6. **Action Items**: Each item: SMART goal, owner, due date, priority. Categorize: Detection (improve alerting) / Prevention (fix root cause) / Response (improve playbook).
+7. **Systemic improvements**: Which action items require architectural changes vs process changes vs tooling? Estimate effort and prioritize.
+8. **Communication template**: The external status page update and internal stakeholder email.
+
+<span class="ph">[paste incident notes / Slack logs / metrics screenshots descriptions]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="category-block">
+    <div class="category-header"><span class="category-name">People, Hiring & Communication</span><div class="category-line"></div><span class="category-count">3 prompts</span></div>
+    <div class="prompts-grid">
+
+      <div class="prompt-card" data-tags="performance review feedback 360 career growth leveling promotion">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Performance Review & Leveling Assessment</div>
+            <div class="card-tags"><span class="tag tag-lib">People</span><span class="tag tag-med">Medium</span></div>
+          </div>
+          <div class="card-badge">Feedback</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Write a rigorous performance review and leveling assessment for an engineer:
+
+Engineer level: <span class="ph">[current: SWE II / Senior / Staff]</span>
+Review period: <span class="ph">[quarter/half/year]</span>
+Key projects: <span class="ph">[list 2-3 with the engineer's specific contribution]</span>
+Behavioral observations: <span class="ph">[specific examples of how they work]</span>
+
+1. **Impact assessment**: Quantify business/engineering impact of their work. Be specific — "reduced p99 latency by 40%" beats "improved performance."
+2. **Competency matrix evaluation**: Assess against the level rubric for: Technical Execution, System Design, Code Quality, Collaboration, Mentorship, Ownership, Communication. Rate: Exceeds/Meets/Below expectation with evidence.
+3. **Promotion case (if applicable)**: If ready, build the promo case: evidence they're ALREADY operating at the next level, not just ready to grow into it. Identify gaps to address.
+4. **Growth areas**: 2-3 specific, actionable development areas with concrete next steps and a 6-month measurable goal for each.
+5. **Honest calibration**: Check for recency bias (overweighting recent work), halo effect (one great project masking weaknesses), and leniency bias (avoiding hard truths).
+6. **Delivery script**: Key phrases for the live conversation — how to deliver criticism constructively, handle defensive reactions, and motivate without over-promising on promotion timelines.
+
+<span class="ph">[add any notes from 1:1s, peer feedback, or project outcomes]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="difficult conversation feedback conflict team engineering management">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Difficult Engineering Conversation Prep</div>
+            <div class="card-tags"><span class="tag tag-lib">Leadership</span><span class="tag tag-med">Medium</span></div>
+          </div>
+          <div class="card-badge">Communication</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Prepare me for this difficult engineering management conversation:
+
+Situation: <span class="ph">[e.g., underperforming senior engineer / missed deadline / architectural disagreement / PIP / layoff / equity dispute]</span>
+My role: <span class="ph">[EM / tech lead / peer]</span>
+History: <span class="ph">[prior conversations, any commitments made]</span>
+Goal: <span class="ph">[what outcome am I trying to achieve?]</span>
+
+1. **Conversation framework**: SBI (Situation-Behavior-Impact) for feedback. Opening sentence that sets a non-threatening tone. The specific observation, not a judgment.
+2. **Anticipated reactions**: What will they likely say? How do I respond to: defensiveness, deflection, counterattack, shutdown, agreement-but-no-change?
+3. **My own biases to check**: Am I sure this is their underperformance vs unclear expectations? Have I given enough context? Is there something I'm missing?
+4. **What I'm asking for**: Specific, measurable behavior change with a timeline. Not vague "do better."
+5. **Escalation path**: If this conversation doesn't lead to change in 30 days, what happens next? Be clear on this for yourself before the meeting.
+6. **Documentation**: What should I write down afterward and where? Protect yourself and them.
+7. **Script the opener**: Write the first 4 sentences I should say in the meeting.
+
+<span class="ph">[add any specific context or constraints]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+      <div class="prompt-card" data-tags="engineering to business executive communication roadmap presentation">
+        <div class="card-top">
+          <div class="card-title-area">
+            <div class="card-title">Eng → Exec Communication Translator</div>
+            <div class="card-tags"><span class="tag tag-lib">Communication</span><span class="tag tag-easy">Easy</span></div>
+          </div>
+          <div class="card-badge">Exec Comms</div>
+        </div>
+        <div class="card-body">
+          <div class="prompt-preview">Transform this engineering update into a crisp executive communication:
+
+Update: <span class="ph">[paste the technical update, incident summary, or project status]</span>
+Audience: <span class="ph">[CTO only / VP Eng + Product / Board / all-hands]</span>
+Context: <span class="ph">[routine update / asking for decision / responding to incident / requesting resources]</span>
+
+1. **Pyramid principle**: Lead with the conclusion/recommendation, then supporting evidence. Execs read the first sentence and may not continue — make it count.
+2. **Translate to business language**: Convert: "P99 latency" → "1 in 100 user requests are slow"; "technical debt" → "hidden tax on engineering velocity"; "refactoring" → "preventive maintenance."
+3. **Decision request framing**: If you need a decision, state it explicitly: "We need a decision on X by [date]. Options are A (cost: $Y, risk: Z) and B (cost: $P, risk: Q). We recommend A because..."
+4. **Numbers that matter**: Revenue impact, user impact (count + %), engineering cost (person-weeks), time-to-market delta. Cut all other metrics.
+5. **Risk communication**: Be honest about risk without catastrophizing. "If we don't address X in Q3, we estimate Y impact."
+6. **Appropriate length**: CTO async Slack = 150 words. VP in a meeting = 5 slides. Board = 3 minutes verbal + 1 slide. Generate the right format.
+7. **What NOT to include**: Root cause technical details, code snippets, jargon, "we tried X and it didn't work" without context.
+
+<span class="ph">[paste the engineering update]</span></div>
+          <div class="card-footer"><button class="btn btn-copy" onclick="copyPrompt(this)">Copy</button><button class="btn btn-expand" onclick="toggleExpand(this)">Expand</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="empty-state" id="emptyState">
+  <div style="font-size:32px;margin-bottom:16px;">⌕</div>
+  <div style="font-size:13px;">No prompts match "<span id="emptyQuery"></span>"</div>
+  <div style="font-size:11px;color:var(--muted);margin-top:8px;">Try a different keyword or clear the search</div>
+</div>
+
+</div><!-- /content -->
+
+<script>
+// Count total prompts
+const allCards = document.querySelectorAll('.prompt-card');
+document.getElementById('total-count').textContent = allCards.length;
+
+// Tab switching
+const tabs = document.querySelectorAll('.tab');
+const sections = document.querySelectorAll('.section');
+
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    sections.forEach(s => s.classList.remove('active'));
+    tab.classList.add('active');
+    const sec = document.getElementById(tab.dataset.tab);
+    if (sec) sec.classList.add('active');
+    // Clear search on tab switch
+    document.getElementById('searchInput').value = '';
+    document.getElementById('searchCount').textContent = '';
+    document.getElementById('emptyState').classList.remove('visible');
+    allCards.forEach(c => c.classList.remove('hidden'));
+  });
+});
+
+// Search
+const searchInput = document.getElementById('searchInput');
+const searchCount = document.getElementById('searchCount');
+const emptyState = document.getElementById('emptyState');
+const emptyQuery = document.getElementById('emptyQuery');
+
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.trim().toLowerCase();
+
+  if (!q) {
+    allCards.forEach(c => c.classList.remove('hidden'));
+    searchCount.textContent = '';
+    emptyState.classList.remove('visible');
+    // restore section visibility
+    sections.forEach(s => {
+      const activeTab = document.querySelector('.tab.active');
+      s.classList.toggle('active', s.id === activeTab?.dataset?.tab);
+    });
+    return;
+  }
+
+  // Show all sections when searching
+  sections.forEach(s => s.classList.add('active'));
+
+  let visible = 0;
+  allCards.forEach(card => {
+    const text = (card.dataset.tags || '') + ' ' +
+                 (card.querySelector('.card-title')?.textContent || '') + ' ' +
+                 (card.querySelector('.prompt-preview')?.textContent || '');
+    const match = text.toLowerCase().includes(q);
+    card.classList.toggle('hidden', !match);
+    if (match) visible++;
+  });
+
+  searchCount.textContent = visible > 0 ? `${visible} found` : '';
+  emptyQuery.textContent = q;
+  emptyState.classList.toggle('visible', visible === 0);
+});
+
+// Copy prompt
+function copyPrompt(btn) {
+  const preview = btn.closest('.card-body').querySelector('.prompt-preview');
+  const text = preview.innerText;
+  // Try modern clipboard API first, fall back to execCommand
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => flashCopied(btn)).catch(() => fallbackCopy(text, btn));
+  } else {
+    fallbackCopy(text, btn);
+  }
+}
+
+function fallbackCopy(text, btn) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0;';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try { document.execCommand('copy'); } catch(e) {}
+  document.body.removeChild(ta);
+  flashCopied(btn);
+}
+
+function flashCopied(btn) {
+  btn.textContent = '✓ Copied';
+  btn.classList.add('success');
+  setTimeout(() => {
+    btn.textContent = 'Copy';
+    btn.classList.remove('success');
+  }, 2200);
+}
+
+// Expand/collapse
+function toggleExpand(btn) {
+  const preview = btn.closest('.card-body').querySelector('.prompt-preview');
+  const isExpanded = preview.classList.toggle('expanded');
+  btn.textContent = isExpanded ? 'Collapse' : 'Expand';
+}
+</script>
+</body>
+</html>
