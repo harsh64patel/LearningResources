@@ -1,0 +1,2738 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-view="grid">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Developer Cheatsheet</title>
+<!-- Baked-in data for portable offline saves (Option B). null = no preloaded data. -->
+<script id="cs3-preload" type="application/json">null</script>
+<style>
+/* ═══ THEME ═══════════════════════════════════════════════════════════════════ */
+:root[data-theme="dark"] {
+  --bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3250;
+  --text:#e2e8f0;--text-dim:#8892a4;--text-muted:#4a5270;--code-bg:#12151f;
+  --accent:#7c83fd;--accent2:#c084fc;--shadow:rgba(0,0,0,.55);
+  --toast-bg:#22263a;--input-bg:#12151f;--hover:rgba(124,131,253,.08);
+  --tag-bg:rgba(124,131,253,.15);--hl-bg:#ffd60a;--hl-c:#111;
+  --palette-bg:#1a1d27;--fade-start:transparent;--fade-end:#1a1d27;
+}
+:root[data-theme="light"] {
+  --bg:#f4f6fb;--surface:#fff;--surface2:#f0f2fa;--border:#dde1f0;
+  --text:#1a1d2e;--text-dim:#5a6080;--text-muted:#9aa0b8;--code-bg:#f8f9ff;
+  --accent:#5b62e8;--accent2:#9333ea;--shadow:rgba(0,0,0,.12);
+  --toast-bg:#fff;--input-bg:#fff;--hover:rgba(91,98,232,.06);
+  --tag-bg:rgba(91,98,232,.1);--hl-bg:#ff6b00;--hl-c:#fff;
+  --palette-bg:#fff;--fade-start:transparent;--fade-end:#fff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;line-height:1.6;transition:background .25s,color .25s}
+
+/* ═══ HIGHLIGHT (search match) ════════════════════════════════════════════════ */
+mark.hl{background:var(--hl-bg);color:var(--hl-c);border-radius:3px;padding:0 2px;font-weight:700}
+
+/* ═══ HEADER ══════════════════════════════════════════════════════════════════ */
+header{padding:28px 32px 18px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.header-left{flex:1;min-width:180px}
+header h1{font-size:1.9rem;font-weight:800;letter-spacing:-.5px;background:linear-gradient(135deg,#7c83fd,#c084fc,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:3px}
+header p{color:var(--text-dim);font-size:.82rem}
+.header-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+
+/* ═══ BUTTONS ═════════════════════════════════════════════════════════════════ */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:7px;font-size:.81rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text);transition:all .15s;text-decoration:none;white-space:nowrap}
+.btn:hover{background:var(--hover);border-color:var(--accent);color:var(--accent)}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-primary:hover{opacity:.85;color:#fff;border-color:var(--accent)}
+.btn-sm{padding:5px 10px;font-size:.74rem}
+.btn-icon{padding:6px;border-radius:6px;background:transparent;border:1px solid transparent;cursor:pointer;color:var(--text-dim);display:inline-flex;align-items:center;transition:all .15s;line-height:1}
+.btn-icon:hover{background:var(--hover);color:var(--accent);border-color:var(--border)}
+.btn-icon.active{background:var(--tag-bg);color:var(--accent);border-color:var(--accent)}
+.btn-danger:hover{background:rgba(248,113,113,.12);color:#f87171;border-color:#f87171}
+
+/* ═══ TOOLBAR ═════════════════════════════════════════════════════════════════ */
+.toolbar{position:sticky;top:0;z-index:200;backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:9px 32px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:rgba(15,17,23,.93)}
+[data-theme="light"] .toolbar{background:rgba(244,246,251,.93)}
+.toolbar-left{flex:1;display:flex;gap:8px;align-items:center;min-width:200px}
+.toolbar-right{display:flex;gap:4px;align-items:center}
+
+/* ═══ SEARCH TRIGGER ══════════════════════════════════════════════════════════ */
+.search-trigger{display:flex;align-items:center;gap:8px;padding:7px 14px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;cursor:pointer;color:var(--text-muted);font-size:.84rem;transition:border-color .15s;min-width:240px;flex:1;max-width:400px}
+.search-trigger:hover{border-color:var(--accent);color:var(--text-dim)}
+.search-trigger kbd{margin-left:auto;font-size:.68rem;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-family:'Fira Code','Consolas',monospace;color:var(--text-muted)}
+
+/* ═══ SEARCH PALETTE (Ctrl+K) ════════════════════════════════════════════════ */
+#paletteOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:900;align-items:flex-start;justify-content:center;padding-top:12vh;backdrop-filter:blur(5px)}
+#paletteOverlay.open{display:flex}
+#palette{background:var(--palette-bg);border:1px solid var(--border);border-radius:14px;width:min(660px,92vw);box-shadow:0 24px 80px rgba(0,0,0,.5);overflow:hidden;animation:palIn .18s ease}
+@keyframes palIn{from{transform:translateY(-18px) scale(.97);opacity:0}to{transform:none;opacity:1}}
+.pal-input-row{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border)}
+.pal-input-row svg{flex-shrink:0;color:var(--accent)}
+#paletteInput{flex:1;background:none;border:none;outline:none;font-size:1rem;color:var(--text);font-family:inherit}
+#paletteInput::placeholder{color:var(--text-muted)}
+#paletteClose{background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:.8rem;padding:3px 6px;border-radius:4px;border:1px solid var(--border)}
+#paletteClose:hover{color:var(--text)}
+#paletteResults{max-height:420px;overflow-y:auto;padding:6px}
+.pal-result{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;transition:background .1s}
+.pal-result:hover,.pal-result.active{background:var(--hover)}
+.pal-result.active{background:var(--tag-bg)}
+.pal-result-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;margin-top:1px}
+.pal-result-body{flex:1;min-width:0}
+.pal-result-title{font-size:.85rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pal-result-meta{font-size:.72rem;color:var(--text-muted);margin-top:1px}
+.pal-result-snippet{font-size:.73rem;color:var(--text-dim);font-family:'Fira Code','Consolas',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.pal-cat-badge{display:inline-block;font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:10px;border:1px solid;margin-right:4px;vertical-align:middle}
+.pal-hint{text-align:center;padding:32px;color:var(--text-muted);font-size:.82rem}
+.pal-empty{text-align:center;padding:32px;color:var(--text-dim);font-size:.85rem}
+.pal-section-label{font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);padding:6px 12px 3px}
+
+/* ═══ NAV PILLS ═══════════════════════════════════════════════════════════════ */
+.nav-pills-wrap{display:flex;gap:5px;align-items:center;flex-wrap:wrap;flex:1}
+.nav-pill{padding:4px 11px;border-radius:20px;font-size:.74rem;font-weight:700;cursor:pointer;border:1px solid var(--border);background:none;color:var(--text-dim);transition:all .15s;white-space:nowrap}
+.nav-pill:hover,.nav-pill.active{color:var(--text);background:var(--surface2)}
+/* built-in colors */
+.np-git{border-color:#f05033}.np-git.active,.np-git:hover{background:rgba(240,80,51,.12);color:#f05033}
+.np-js{border-color:#c9b800}.np-js.active,.np-js:hover{background:rgba(247,223,30,.1);color:#c9b800}
+.np-py{border-color:#3776ab}.np-py.active,.np-py:hover{background:rgba(55,118,171,.15);color:#5ba3d9}
+.np-cpp{border-color:#00599c}.np-cpp.active,.np-cpp:hover{background:rgba(0,89,156,.15);color:#4da6ff}
+.np-cmd{border-color:#23d18b}.np-cmd.active,.np-cmd:hover{background:rgba(35,209,139,.1);color:#23d18b}
+.np-linux{border-color:#e95420}.np-linux.active,.np-linux:hover{background:rgba(233,84,32,.12);color:#e95420}
+.np-ai{border-color:#a855f7}.np-ai.active,.np-ai:hover{background:rgba(168,85,247,.12);color:#a855f7}
+.np-custom{border-color:var(--accent)}.np-custom.active,.np-custom:hover{background:var(--tag-bg);color:var(--accent)}
+.np-bookmarks{border-color:#fb923c}.np-bookmarks.active,.np-bookmarks:hover{background:rgba(251,146,60,.1);color:#fb923c}
+
+/* ═══ VIEW TOGGLE ═════════════════════════════════════════════════════════════ */
+.view-toggle{display:flex;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:3px}
+.view-btn{padding:4px 7px;border-radius:5px;background:none;border:none;cursor:pointer;color:var(--text-muted);transition:all .15s;display:flex;align-items:center}
+.view-btn:hover{color:var(--text)}
+.view-btn.active{background:var(--accent);color:#fff}
+
+/* ═══ MAIN ════════════════════════════════════════════════════════════════════ */
+main{max-width:1500px;margin:0 auto;padding:28px 32px 80px}
+
+/* ═══ STATS BAR ═══════════════════════════════════════════════════════════════ */
+.stats-bar{display:flex;gap:6px;margin-bottom:22px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0;overflow:hidden}
+.stat{flex:1;text-align:center;padding:10px 8px;border-right:1px solid var(--border);transition:background .15s}
+.stat:last-child{border-right:none}
+.stat:hover{background:var(--hover)}
+.stat-val{font-size:1.25rem;font-weight:800;color:var(--accent);line-height:1.2}
+.stat-label{font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px}
+
+/* ═══ SECTION ═════════════════════════════════════════════════════════════════ */
+.section{margin-bottom:48px}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid var(--border);cursor:pointer;user-select:none}
+.section-header:hover .section-title-group h2{opacity:.85}
+.section-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.section-header h2{font-size:1.35rem;font-weight:800;letter-spacing:-.4px}
+.section-header small{color:var(--text-dim);font-size:.8rem;font-weight:400}
+.section-title-group{flex:1}
+.section-collapse-btn{background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:.85rem;padding:4px;border-radius:4px;transition:transform .2s;display:flex;align-items:center}
+.section.collapsed .section-collapse-btn{transform:rotate(-90deg)}
+.section.collapsed .grid{display:none}
+.section-count{font-size:.7rem;font-weight:600;background:var(--surface2);border:1px solid var(--border);color:var(--text-dim);padding:1px 7px;border-radius:10px;margin-left:6px}
+/* Section colors */
+#git .section-icon{background:rgba(240,80,51,.15)} #git .section-header h2{color:#f05033}
+#js .section-icon{background:rgba(247,223,30,.12)} #js .section-header h2{color:#c9b800}
+#py .section-icon{background:rgba(55,118,171,.2)} #py .section-header h2{color:#5ba3d9}
+#cpp .section-icon{background:rgba(0,89,156,.2)} #cpp .section-header h2{color:#4da6ff}
+#cmd .section-icon{background:rgba(35,209,139,.12)} #cmd .section-header h2{color:#23d18b}
+#linux .section-icon{background:rgba(233,84,32,.12)} #linux .section-header h2{color:#e95420}
+#ai .section-icon{background:rgba(168,85,247,.12)} #ai .section-header h2{color:#a855f7}
+#custom-section .section-icon{background:var(--tag-bg)} #custom-section .section-header h2{color:var(--accent)}
+#bookmarks-section .section-icon{background:rgba(251,146,60,.12)} #bookmarks-section .section-header h2{color:#fb923c}
+
+/* ═══ GRID / VIEWS ════════════════════════════════════════════════════════════ */
+.grid{display:grid;gap:14px}
+[data-view="grid"] .grid{grid-template-columns:repeat(auto-fill,minmax(340px,1fr))}
+[data-view="list"] .grid{grid-template-columns:1fr}
+[data-view="compact"] .grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+
+/* ═══ CARD ════════════════════════════════════════════════════════════════════ */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color .2s,box-shadow .2s;position:relative;display:flex;flex-direction:column}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 24px var(--shadow)}
+.card.bookmarked{border-color:#fb923c}
+.card.bookmarked::after{content:"";position:absolute;top:0;right:0;border-width:0 18px 18px 0;border-style:solid;border-color:transparent #fb923c transparent transparent;z-index:2}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface2);border-bottom:1px solid var(--border);flex-shrink:0}
+.card-title-text{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text-dim);flex:1;padding-right:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-actions{display:flex;gap:2px;flex-shrink:0}
+.card-actions .btn-icon{width:30px;height:30px;font-size:.85rem}
+
+/* Card body with collapsible height */
+.card-body{position:relative;overflow:hidden;transition:max-height .3s ease}
+[data-view="grid"] .card-body{max-height:260px}
+[data-view="compact"] .card-body{max-height:160px}
+[data-view="list"] .card-body{max-height:none!important}
+.card.expanded .card-body{max-height:9999px!important}
+.card-fade{position:absolute;bottom:0;left:0;right:0;height:64px;background:linear-gradient(transparent,var(--fade-end));pointer-events:none;display:none}
+.card.clipped .card-fade{display:block}
+.card-expand-row{display:none;border-top:1px solid var(--border);flex-shrink:0}
+.card.clipped .card-expand-row,.card.expanded .card-expand-row{display:flex}
+.card-expand-btn{width:100%;background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:.75rem;font-weight:600;padding:6px;text-align:center;transition:background .15s;letter-spacing:.3px}
+.card-expand-btn:hover{background:var(--hover);color:var(--accent)}
+
+/* Table */
+.card table{width:100%;border-collapse:collapse}
+.card table tr{transition:background .1s}
+.card table tr:hover{background:var(--hover)}
+.card table tr:not(:last-child) td{border-bottom:1px solid var(--border)}
+.card table td{padding:6px 12px;font-size:.82rem;vertical-align:middle}
+.card table td:first-child{font-family:'Fira Code','Cascadia Code','Consolas',monospace;font-size:.76rem;color:#a5f3fc;background:var(--code-bg);width:48%;white-space:pre-wrap;word-break:break-all;cursor:pointer;user-select:none;position:relative;transition:opacity .12s,background .12s}
+.card table td:first-child:hover{opacity:.5;background:rgba(124,131,253,.10)}
+[data-theme="light"] .card table td:first-child{color:#0369a1}
+[data-theme="light"] .card table td:first-child:hover{opacity:.5;background:rgba(91,98,232,.08)}
+.card table td:last-child{color:var(--text-dim)}
+.row-copy-btn{display:none}
+[data-view="compact"] .card table td{padding:4px 10px;font-size:.76rem}
+[data-view="list"] .card table td{padding:7px 14px}
+
+/* Code block */
+.codeblock{overflow:hidden;display:flex;flex-direction:column}
+.codeblock-header{display:flex;align-items:center;padding:7px 12px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:.7rem;color:var(--text-dim);font-family:'Fira Code','Consolas',monospace;flex-shrink:0}
+.codeblock-dots{display:flex;gap:4px;margin-right:9px}
+.codeblock-dots span{width:8px;height:8px;border-radius:50%}
+.codeblock-dots span:nth-child(1){background:#ff5f57}
+.codeblock-dots span:nth-child(2){background:#febc2e}
+.codeblock-dots span:nth-child(3){background:#28c840}
+.codeblock-filename{flex:1}
+.copy-code-btn{background:none;border:1px solid var(--border);border-radius:4px;padding:2px 7px;font-size:.66rem;cursor:pointer;color:var(--text-muted);transition:all .15s;font-family:inherit}
+.copy-code-btn:hover{border-color:var(--accent);color:var(--accent)}
+.copy-code-btn.copied{border-color:#4ade80;color:#4ade80}
+.codeblock pre{padding:12px 14px;font-family:'Fira Code','Cascadia Code','Consolas',monospace;font-size:.77rem;line-height:1.72;overflow-x:auto;color:#cdd6f4;background:var(--code-bg);cursor:pointer;transition:opacity .12s}
+.codeblock pre:hover{opacity:.55}
+[data-theme="light"] .codeblock pre{color:#2d3748}
+
+/* Image card */
+.card-image-wrap{padding:10px;background:var(--code-bg);text-align:center}
+.card-image-wrap img{max-width:100%;max-height:240px;border-radius:6px;object-fit:contain}
+.card-caption{font-size:.78rem;color:var(--text-dim);padding:6px 12px;border-top:1px solid var(--border)}
+
+/* Note card */
+.card-note{padding:12px 14px;font-size:.84rem;color:var(--text-dim);line-height:1.65;white-space:pre-wrap;word-break:break-word;cursor:pointer;transition:opacity .12s}
+.card-note:hover{opacity:.55}
+
+/* ═══ SECTION / CAT COLORS for dynamic cats ══════════════════════════════════ */
+.cat-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;flex-shrink:0}
+
+/* ═══ EMPTY STATES ════════════════════════════════════════════════════════════ */
+.empty-state{text-align:center;padding:48px 24px;color:var(--text-dim)}
+.empty-state .icon{font-size:2.6rem;margin-bottom:12px}
+.empty-state h3{font-size:1rem;font-weight:600;margin-bottom:6px;color:var(--text)}
+#noResults{display:none;text-align:center;padding:48px;color:var(--text-dim)}
+
+/* ═══ MODAL ═══════════════════════════════════════════════════════════════════ */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:800;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;width:100%;max-width:560px;box-shadow:0 20px 60px rgba(0,0,0,.45);animation:modalIn .2s ease;max-height:90vh;display:flex;flex-direction:column}
+.modal-lg{max-width:820px}
+.modal-xl{max-width:95vw;max-height:95vh}
+@keyframes modalIn{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+.modal-header h3{font-size:1rem;font-weight:700}
+.modal-close{background:none;border:none;cursor:pointer;color:var(--text-dim);font-size:1.1rem;line-height:1;padding:2px;border-radius:4px}
+.modal-close:hover{color:var(--text);background:var(--hover)}
+.modal-body{padding:18px 20px;overflow-y:auto;flex:1}
+.modal-footer{padding:13px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0}
+.form-group{margin-bottom:13px}
+.form-group label{display:block;font-size:.76rem;font-weight:600;color:var(--text-dim);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.form-row{display:flex;gap:10px}
+.form-row .form-group{flex:1}
+.form-control{width:100%;padding:8px 11px;background:var(--input-bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:.85rem;outline:none;transition:border-color .15s;font-family:inherit}
+.form-control:focus{border-color:var(--accent)}
+.form-control::placeholder{color:var(--text-muted)}
+textarea.form-control{resize:vertical;min-height:90px;font-family:'Fira Code','Consolas',monospace;font-size:.77rem}
+.rows-editor{border:1px solid var(--border);border-radius:8px;overflow:hidden;max-height:240px;overflow-y:auto}
+.row-editor-item{display:flex;gap:5px;align-items:center;padding:6px 8px;border-bottom:1px solid var(--border)}
+.row-editor-item:last-child{border-bottom:none}
+.row-editor-item input{flex:1;background:var(--input-bg);border:1px solid var(--border);border-radius:5px;padding:5px 8px;color:var(--text);font-size:.77rem;outline:none;font-family:'Fira Code','Consolas',monospace}
+.row-editor-item input:last-of-type{font-family:inherit}
+.row-editor-item input:focus{border-color:var(--accent)}
+.row-del-btn{background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:.9rem;padding:2px 5px;border-radius:4px;flex-shrink:0}
+.row-del-btn:hover{color:#f87171;background:rgba(248,113,113,.1)}
+.add-row-btn{width:100%;padding:6px;background:none;border:none;border-top:1px dashed var(--border);color:var(--text-muted);cursor:pointer;font-size:.76rem;transition:all .15s}
+.add-row-btn:hover{color:var(--accent);background:var(--hover)}
+/* Category selector with "new" btn */
+.cat-select-row{display:flex;gap:6px;align-items:center}
+.cat-select-row .form-control{flex:1}
+.cat-new-btn{white-space:nowrap;flex-shrink:0}
+
+/* Image upload zone */
+.img-drop-zone{border:2px dashed var(--border);border-radius:8px;padding:24px;text-align:center;cursor:pointer;transition:border-color .15s;color:var(--text-dim);font-size:.83rem}
+.img-drop-zone:hover,.img-drop-zone.drag-over{border-color:var(--accent);color:var(--accent);background:var(--hover)}
+.img-drop-zone input[type="file"]{display:none}
+.img-preview{margin-top:10px;text-align:center}
+.img-preview img{max-width:100%;max-height:200px;border-radius:6px;border:1px solid var(--border)}
+
+/* Emoji grid for category modal */
+.emoji-grid{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.emoji-btn{width:32px;height:32px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.emoji-btn:hover,.emoji-btn.selected{border-color:var(--accent);background:var(--tag-bg)}
+
+/* ═══ EXPAND MODAL ════════════════════════════════════════════════════════════ */
+#expandModal .modal-body{padding:0}
+#expandModal .codeblock{border:none;border-radius:0}
+#expandModal .codeblock pre{max-height:75vh;overflow:auto}
+
+/* ═══ CARD (list view extras) ════════════════════════════════════════════════ */
+[data-view="list"] .card{flex-direction:row;flex-wrap:wrap}
+[data-view="list"] .card-head{flex:0 0 200px;border-bottom:none;border-right:1px solid var(--border);flex-direction:column;align-items:flex-start;gap:8px}
+[data-view="list"] .card-actions{flex-direction:column}
+[data-view="list"] .card-body{flex:1;overflow:auto;max-height:none!important}
+[data-view="list"] .card-expand-row{display:none!important}
+[data-view="list"] .card-fade{display:none!important}
+[data-view="compact"] .codeblock pre{font-size:.71rem;line-height:1.6}
+[data-view="compact"] .card-head{padding:6px 10px}
+
+/* ═══ KEYBOARD SHORTCUTS PANEL ═══════════════════════════════════════════════ */
+.shortcuts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.shortcut-row{display:flex;align-items:center;justify-content:space-between;font-size:.82rem;padding:5px 0;border-bottom:1px solid var(--border)}
+.shortcut-row:last-child{border-bottom:none}
+.shortcut-desc{color:var(--text-dim)}
+kbd.sc{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:2px 7px;font-size:.73rem;font-family:'Fira Code','Consolas',monospace;color:var(--text)}
+
+/* ═══ TOAST ═══════════════════════════════════════════════════════════════════ */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--toast-bg);border:1px solid var(--border);color:var(--text);padding:10px 18px;border-radius:10px;font-size:.82rem;font-weight:500;box-shadow:0 8px 30px var(--shadow);z-index:2000;transition:transform .25s ease,opacity .25s;display:flex;align-items:center;gap:8px;opacity:0;white-space:nowrap}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+#toast.success{border-color:#4ade80}
+#toast.info{border-color:var(--accent)}
+#toast.warning{border-color:#fbbf24}
+
+.kbd{display:inline-block;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:.68rem;font-family:'Fira Code','Consolas',monospace;color:var(--text-dim)}
+footer{text-align:center;padding:20px;color:var(--text-muted);font-size:.77rem;border-top:1px solid var(--border)}
+
+@media(max-width:640px){
+  header,main,.toolbar{padding-left:16px;padding-right:16px}
+  [data-view="grid"] .grid{grid-template-columns:1fr}
+  [data-view="list"] .card{flex-direction:column}
+  [data-view="list"] .card-head{flex:none;border-right:none;border-bottom:1px solid var(--border)}
+  header h1{font-size:1.5rem}
+  .search-trigger{min-width:auto}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ SEARCH PALETTE ══════════════════════════════════════════════════════════ -->
+<div id="paletteOverlay" onclick="closePalette(event)">
+  <div id="palette">
+    <div class="pal-input-row">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="paletteInput" placeholder="Search cards, commands, concepts…" oninput="paletteSearch(this.value)" onkeydown="paletteKey(event)" autocomplete="off"/>
+      <button id="paletteClose" onclick="closePaletteBtn()">Esc</button>
+    </div>
+    <div id="paletteResults"><div class="pal-hint">Start typing to search across all cards</div></div>
+  </div>
+</div>
+
+<!-- ═══ HEADER ══════════════════════════════════════════════════════════════════ -->
+<header>
+  <div class="header-left">
+    <h1>⚡ Developer Cheatsheet</h1>
+    <p id="headerSub">Git · JS/TS · Python · C++ · CMD · Linux · AI Agents &nbsp;|&nbsp; <span class="kbd">Ctrl+K</span> search &nbsp;·&nbsp; <span class="kbd">Ctrl+N</span> new card</p>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-primary btn-sm" onclick="openModal('createModal')">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Card
+    </button>
+    <button class="btn btn-sm" onclick="openModal('catModal')">🗂 New Category</button>
+    <button class="btn btn-sm" onclick="openModal('sectionsModal')" title="Show, hide, or rename the built-in sections">⚙ Sections</button>
+    <button class="btn btn-sm" onclick="saveAsHtml()" title="Download this HTML file with all your data baked in — open it on any machine">💾 Save HTML</button>
+    <button class="btn btn-sm" onclick="exportData()">⬇ Export JSON</button>
+    <label class="btn btn-sm" style="cursor:pointer">⬆ Import<input type="file" accept=".json" style="display:none" onchange="importData(this)"/></label>
+    <button class="btn btn-sm" id="themeBtn" onclick="toggleTheme()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <span id="themeLabel">Light</span>
+    </button>
+    <button class="btn btn-sm" onclick="openModal('shortcutsModal')">⌨ Shortcuts</button>
+    <button class="btn btn-sm" onclick="window.print()">🖨 Print</button>
+  </div>
+</header>
+
+<!-- ═══ TOOLBAR ══════════════════════════════════════════════════════════════════ -->
+<div class="toolbar">
+  <div class="toolbar-left">
+    <div class="search-trigger" onclick="openPalette()" role="button">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span>Search cards…</span>
+      <kbd>Ctrl+K</kbd>
+    </div>
+    <div class="nav-pills-wrap" id="navPills">
+      <button class="nav-pill active" data-filter="all" onclick="setFilter('all',this)">All</button>
+      <button class="nav-pill np-git" data-filter="git" onclick="setFilter('git',this)">🔴 Git</button>
+      <button class="nav-pill np-js" data-filter="js" onclick="setFilter('js',this)">🟡 JS/TS</button>
+      <button class="nav-pill np-py" data-filter="py" onclick="setFilter('py',this)">🔵 Python</button>
+      <button class="nav-pill np-cpp" data-filter="cpp" onclick="setFilter('cpp',this)">🔷 C++</button>
+      <button class="nav-pill np-cmd" data-filter="cmd" onclick="setFilter('cmd',this)">🟢 CMD</button>
+      <button class="nav-pill np-linux" data-filter="linux" onclick="setFilter('linux',this)">🐧 Linux</button>
+      <button class="nav-pill np-ai" data-filter="ai" onclick="setFilter('ai',this)">🤖 AI</button>
+      <button class="nav-pill np-custom" data-filter="custom" onclick="setFilter('custom',this)">✨ My Cards</button>
+      <button class="nav-pill np-bookmarks" data-filter="bookmarks" onclick="setFilter('bookmarks',this)">🔖 Saved</button>
+    </div>
+  </div>
+  <div class="toolbar-right">
+    <div class="view-toggle">
+      <button class="view-btn active" id="vb-grid" onclick="setView('grid')" title="Grid view">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      </button>
+      <button class="view-btn" id="vb-list" onclick="setView('list')" title="List view">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      </button>
+      <button class="view-btn" id="vb-compact" onclick="setView('compact')" title="Compact view">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="4" height="4"/><rect x="10" y="3" width="4" height="4"/><rect x="17" y="3" width="4" height="4"/><rect x="3" y="10" width="4" height="4"/><rect x="10" y="10" width="4" height="4"/><rect x="17" y="10" width="4" height="4"/><rect x="3" y="17" width="4" height="4"/><rect x="10" y="17" width="4" height="4"/><rect x="17" y="17" width="4" height="4"/></svg>
+      </button>
+    </div>
+    <button class="btn-icon" onclick="toggleAllSections()" title="Collapse/expand all" style="margin-left:4px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 15 12 20 17 15"/><polyline points="7 9 12 4 17 9"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ═══ MAIN ════════════════════════════════════════════════════════════════════ -->
+<main>
+  <div class="stats-bar" id="statsBar">
+    <div class="stat"><div class="stat-val" id="statCards">0</div><div class="stat-label">Cards</div></div>
+    <div class="stat"><div class="stat-val" id="statRows">0</div><div class="stat-label">Commands</div></div>
+    <div class="stat"><div class="stat-val" id="statBookmarks">0</div><div class="stat-label">Bookmarked</div></div>
+    <div class="stat"><div class="stat-val" id="statCustom">0</div><div class="stat-label">Custom</div></div>
+    <div class="stat"><div class="stat-val" id="statCategories">0</div><div class="stat-label">Categories</div></div>
+  </div>
+  <div id="noResults" style="display:none;text-align:center;padding:48px;color:var(--text-dim)">
+    <div style="font-size:2rem;margin-bottom:8px">🔍</div><p>No cards match your filter.</p>
+  </div>
+
+  <!-- Built-in sections (always rendered) -->
+  <section class="section" id="git" data-category="git">
+    <div class="section-header" onclick="toggleSection('git')">
+      <div class="section-icon">🔴</div>
+      <div class="section-title-group"><h2>Git <span class="section-count" id="cnt-git"></span></h2><small>Version Control System</small></div>
+      <button class="section-collapse-btn" tabindex="-1">▾</button>
+    </div>
+    <div class="grid" id="grid-git"></div>
+  </section>
+  <section class="section" id="js" data-category="js">
+    <div class="section-header" onclick="toggleSection('js')">
+      <div class="section-icon">🟡</div>
+      <div class="section-title-group"><h2>JavaScript / TypeScript <span class="section-count" id="cnt-js"></span></h2><small>ES2023+ · Node.js · TS Essentials</small></div>
+      <button class="section-collapse-btn" tabindex="-1">▾</button>
+    </div>
+    <div class="grid" id="grid-js"></div>
+  </section>
+  <section class="section" id="py" data-category="py">
+    <div class="section-header" onclick="toggleSection('py')">
+      <div class="section-icon">🔵</div>
+      <div class="section-title-group"><h2>Python <span class="section-count" id="cnt-py"></span></h2><small>Python 3.12+ · Patterns · Stdlib</small></div>
+      <button class="section-collapse-btn" tabindex="-1">▾</button>
+    </div>
+    <div class="grid" id="grid-py"></div>
+  </section>
+  <section class="section" id="cpp" data-category="cpp">
+    <div class="section-header" onclick="toggleSection('cpp')">
+      <div class="section-icon">🔷</div>
+      <div class="section-title-group"><h2>C++ <span class="section-count" id="cnt-cpp"></span></h2><small>C++17 / C++20 Modern Features</small></div>
+      <button class="section-collapse-btn" tabindex="-1">▾</button>
+    </div>
+    <div class="grid" id="grid-cpp"></div>
+  </section>
+  <section class="section" id="cmd" data-category="cmd">
+    <div class="section-header" onclick="toggleSection('cmd')">
+      <div class="section-icon">🟢</div>
+      <div class="section-title-group"><h2>Windows CMD / PowerShell <span class="section-count" id="cnt-cmd"></span></h2><small>Command Prompt · PowerShell</small></div>
+      <button class="section-collapse-btn" tabindex="-1">▾</button>
+    </div>
+    <div class="grid" id="grid-cmd"></div>
+  </section>
+  <section class="section" id="linux" data-category="linux">
+    <div class="section-header" onclick="toggleSection('linux')">
+      <div class="section-icon">🐧</div>
+      <div class="section-title-group"><h2>Linux / Bash <span class="section-count" id="cnt-linux"></span></h2><small>Shell Commands · Scripting · Permissions</small></div>
+      <button class="section-collapse-btn" tabindex="-1">▾</button>
+    </div>
+    <div class="grid" id="grid-linux"></div>
+  </section>
+  <section class="section" id="ai" data-category="ai">
+    <div class="section-header" onclick="toggleSection('ai')">
+      <div class="section-icon">🤖</div>
+      <div class="section-title-group"><h2>AI Agent Libraries <span class="section-count" id="cnt-ai"></span></h2><small>LangChain · LangGraph · LlamaIndex · CrewAI · AutoGen · Pydantic AI</small></div>
+      <button class="section-collapse-btn" tabindex="-1">▾</button>
+    </div>
+    <div class="grid" id="grid-ai"></div>
+  </section>
+
+  <!-- Dynamic custom category sections injected here -->
+  <div id="dynamicSections"></div>
+
+  <!-- My Cards -->
+  <section class="section" id="custom-section" data-category="custom">
+    <div class="section-header" onclick="toggleSection('custom-section')">
+      <div class="section-icon">✨</div>
+      <div class="section-title-group"><h2>My Cards <span class="section-count" id="cnt-custom"></span></h2><small>Your personal notes &amp; snippets</small></div>
+      <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openModal('createModal')" style="margin-right:8px">+ New Card</button>
+      <button class="section-collapse-btn" tabindex="-1">▾</button>
+    </div>
+    <div class="grid" id="grid-custom">
+      <div class="empty-state" id="customEmpty"><div class="icon">✨</div><h3>No custom cards yet</h3><p>Press <span class="kbd">Ctrl+N</span> or click <strong>+ New Card</strong>.</p></div>
+    </div>
+  </section>
+
+  <!-- Bookmarks -->
+  <section class="section" id="bookmarks-section" data-category="bookmarks" style="display:none">
+    <div class="section-header" onclick="toggleSection('bookmarks-section')">
+      <div class="section-icon">🔖</div>
+      <div class="section-title-group"><h2>Bookmarked <span class="section-count" id="cnt-bookmarks"></span></h2><small>Your saved cards</small></div>
+      <button class="section-collapse-btn" tabindex="-1">▾</button>
+    </div>
+    <div class="grid" id="grid-bookmarks">
+      <div class="empty-state"><div class="icon">🔖</div><h3>No bookmarks yet</h3><p>Click the bookmark icon on any card.</p></div>
+    </div>
+  </section>
+</main>
+
+<!-- ═══ BUILTIN SECTION EDIT MODAL ══════════════════════════════════════════ -->
+<div class="modal-overlay" id="builtinEditModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header"><h3 id="builtinModalTitle">Edit Section</h3><button class="modal-close" onclick="closeModal('builtinEditModal')">✕</button></div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:14px">
+      <div class="form-row">
+        <label class="form-label">Section Name</label>
+        <input type="text" id="builtinNameInput" class="form-input" maxlength="60" placeholder="Section name…"/>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Subtitle</label>
+        <input type="text" id="builtinSubtitleInput" class="form-input" maxlength="120" placeholder="Short description…"/>
+      </div>
+      <div style="padding-top:8px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-sm" style="color:#f87171;border-color:#f87171" onclick="hideBuiltinSection()">🙈 Hide Section</button>
+        <button class="btn btn-sm" onclick="resetBuiltinSection()">↺ Reset to Default</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('builtinEditModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBuiltinSection()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MANAGE SECTIONS MODAL ════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="sectionsModal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header"><h3>Manage Sections</h3><button class="modal-close" onclick="closeModal('sectionsModal')">✕</button></div>
+    <div class="modal-body" style="padding:0">
+      <div id="sectionsList" style="display:flex;flex-direction:column"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-primary" onclick="closeModal('sectionsModal')">Done</button></div>
+  </div>
+</div>
+
+<footer>⚡ Developer Cheatsheet &nbsp;·&nbsp; Data in browser localStorage &nbsp;·&nbsp; Use <b>💾 Save HTML</b> to make a portable copy &nbsp;·&nbsp; <span class="kbd">Ctrl+K</span> Search &nbsp; <span class="kbd">Ctrl+N</span> New Card</footer>
+<div id="toast"></div>
+
+<!-- ═══ CARD CREATE / EDIT MODAL ════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="createModal">
+  <div class="modal">
+    <div class="modal-header"><h3 id="modalTitle">Add New Card</h3><button class="modal-close" onclick="closeModal('createModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group" style="flex:2">
+          <label>Title</label>
+          <input class="form-control" id="cardTitleInput" placeholder="e.g. Docker Commands"/>
+        </div>
+        <div class="form-group" style="flex:1">
+          <label>Type</label>
+          <select class="form-control" id="cardTypeInput" onchange="toggleCardType()">
+            <option value="table">📋 Table</option>
+            <option value="code">💻 Code</option>
+            <option value="note">📝 Note</option>
+            <option value="image">🖼 Image</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <div class="cat-select-row">
+          <select class="form-control" id="cardCategoryInput"></select>
+          <button class="btn btn-sm cat-new-btn" onclick="openModal('catModal')">＋ New</button>
+        </div>
+      </div>
+      <!-- Table editor -->
+      <div id="tableEditor">
+        <div class="form-group">
+          <label>Rows <span style="font-weight:400;text-transform:none;font-size:.72rem">(command / value — description)</span></label>
+          <div class="rows-editor" id="rowsEditor"></div>
+          <button class="add-row-btn" onclick="addEditorRow()">＋ Add row</button>
+        </div>
+      </div>
+      <!-- Code editor -->
+      <div id="codeEditor" style="display:none">
+        <div class="form-row">
+          <div class="form-group"><label>Filename</label><input class="form-control" id="codeFilename" placeholder="snippet.py"/></div>
+          <div class="form-group" style="flex:0 0 120px"><label>Language</label>
+            <select class="form-control" id="codeLang">
+              <option value="">plain</option><option value="python">Python</option><option value="js">JavaScript</option><option value="ts">TypeScript</option><option value="bash">Bash</option><option value="cpp">C++</option><option value="json">JSON</option><option value="sql">SQL</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group"><label>Code</label><textarea class="form-control" id="codeContent" placeholder="Paste your code here…" style="min-height:160px"></textarea></div>
+      </div>
+      <!-- Note editor -->
+      <div id="noteEditor" style="display:none">
+        <div class="form-group"><label>Note content</label><textarea class="form-control" id="noteContent" placeholder="Write your notes here… supports plain text." style="min-height:140px;font-family:inherit"></textarea></div>
+      </div>
+      <!-- Image editor -->
+      <div id="imageEditor" style="display:none">
+        <div class="form-group">
+          <label>Image</label>
+          <div class="img-drop-zone" id="imgDropZone" onclick="document.getElementById('imgFileInput').click()" ondragover="imgDragOver(event)" ondrop="imgDrop(event)">
+            <div>📁 Click to upload or drag & drop an image<br><small style="opacity:.7">PNG · JPG · GIF · WebP — or paste with Ctrl+V</small></div>
+            <input type="file" id="imgFileInput" accept="image/*" onchange="imgFileSelect(this)"/>
+          </div>
+          <div class="img-preview" id="imgPreview"></div>
+        </div>
+        <div class="form-group"><label>Caption (optional)</label><input class="form-control" id="imgCaption" placeholder="Describe the image…"/></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('createModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCard()">Save Card</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CATEGORY MODAL ══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="catModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header"><h3 id="catModalTitle">New Category</h3><button class="modal-close" onclick="closeModal('catModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Name</label><input class="form-control" id="catNameInput" placeholder="e.g. Docker, Kubernetes…"/></div>
+      <div class="form-group">
+        <label>Emoji / Icon</label>
+        <div class="emoji-grid" id="emojiGrid"></div>
+      </div>
+      <div class="form-group">
+        <label>Accent Color</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="color" id="catColorInput" value="#7c83fd" style="width:42px;height:34px;border-radius:6px;border:1px solid var(--border);cursor:pointer;padding:2px"/>
+          <span style="font-size:.78rem;color:var(--text-dim)">Shown on the category pill and section header</span>
+        </div>
+      </div>
+      <div id="catDeleteRow" style="display:none;padding-top:8px;border-top:1px solid var(--border);margin-top:4px">
+        <button class="btn btn-sm" style="color:#f87171;border-color:#f87171" onclick="deleteCurrentCategory()">🗑 Delete this category</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('catModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCategory()">Save Category</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ EXPAND / MAXIMIZE MODAL ════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="expandModal">
+  <div class="modal modal-xl">
+    <div class="modal-header" id="expandModalHeader">
+      <h3 id="expandModalTitle">Card</h3>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-sm" id="expandEditBtn" onclick="">✏ Edit</button>
+        <button class="modal-close" onclick="closeModal('expandModal')">✕</button>
+      </div>
+    </div>
+    <div class="modal-body" id="expandModalBody" style="padding:0"></div>
+  </div>
+</div>
+
+<!-- ═══ SHORTCUTS MODAL ═════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="shortcutsModal">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header"><h3>⌨ Keyboard Shortcuts</h3><button class="modal-close" onclick="closeModal('shortcutsModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="shortcuts-grid">
+        <div class="shortcut-row"><span class="shortcut-desc">Open search palette</span><kbd class="sc">Ctrl+K</kbd></div>
+        <div class="shortcut-row"><span class="shortcut-desc">New card</span><kbd class="sc">Ctrl+N</kbd></div>
+        <div class="shortcut-row"><span class="shortcut-desc">Export data</span><kbd class="sc">Ctrl+E</kbd></div>
+        <div class="shortcut-row"><span class="shortcut-desc">Close modal / palette</span><kbd class="sc">Escape</kbd></div>
+        <div class="shortcut-row"><span class="shortcut-desc">Navigate results</span><kbd class="sc">↑ ↓</kbd></div>
+        <div class="shortcut-row"><span class="shortcut-desc">Select result</span><kbd class="sc">Enter</kbd></div>
+        <div class="shortcut-row"><span class="shortcut-desc">Toggle dark / light</span><kbd class="sc">Alt+T</kbd></div>
+        <div class="shortcut-row"><span class="shortcut-desc">Collapse all sections</span><kbd class="sc">Alt+C</kbd></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-primary" onclick="closeModal('shortcutsModal')">Got it</button></div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════════════
+   DATA — BUILTIN CARDS
+══════════════════════════════════════════════════════════════════════════════ */
+const BUILTIN_CARDS = [
+
+/* ── GIT ─────────────────────────────────────────────────────────────────── */
+{id:"git-1",cat:"git",type:"table",title:"Setup & Config",rows:[
+  ["git config --global user.name \"Name\"","Set global username"],
+  ["git config --global user.email \"e@x.com\"","Set global email"],
+  ["git config --global core.editor \"code --wait\"","Set VS Code as editor"],
+  ["git config --global alias.lg \"log --oneline --graph\"","Create log alias"],
+  ["git config --list","List all config values"],
+  ["git init","Initialise new repo"],
+  ["git clone <url>","Clone remote repo"],
+  ["git clone <url> --depth 1","Shallow clone (faster)"],
+]},
+{id:"git-2",cat:"git",type:"table",title:"Core Workflow",rows:[
+  ["git status","Show working tree status"],
+  ["git add .","Stage all changes"],
+  ["git add -p","Stage interactively (hunk by hunk)"],
+  ["git commit -m \"msg\"","Commit staged changes"],
+  ["git commit -am \"msg\"","Stage tracked files + commit"],
+  ["git commit --amend --no-edit","Amend last commit silently"],
+  ["git diff","Show unstaged changes"],
+  ["git diff --staged","Show staged changes vs last commit"],
+]},
+{id:"git-3",cat:"git",type:"table",title:"Branches",rows:[
+  ["git branch","List local branches"],
+  ["git branch -a","List all branches incl. remote"],
+  ["git branch <name>","Create new branch"],
+  ["git switch <name>","Switch to branch (modern)"],
+  ["git switch -c <name>","Create + switch branch"],
+  ["git merge <branch>","Merge branch into current"],
+  ["git merge --squash <branch>","Squash-merge (one commit)"],
+  ["git rebase <branch>","Rebase current onto branch"],
+  ["git rebase -i HEAD~3","Interactive rebase last 3 commits"],
+  ["git branch -d <name>","Delete merged branch"],
+  ["git push origin --delete <name>","Delete remote branch"],
+]},
+{id:"git-4",cat:"git",type:"table",title:"Remote & Tags",rows:[
+  ["git remote -v","List remotes with URLs"],
+  ["git remote add origin <url>","Add remote"],
+  ["git remote set-url origin <url>","Change remote URL"],
+  ["git push -u origin main","Push & set upstream"],
+  ["git pull --rebase","Pull and rebase local commits"],
+  ["git fetch --prune","Fetch + remove stale remote refs"],
+  ["git tag -a v1.0.0 -m \"msg\"","Create annotated tag"],
+  ["git push --tags","Push all tags"],
+]},
+{id:"git-5",cat:"git",type:"table",title:"Undo & Recovery",rows:[
+  ["git restore <file>","Discard working changes"],
+  ["git restore --staged <file>","Unstage a file"],
+  ["git reset HEAD~1","Undo last commit (keep files staged)"],
+  ["git reset --hard HEAD~1","Undo + discard (danger!)"],
+  ["git revert <hash>","New commit undoing change (safe)"],
+  ["git cherry-pick <hash>","Apply commit from another branch"],
+  ["git reflog","Find lost commits / HEAD history"],
+  ["git bisect start","Binary search for bug-causing commit"],
+]},
+{id:"git-6",cat:"git",type:"table",title:"Stash",rows:[
+  ["git stash","Stash working changes"],
+  ["git stash push -m \"wip: feat\"","Stash with description"],
+  ["git stash list","List all stashes"],
+  ["git stash pop","Apply latest stash & remove"],
+  ["git stash apply stash@{2}","Apply specific stash (keep)"],
+  ["git stash drop stash@{0}","Delete specific stash"],
+  ["git stash clear","Delete ALL stashes"],
+  ["git stash show -p","Show diff of latest stash"],
+]},
+{id:"git-7",cat:"git",type:"table",title:"Log & History",rows:[
+  ["git log --oneline","Compact one-line log"],
+  ["git log --oneline --graph --all","Visual branch graph"],
+  ["git log -p <file>","Patch history for file"],
+  ["git log --author=\"name\"","Filter by author"],
+  ["git log --since=\"2 weeks ago\"","Filter by date"],
+  ["git log -S \"searchterm\"","Find commits touching string"],
+  ["git show <hash>","Show commit details"],
+  ["git blame <file>","Who changed each line"],
+]},
+{id:"git-8",cat:"git",type:"table",title:"Advanced",rows:[
+  ["git worktree add ../hotfix hotfix","Checkout branch in new dir"],
+  ["git worktree list","List all worktrees"],
+  ["git submodule add <url>","Add submodule"],
+  ["git submodule update --init --recursive","Init all submodules"],
+  ["git clean -fd","Remove untracked files & dirs"],
+  ["git clean -fdn","Dry-run of clean"],
+  ["git diff branch1..branch2","Diff between two branches"],
+  ["git shortlog -sn","Commit count by author"],
+]},
+
+/* ── JS / TS ──────────────────────────────────────────────────────────────── */
+{id:"js-1",cat:"js",type:"table",title:"Variables & Destructuring",rows:[
+  ["const x = 1","Block-scoped constant"],
+  ["let y = 2","Block-scoped variable"],
+  ["const [a,b,...rest] = arr","Array destructure + rest"],
+  ["const {x, y=0} = obj","Object destructure + default"],
+  ["const {name: n} = obj","Rename on destructure"],
+  ["x ?? \"default\"","Nullish coalescing"],
+  ["x?.foo?.bar","Optional chaining"],
+  ["x ??= \"default\"","Nullish assign (2021+)"],
+]},
+{id:"js-2",cat:"js",type:"code",title:"Array Methods",filename:"arrays.js",
+code:`const arr = [1,2,3,4,5];
+arr.map(x => x * 2)              // [2,4,6,8,10]
+arr.flatMap(x => [x, x*2])       // [1,2,2,4,...]
+arr.filter(x => x % 2 === 0)     // [2,4]
+arr.reduce((acc,x) => acc+x, 0)  // 15
+arr.find(x => x > 3)             // 4
+arr.some(x => x > 4)             // true
+arr.every(x => x > 0)            // true
+arr.includes(3)                   // true
+[...arr].sort((a,b) => b-a)      // [5,4,3,2,1]
+[[1,2],[3,[4]]].flat(Infinity)   // [1,2,3,4]
+Array.from({length:5}, (_,i) => i) // [0,1,2,3,4]
+Array.from(new Set([1,1,2,3]))   // [1,2,3]`},
+{id:"js-3",cat:"js",type:"code",title:"Objects & Spread",filename:"objects.js",
+code:`const user = { name:'Alice', age:30, role:'dev' };
+const { name, role: r = 'user' } = user;     // destructure+rename
+const updated = { ...user, age: 31 };         // spread override
+Object.keys(user)     // ['name','age','role']
+Object.values(user)   // ['Alice',30,'dev']
+Object.entries(user)  // [['name','Alice'],...]
+Object.fromEntries([['a',1],['b',2]])         // {a:1,b:2}
+Object.freeze(user)                           // immutable
+structuredClone(user)                         // deep clone
+const city = user?.address?.city ?? 'Unknown'; // safe access`},
+{id:"js-4",cat:"js",type:"code",title:"Async / Promises",filename:"async.js",
+code:`// async/await
+async function fetchUser(id) {
+  try {
+    const res = await fetch(\`/api/users/\${id}\`);
+    if (!res.ok) throw new Error(\`HTTP \${res.status}\`);
+    return await res.json();
+  } catch (err) { throw err; }
+}
+// Parallel
+const [users, posts] = await Promise.all([fetchUsers(), fetchPosts()]);
+// All settled (never fails)
+const results = await Promise.allSettled([p1, p2, p3]);
+// Timeout wrapper
+const withTimeout = (p, ms) => Promise.race([
+  p, new Promise((_,rej) => setTimeout(() => rej(new Error('Timeout')), ms))
+]);
+// Retry
+async function withRetry(fn, retries=3) {
+  for (let i=0; i<retries; i++) {
+    try { return await fn(); }
+    catch(e) { if (i===retries-1) throw e; }
+  }
+}`},
+{id:"js-5",cat:"js",type:"code",title:"TypeScript Essentials",filename:"types.ts",
+code:`// Basic types
+let n: number = 42;
+let arr: number[] = [1,2,3];
+let tuple: [string, number] = ["alice", 30];
+
+// Interface & union
+interface User { id: number; name: string; email?: string; }
+type Status = 'active' | 'inactive' | 'pending';
+
+// Generics
+function first<T>(arr: T[]): T | undefined { return arr[0]; }
+
+// Utility types
+Partial<User>           // all optional
+Required<User>          // all required
+Pick<User,'id'|'name'>  // subset
+Omit<User,'email'>      // exclude
+Readonly<User>          // immutable
+Record<string, User>    // dict type
+
+// Discriminated union
+type Shape = { kind:'circle'; r:number } | { kind:'rect'; w:number; h:number };
+function area(s: Shape) {
+  if (s.kind==='circle') return Math.PI * s.r**2;
+  return s.w * s.h;
+}
+// Mapped type
+type Getters<T> = { [K in keyof T as \`get\${Capitalize<string&K>}\`]: () => T[K] };`},
+{id:"js-6",cat:"js",type:"code",title:"Common Patterns",filename:"patterns.js",
+code:`// Debounce
+const debounce = (fn, ms) => {
+  let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+};
+// Throttle
+const throttle = (fn, ms) => {
+  let last=0; return (...args) => { const now=Date.now(); if(now-last>=ms){last=now;fn(...args);} };
+};
+// Memoize
+const memoize = fn => {
+  const c = new Map();
+  return (...args) => { const k=JSON.stringify(args); if(!c.has(k))c.set(k,fn(...args)); return c.get(k); };
+};
+// Pipe
+const pipe = (...fns) => x => fns.reduce((v,f) => f(v), x);
+// EventEmitter
+class Emitter {
+  #l = new Map();
+  on(e,fn) { (this.#l.get(e)||this.#l.set(e,[]).get(e)).push(fn); }
+  off(e,fn) { this.#l.set(e,(this.#l.get(e)||[]).filter(f=>f!==fn)); }
+  emit(e,...a) { (this.#l.get(e)||[]).forEach(fn=>fn(...a)); }
+}`},
+{id:"js-7",cat:"js",type:"table",title:"DOM & Browser APIs",rows:[
+  ["document.querySelector(\"#id\")","Select element (CSS selector)"],
+  ["document.querySelectorAll(\"li\")","NodeList of all matching elements"],
+  ["el.addEventListener(\"click\", fn)","Add event listener"],
+  ["el.closest(\".parent\")","Walk up DOM to ancestor"],
+  ["el.classList.toggle(\"active\")","Toggle CSS class"],
+  ["el.dataset.myAttr","Access data-my-attr attribute"],
+  ["new IntersectionObserver(fn).observe(el)","Watch element visibility"],
+  ["navigator.clipboard.writeText(\"txt\")","Copy to clipboard (async)"],
+  ["localStorage.setItem(\"k\",\"v\")","Persist to localStorage"],
+  ["window.matchMedia(\"(prefers-color-scheme:dark)\")","Check dark mode pref"],
+]},
+
+/* ── PYTHON ───────────────────────────────────────────────────────────────── */
+{id:"py-1",cat:"py",type:"table",title:"Built-in Functions",rows:[
+  ["print(x, end=\"\")","Print with custom end"],
+  ["len(x)","Length of sequence"],
+  ["range(a,b,step)","Custom range iterator"],
+  ["enumerate(it, start=1)","Index + value pairs"],
+  ["zip(a, b)","Pair two iterables"],
+  ["sorted(it, key=fn, reverse=True)","Return sorted list"],
+  ["min/max(it, key=fn)","Min/max with key function"],
+  ["any(it) / all(it)","Any/all truthy check"],
+  ["isinstance(x, T)","Type check"],
+  ["vars(obj)","Object __dict__"],
+]},
+{id:"py-2",cat:"py",type:"code",title:"Comprehensions",filename:"comprehensions.py",
+code:`# List
+squares = [x**2 for x in range(10)]
+evens   = [x for x in range(20) if x % 2 == 0]
+flat    = [n for row in matrix for n in row]  # flatten 2D
+# Dict
+word_len = {word: len(word) for word in ["apple","banana"]}
+inverted = {v: k for k, v in original.items()}
+# Set
+unique_lens = {len(word) for word in words}
+# Generator (lazy, memory-efficient)
+gen   = (x**2 for x in range(1_000_000))
+total = sum(x**2 for x in range(1000))
+# Conditional
+classified = {k: "big" if v > 100 else "small" for k, v in data.items()}`},
+{id:"py-3",cat:"py",type:"code",title:"Collections Module",filename:"collections.py",
+code:`from collections import defaultdict, Counter, deque, ChainMap
+# defaultdict
+word_count = defaultdict(int)
+for word in words: word_count[word] += 1
+graph = defaultdict(list); graph['A'].append('B')
+# Counter
+c = Counter("hello world")  # {'l':3,'o':2,...}
+c.most_common(3)
+c1 + c2
+# deque — O(1) at both ends
+dq = deque([1,2,3], maxlen=100)
+dq.appendleft(0); dq.rotate(2)
+# Dict tricks
+d.get('x', 0)
+d.setdefault('key',[]).append(v)
+d1 | d2                          # merge py3.9+
+dict(sorted(d.items(), key=lambda x: x[1]))`},
+{id:"py-4",cat:"py",type:"code",title:"File I/O & Pathlib",filename:"pathlib.py",
+code:`from pathlib import Path
+p = Path("src/main.py")
+p.name; p.stem; p.suffix; p.parent
+p.exists(); p.is_file()
+for f in Path(".").rglob("*.py"): print(f)
+text = p.read_text(encoding="utf-8")
+p.write_text("content\n", encoding="utf-8")
+Path("output/logs").mkdir(parents=True, exist_ok=True)
+import json
+data  = json.loads(Path("data.json").read_text())
+Path("out.json").write_text(json.dumps(data, indent=2))
+import csv
+with open("data.csv") as f:
+    rows = list(csv.DictReader(f))`},
+{id:"py-5",cat:"py",type:"code",title:"Decorators & Context Managers",filename:"decorators.py",
+code:`import functools, time, contextlib
+def timer(fn):
+    @functools.wraps(fn)
+    def wrapper(*args, **kwargs):
+        t = time.perf_counter()
+        r = fn(*args, **kwargs)
+        print(f"{fn.__name__}: {time.perf_counter()-t:.4f}s")
+        return r
+    return wrapper
+def retry(max_attempts=3, exceptions=(Exception,)):
+    def deco(fn):
+        @functools.wraps(fn)
+        def wrapper(*args, **kwargs):
+            for i in range(max_attempts):
+                try: return fn(*args, **kwargs)
+                except exceptions:
+                    if i == max_attempts-1: raise
+                    time.sleep(2**i)
+        return wrapper
+    return deco
+@contextlib.contextmanager
+def timer_ctx(label):
+    t = time.perf_counter()
+    try: yield
+    finally: print(f"{label}: {time.perf_counter()-t:.4f}s")`},
+{id:"py-6",cat:"py",type:"code",title:"Dataclasses & Type Hints",filename:"dataclasses.py",
+code:`from dataclasses import dataclass, field
+from typing import Optional, List, Protocol, TypedDict, TypeVar, Sequence
+@dataclass
+class User:
+    id: int
+    name: str
+    email: str = ""
+    tags: List[str] = field(default_factory=list)
+    def __post_init__(self): self.email = self.email.lower()
+@dataclass(frozen=True)
+class Point:
+    x: float; y: float
+class Drawable(Protocol):
+    def draw(self) -> None: ...
+class UserDict(TypedDict):
+    id: int; name: str; email: str
+T = TypeVar('T')
+def first(items: Sequence[T]) -> Optional[T]:
+    return items[0] if items else None`},
+{id:"py-7",cat:"py",type:"code",title:"Regex Quick Reference",filename:"regex.py",
+code:`import re
+text = "Email: user@example.com | Phone: 555-1234"
+re.search(r'\d+', text)                    # first match
+re.findall(r'\d+', text)                   # ['555','1234']
+re.sub(r'\d{3}-\d{4}', '[PHONE]', text)   # replace
+re.split(r'[,\s]+', "a, b  c,d")          # split on whitespace/comma
+# Named groups
+m = re.search(r'(?P<user>\w+)@(?P<domain>[\w.]+)', text)
+m.group('user'); m.groupdict()
+# Compile for repeated use
+EMAIL_RE = re.compile(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}')
+# Patterns
+IP   = r'\b(?:\d{1,3}\.){3}\d{1,3}\b'
+URL  = r'https?://[^\s]+'
+DATE = r'\d{4}-\d{2}-\d{2}'`},
+
+/* ── C++ ──────────────────────────────────────────────────────────────────── */
+{id:"cpp-1",cat:"cpp",type:"table",title:"Basics & I/O",rows:[
+  ["std::cout << x << '\\n'","Print (fast newline)"],
+  ["auto x = 42","Type inference (C++11)"],
+  ["const int N = 100","Compile-time constant"],
+  ["constexpr int f(){}","Compile-time function"],
+  ["using T = std::vector<int>","Type alias"],
+  ["[[nodiscard]]","Warn if return value unused"],
+  ["std::format(\"x={}\", x)","String formatting (C++20)"],
+]},
+{id:"cpp-2",cat:"cpp",type:"table",title:"STL Containers",rows:[
+  ["std::vector<T>","Dynamic array"],
+  ["std::array<T,N>","Fixed-size array"],
+  ["std::map<K,V>","Sorted key-value tree"],
+  ["std::unordered_map<K,V>","Hash map O(1) avg"],
+  ["std::set<T> / unordered_set<T>","Unique sorted / hash set"],
+  ["std::deque<T>","Double-ended queue"],
+  ["std::queue<T> / stack<T>","FIFO / LIFO adapters"],
+  ["std::string_view","Non-owning string view"],
+  ["std::span<T>","Non-owning contiguous view (C++20)"],
+]},
+{id:"cpp-3",cat:"cpp",type:"code",title:"Smart Pointers",filename:"smart_ptrs.cpp",
+code:`#include <memory>
+// unique_ptr — sole ownership
+auto up = std::make_unique<MyClass>(arg1, arg2);
+up->method();
+auto moved = std::move(up);         // transfer ownership
+// shared_ptr — shared ownership
+auto sp1 = std::make_shared<MyClass>();
+auto sp2 = sp1;                     // both own
+sp1.use_count();                    // ref count = 2
+// weak_ptr — observe without owning (breaks cycles)
+std::weak_ptr<MyClass> wp = sp1;
+if (auto locked = wp.lock()) locked->method();
+// Custom deleter
+auto file = std::unique_ptr<FILE, decltype(&fclose)>(
+    fopen("f.txt","r"), &fclose);
+// Rule: always prefer make_unique/make_shared over new`},
+{id:"cpp-4",cat:"cpp",type:"code",title:"Lambdas & Functional",filename:"lambdas.cpp",
+code:`auto add = [](int a, int b) -> int { return a + b; };
+int m = 3;
+auto mul    = [m](int x){ return x * m; };   // capture by value
+auto mulRef = [&m](int x){ return x * m; };  // capture by ref
+auto counter= [n=0]() mutable { return ++n; }; // mutable capture
+// Generic lambda (C++14)
+auto print = [](const auto& x){ std::cout << x << "\n"; };
+// std::function for storage/passing
+std::function<int(int)> fn = [](int x){ return x+1; };
+// Algorithm usage
+std::sort(v.begin(), v.end(), [](auto& a, auto& b){ return a.val < b.val; });
+auto it = std::find_if(v.begin(), v.end(), [](auto& x){ return x > 5; });`},
+{id:"cpp-5",cat:"cpp",type:"code",title:"Modern C++ (17/20)",filename:"modern.cpp",
+code:`// Structured bindings (C++17)
+auto [x, y] = std::make_pair(1, 2);
+auto [key, val] = *mymap.begin();
+// if-init statement (C++17)
+if (auto it = m.find(key); it != m.end()) use(it->second);
+// std::optional (C++17)
+std::optional<int> findVal(int key) {
+    if (found) return value; return std::nullopt;
+}
+int x = findVal(5).value_or(0);
+// Ranges (C++20)
+#include <ranges>
+auto even_sq = std::views::iota(1,10)
+  | std::views::filter([](int n){ return n%2==0; })
+  | std::views::transform([](int n){ return n*n; });
+// Concepts (C++20)
+template<std::integral T> T double_it(T x) { return x * 2; }
+// constexpr if
+template<typename T> auto process(T v) {
+    if constexpr (std::is_integral_v<T>) return v*2;
+    else return v + " extra";
+}`},
+{id:"cpp-6",cat:"cpp",type:"code",title:"Threading (C++11+)",filename:"threads.cpp",
+code:`#include <thread>
+#include <mutex>
+#include <future>
+// Basic thread
+std::thread t([](){ std::cout << "Worker\n"; });
+t.join();
+// Mutex — RAII lock
+std::mutex mtx;
+{ std::lock_guard<std::mutex> lock(mtx); /* critical section */ }
+// async / future
+auto fut = std::async(std::launch::async, []{ return heavyComputation(); });
+auto result = fut.get();  // blocks
+// Condition variable
+std::condition_variable cv;
+std::unique_lock<std::mutex> lk(mtx);
+cv.wait(lk, []{ return ready; });
+cv.notify_all();`},
+{id:"cpp-7",cat:"cpp",type:"code",title:"Filesystem (C++17)",filename:"files.cpp",
+code:`#include <fstream>
+#include <filesystem>
+namespace fs = std::filesystem;
+// Write/Read
+std::ofstream out("output.txt"); out << "Line 1\n";
+std::ifstream in("input.txt");
+std::string line;
+while (std::getline(in, line)) { /* use line */ }
+// Read all to string
+std::ostringstream ss; ss << std::ifstream("file.txt").rdbuf();
+std::string content = ss.str();
+// Filesystem
+fs::path p = "src/main.cpp";
+p.filename(); p.stem(); p.extension();
+for (auto& e : fs::recursive_directory_iterator("./src"))
+    if (e.path().extension() == ".cpp") std::cout << e.path() << "\n";
+fs::create_directories("out/logs");
+fs::copy("src", "dst", fs::copy_options::recursive);`},
+
+/* ── CMD ──────────────────────────────────────────────────────────────────── */
+{id:"cmd-1",cat:"cmd",type:"table",title:"Navigation & Directory",rows:[
+  ["cd /d D:\\projects","Change drive and path"],
+  ["dir /a","List including hidden files"],
+  ["dir /s /b *.txt","Recursive search for .txt"],
+  ["mkdir a\\b\\c","Create nested directories"],
+  ["rmdir /s /q <dir>","Delete dir and all contents"],
+  ["tree /f","Show directory tree with files"],
+]},
+{id:"cmd-2",cat:"cmd",type:"table",title:"File Operations",rows:[
+  ["copy src.txt dst.txt","Copy file"],
+  ["xcopy /s /e /i src dst","Copy dir recursively"],
+  ["robocopy src dst /mir","Mirror copy (most powerful)"],
+  ["move file.txt C:\\dest\\","Move file"],
+  ["ren old.txt new.txt","Rename file"],
+  ["del /s /q *.log","Delete all .log files recursively"],
+  ["findstr /s /i \"error\" *.log","Case-insensitive recursive search"],
+  ["fc file1.txt file2.txt","Compare two files"],
+]},
+{id:"cmd-3",cat:"cmd",type:"table",title:"Networking",rows:[
+  ["ipconfig /all","Detailed adapter info"],
+  ["ipconfig /flushdns","Flush DNS cache"],
+  ["ping -t google.com","Continuous ping"],
+  ["tracert google.com","Trace route to host"],
+  ["netstat -ano","Active connections with PIDs"],
+  ["netstat -ano | findstr :8080","What is on port 8080"],
+  ["nslookup google.com","DNS lookup"],
+  ["curl -s https://api.example.com","HTTP GET request"],
+]},
+{id:"cmd-4",cat:"cmd",type:"table",title:"Processes & System",rows:[
+  ["tasklist | findstr node","Find specific process"],
+  ["taskkill /pid 1234 /f","Kill process by PID"],
+  ["taskkill /im node.exe /f","Kill all processes by name"],
+  ["where node","Find executable location"],
+  ["setx MY_VAR \"value\"","Set persistent env variable"],
+  ["wmic cpu get name","CPU info"],
+  ["wmic logicaldisk get size,freespace,caption","Disk usage"],
+]},
+{id:"cmd-5",cat:"cmd",type:"table",title:"PowerShell Essentials",rows:[
+  ["Get-ChildItem -Recurse -Filter *.log","Recursive file find"],
+  ["Get-Content log.txt | Select-String \"error\"","Grep equivalent"],
+  ["Get-Process | Where-Object CPU -gt 50","Filter processes by CPU"],
+  ["Stop-Process -Name \"node\" -Force","Kill process"],
+  ["Invoke-RestMethod https://api.example.com","HTTP GET request"],
+  ["$env:MY_VAR = \"hello\"","Set env var (session)"],
+  ["Get-Help Get-ChildItem -Examples","Help with examples"],
+]},
+{id:"cmd-6",cat:"cmd",type:"table",title:"Redirection & Pipes",rows:[
+  ["command > out.txt","Redirect stdout to file"],
+  ["command >> out.txt","Append stdout to file"],
+  ["command 2> err.txt","Redirect stderr"],
+  ["command > out.txt 2>&1","Both stdout+stderr"],
+  ["cmd1 && cmd2","Run cmd2 only if cmd1 succeeds"],
+  ["cmd1 || cmd2","Run cmd2 only if cmd1 fails"],
+  ["echo %DATE% %TIME%","Print date and time"],
+]},
+
+/* ── LINUX ────────────────────────────────────────────────────────────────── */
+{id:"linux-1",cat:"linux",type:"table",title:"Navigation & Files",rows:[
+  ["ls -la","List all files with details"],
+  ["ls -lh --sort=size","Sort by size, human readable"],
+  ["cd -","Go to previous directory"],
+  ["mkdir -p a/b/c","Create nested dirs"],
+  ["rm -rf <dir>","Remove dir recursively"],
+  ["cp -r src/ dst/","Copy dir recursively"],
+  ["ln -s /path/to/file link","Create symbolic link"],
+  ["du -sh *","Disk usage of each item"],
+  ["df -h","Disk space for all mounts"],
+]},
+{id:"linux-2",cat:"linux",type:"table",title:"Find & Search",rows:[
+  ["find . -name \"*.cpp\" -type f","Find .cpp files"],
+  ["find . -mtime -7","Files modified in last 7 days"],
+  ["grep -rni \"pattern\" .","Recursive case-insensitive grep"],
+  ["grep -v \"pattern\" file","Invert match (exclude lines)"],
+  ["grep -n \"pattern\" file","Show line numbers"],
+  ["cat file | grep \"err\" | wc -l","Count matching lines"],
+  ["which node","Find executable path"],
+]},
+{id:"linux-3",cat:"linux",type:"table",title:"Text Processing",rows:[
+  ["tail -f app.log","Follow log file in real time"],
+  ["tail -n 100 / head -n 20","Last 100 / first 20 lines"],
+  ["sort file | uniq -c | sort -rn","Count unique lines ranked"],
+  ["sed \"s/foo/bar/g\" file","Replace all foo with bar"],
+  ["sed -i \"s/old/new/g\" file.txt","In-place replace"],
+  ["awk \"{print $1,$3}\" file","Print columns 1 and 3"],
+  ["cut -d, -f1,3 file.csv","Cut CSV columns 1 and 3"],
+  ["tr '[:upper:]' '[:lower:]'","Lowercase conversion"],
+]},
+{id:"linux-4",cat:"linux",type:"table",title:"Processes",rows:[
+  ["ps aux | grep node","Find node processes"],
+  ["kill -9 <PID>","Force kill process"],
+  ["pkill -f \"python script.py\"","Kill by name pattern"],
+  ["nohup cmd &","Run in background after logout"],
+  ["jobs / fg %1","List jobs / bring to foreground"],
+  ["lsof -i :8080","What is listening on port 8080"],
+  ["top / htop","Interactive process monitor"],
+]},
+{id:"linux-5",cat:"linux",type:"table",title:"Permissions & SSH",rows:[
+  ["chmod 755 script.sh","rwxr-xr-x permissions"],
+  ["chmod +x script.sh","Make executable"],
+  ["chown user:group file","Change owner"],
+  ["sudo !!","Re-run last cmd as root"],
+  ["ssh user@host -p 22","SSH connect"],
+  ["ssh -L 8080:localhost:8080 user@host","SSH tunnel (port forward)"],
+  ["scp -r user@host:/path/ ./local/","Copy from remote recursively"],
+]},
+{id:"linux-6",cat:"linux",type:"table",title:"Networking",rows:[
+  ["ip addr show","Show all IPs"],
+  ["curl -X POST -H \"Content-Type: application/json\" -d @data.json URL","POST JSON"],
+  ["curl -s -o /dev/null -w \"%{http_code}\" URL","Check HTTP status code"],
+  ["nc -zv host 80","Test if port is open"],
+  ["ss -tlnp","Listening ports with PIDs"],
+  ["nmap -sV host","Scan ports & versions"],
+]},
+{id:"linux-7",cat:"linux",type:"code",title:"Bash Scripting",filename:"script.sh",
+code:`#!/bin/bash
+set -euo pipefail  # strict mode: exit on error, unset var, pipe fail
+NAME="World"
+echo "Hello, \${NAME}!"
+# Conditionals
+if [[ -f "file.txt" ]]; then echo "File exists"
+elif [[ -d "dir/" ]]; then echo "Dir exists"; fi
+# For loop
+for f in *.cpp; do echo "Processing: \$f"; done
+# While
+i=0; while [[ \$i -lt 5 ]]; do echo "i=\$i"; ((i++)); done
+# Functions
+build() { local target="\$1"; echo "Building \$target..."; }
+build "myapp"
+# Arrays
+arr=(a b c d)
+echo "\${arr[@]}"; echo "\${#arr[@]}"  # all / length
+# Subshell result
+count=\$(ls -1 *.py | wc -l)`},
+{id:"linux-8",cat:"linux",type:"table",title:"Environment & Shell",rows:[
+  ["export MY_VAR=\"value\"","Set env var for session"],
+  ["echo $MY_VAR","Print env var"],
+  ["source ~/.bashrc","Reload shell config"],
+  ["alias ll=\"ls -la\"","Create alias"],
+  ["history | grep git","Search command history"],
+  ["Ctrl+R","Reverse history search"],
+  ["!!","Repeat last command"],
+  ["echo $?","Exit code of last command"],
+]},
+
+/* ── AI AGENTS ────────────────────────────────────────────────────────────── */
+{id:"ai-lc-1",cat:"ai",type:"code",title:"LangChain — Install & Setup",filename:"install.sh",
+code:`pip install langchain langchain-openai langchain-community
+pip install langchain-anthropic langchain-google-genai
+pip install faiss-cpu chromadb tiktoken
+# Core imports
+from langchain_openai import ChatOpenAI
+from langchain_anthropic import ChatAnthropic
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough`},
+{id:"ai-lc-2",cat:"ai",type:"code",title:"LangChain — LCEL Chains",filename:"chain.py",
+code:`from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+llm = ChatOpenAI(model="gpt-4o", temperature=0)
+# LCEL pipe operator
+chain = (
+    ChatPromptTemplate.from_template("Tell me a fact about {topic}")
+    | llm | StrOutputParser()
+)
+result = chain.invoke({"topic": "Python"})
+# Streaming
+for chunk in chain.stream({"topic": "AI"}):
+    print(chunk, end="", flush=True)
+# Structured output
+from pydantic import BaseModel, Field
+class Joke(BaseModel):
+    setup: str = Field(description="The joke setup")
+    punchline: str = Field(description="The punchline")
+joke = llm.with_structured_output(Joke).invoke("Tell me a programming joke")`},
+{id:"ai-lc-3",cat:"ai",type:"code",title:"LangChain — RAG Pipeline",filename:"rag.py",
+code:`from langchain_community.document_loaders import PyPDFLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_openai import OpenAIEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.output_parsers import StrOutputParser
+# 1. Load + chunk
+docs = PyPDFLoader("docs/manual.pdf").load()
+chunks = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200).split_documents(docs)
+# 2. Embed + store
+vectorstore = FAISS.from_documents(chunks, OpenAIEmbeddings(model="text-embedding-3-small"))
+# 3. Retriever
+retriever = vectorstore.as_retriever(search_type="mmr", search_kwargs={"k": 5})
+# 4. RAG chain
+def format_docs(docs): return "\n\n".join(d.page_content for d in docs)
+rag_chain = (
+    {"context": retriever | format_docs, "question": RunnablePassthrough()}
+    | ChatPromptTemplate.from_template("Context: {context}\nQ: {question}")
+    | llm | StrOutputParser()
+)
+answer = rag_chain.invoke("What does the manual say about X?")`},
+{id:"ai-lc-4",cat:"ai",type:"code",title:"LangChain — Tools & Agents",filename:"agents.py",
+code:`from langchain_core.tools import tool
+from langchain.agents import create_tool_calling_agent, AgentExecutor
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+@tool
+def get_weather(city: str) -> str:
+    """Get current weather for a city."""
+    return f"Weather in {city}: 22°C, sunny"
+@tool
+def calculate(expression: str) -> str:
+    """Evaluate a math expression. e.g. '2 + 2'"""
+    try: return str(eval(expression))
+    except: return "Invalid expression"
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are a helpful assistant with tools."),
+    ("human", "{input}"),
+    MessagesPlaceholder(variable_name="agent_scratchpad"),
+])
+agent = create_tool_calling_agent(llm, [get_weather, calculate], prompt)
+executor = AgentExecutor(agent=agent, tools=[get_weather, calculate], verbose=True)
+result = executor.invoke({"input": "Weather in Mumbai and 15 * 23?"})`},
+{id:"ai-lc-5",cat:"ai",type:"code",title:"LangChain — Memory",filename:"memory.py",
+code:`from langchain_community.chat_message_histories import ChatMessageHistory
+from langchain_core.runnables.history import RunnableWithMessageHistory
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+store = {}
+def get_session_history(session_id: str):
+    if session_id not in store: store[session_id] = ChatMessageHistory()
+    return store[session_id]
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are a helpful assistant."),
+    MessagesPlaceholder(variable_name="history"),
+    ("human", "{input}"),
+])
+chain_with_history = RunnableWithMessageHistory(
+    prompt | llm | StrOutputParser(),
+    get_session_history,
+    input_messages_key="input",
+    history_messages_key="history",
+)
+config = {"configurable": {"session_id": "user-123"}}
+resp1 = chain_with_history.invoke({"input": "My name is Alice"}, config=config)
+resp2 = chain_with_history.invoke({"input": "What is my name?"}, config=config)
+# resp2 remembers "Alice"!`},
+{id:"ai-lg-1",cat:"ai",type:"code",title:"LangGraph — Basic Graph",filename:"basic_graph.py",
+code:`from langgraph.graph import StateGraph, END, START
+from langgraph.graph.message import add_messages
+from typing import TypedDict, Annotated
+from langchain_openai import ChatOpenAI
+llm = ChatOpenAI(model="gpt-4o")
+class State(TypedDict):
+    messages: Annotated[list, add_messages]
+def chatbot(state: State) -> dict:
+    return {"messages": [llm.invoke(state["messages"])]}
+builder = StateGraph(State)
+builder.add_node("chatbot", chatbot)
+builder.add_edge(START, "chatbot")
+builder.add_edge("chatbot", END)
+graph = builder.compile()
+result = graph.invoke({"messages": [("human", "Hello!")]})
+print(result["messages"][-1].content)`},
+{id:"ai-lg-2",cat:"ai",type:"code",title:"LangGraph — Conditional Routing",filename:"routing.py",
+code:`from langchain_core.messages import ToolMessage
+def should_continue(state: State) -> str:
+    last = state["messages"][-1]
+    return "tools" if (hasattr(last,"tool_calls") and last.tool_calls) else END
+def call_tools(state: State) -> dict:
+    tools_by_name = {t.name: t for t in tools}
+    messages = []
+    for call in state["messages"][-1].tool_calls:
+        result = tools_by_name[call["name"]].invoke(call["args"])
+        messages.append(ToolMessage(content=str(result), tool_call_id=call["id"]))
+    return {"messages": messages}
+builder = StateGraph(State)
+builder.add_node("agent", agent_node)
+builder.add_node("tools", call_tools)
+builder.add_edge(START, "agent")
+builder.add_conditional_edges("agent", should_continue)
+builder.add_edge("tools", "agent")  # loop back
+graph = builder.compile()`},
+{id:"ai-lg-3",cat:"ai",type:"code",title:"LangGraph — Persistence",filename:"checkpoints.py",
+code:`from langgraph.checkpoint.memory import MemorySaver
+from langgraph.checkpoint.sqlite import SqliteSaver
+# SQLite (persistent)
+with SqliteSaver.from_conn_string("checkpoints.db") as memory:
+    graph = builder.compile(checkpointer=memory)
+    config = {"configurable": {"thread_id": "user-abc"}}
+    graph.invoke({"messages": [("human", "My name is Alice")]}, config=config)
+    result = graph.invoke({"messages": [("human", "What is my name?")]}, config=config)
+    # Inspect
+    state = graph.get_state(config)
+    print(state.values["messages"])`},
+{id:"ai-lg-4",cat:"ai",type:"code",title:"LangGraph — Human-in-the-Loop",filename:"hitl.py",
+code:`from langgraph.checkpoint.memory import MemorySaver
+graph = builder.compile(
+    checkpointer=MemorySaver(),
+    interrupt_before=["tools"],  # pause BEFORE tools node
+)
+config = {"configurable": {"thread_id": "review-1"}}
+result = graph.invoke({"messages": [("human", "Delete all temp files")]}, config)
+# Graph pauses here — inspect planned action
+state = graph.get_state(config)
+print("Planned:", state.values["messages"][-1].tool_calls)
+# Option 1: Approve — resume
+final = graph.invoke(None, config)
+# Option 2: Override then resume
+graph.update_state(config, {"messages": [("human", "List files instead")]})
+final = graph.invoke(None, config)`},
+{id:"ai-lg-5",cat:"ai",type:"code",title:"LangGraph — Multi-Agent Supervisor",filename:"supervisor.py",
+code:`from langgraph.graph import StateGraph, END, START
+from typing import TypedDict, Annotated
+import operator
+class SupervisorState(TypedDict):
+    messages: Annotated[list, operator.add]
+    next: str
+members = ["researcher", "coder", "reviewer"]
+def supervisor_node(state):
+    resp = llm.invoke([("system", f"Manage: {members}. Reply with one of {members} or FINISH.")]
+                     + state["messages"])
+    return {"next": resp.content.strip()}
+def route_from_supervisor(state):
+    return END if state["next"] == "FINISH" else state["next"]
+builder = StateGraph(SupervisorState)
+builder.add_node("supervisor", supervisor_node)
+for name in members:
+    builder.add_node(name, make_agent_node(name))
+builder.add_edge(START, "supervisor")
+builder.add_conditional_edges("supervisor", route_from_supervisor)
+for name in members: builder.add_edge(name, "supervisor")
+graph = builder.compile()`},
+{id:"ai-li-1",cat:"ai",type:"code",title:"LlamaIndex — RAG",filename:"llamaindex_rag.py",
+code:`# pip install llama-index llama-index-llms-openai llama-index-embeddings-openai
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, Settings
+from llama_index.llms.openai import OpenAI
+from llama_index.embeddings.openai import OpenAIEmbedding
+Settings.llm = OpenAI(model="gpt-4o", temperature=0)
+Settings.embed_model = OpenAIEmbedding(model="text-embedding-3-small")
+documents = SimpleDirectoryReader("./data").load_data()
+index = VectorStoreIndex.from_documents(documents)
+query_engine = index.as_query_engine(similarity_top_k=5)
+response = query_engine.query("What does the document say about X?")
+print(response)`},
+{id:"ai-li-2",cat:"ai",type:"code",title:"LlamaIndex — Agents",filename:"llamaindex_agents.py",
+code:`from llama_index.core.tools import FunctionTool, QueryEngineTool
+from llama_index.core.agent import ReActAgent
+from llama_index.llms.openai import OpenAI
+llm = OpenAI(model="gpt-4o")
+def multiply(a: float, b: float) -> float:
+    """Multiply two numbers."""
+    return a * b
+multiply_tool = FunctionTool.from_defaults(fn=multiply)
+query_tool = QueryEngineTool.from_defaults(
+    query_engine=query_engine, name="knowledge_base",
+    description="Answer questions from the docs."
+)
+agent = ReActAgent.from_tools([multiply_tool, query_tool], llm=llm, verbose=True)
+response = agent.chat("What is 25 * 4? And what does the doc say about pricing?")`},
+{id:"ai-cr-1",cat:"ai",type:"code",title:"CrewAI — Agents & Crew",filename:"crewai_basic.py",
+code:`# pip install crewai crewai-tools
+from crewai import Agent, Task, Crew, Process
+from crewai_tools import SerperDevTool
+researcher = Agent(
+    role="Senior Researcher",
+    goal="Find and summarize the latest AI news",
+    backstory="Expert at gathering and analyzing research papers.",
+    tools=[SerperDevTool()], verbose=True, llm="gpt-4o"
+)
+writer = Agent(
+    role="Content Writer",
+    goal="Write engaging blog posts based on research",
+    backstory="Skilled writer who turns research into readable content.",
+    verbose=True, llm="gpt-4o"
+)
+research_task = Task(
+    description="Research the top 5 AI agent frameworks in 2025",
+    expected_output="A bullet-point summary of each framework",
+    agent=researcher
+)
+write_task = Task(
+    description="Write a 500-word blog post based on the research",
+    expected_output="A complete blog post ready for publishing",
+    agent=writer, context=[research_task]
+)
+result = Crew(agents=[researcher, writer], tasks=[research_task, write_task],
+              process=Process.sequential, verbose=True).kickoff()
+print(result.raw)`},
+{id:"ai-ag-1",cat:"ai",type:"code",title:"AutoGen — Multi-Agent",filename:"autogen_basic.py",
+code:`# pip install pyautogen
+import autogen
+llm_config = {"config_list": [{"model": "gpt-4o", "api_key": "YOUR_KEY"}]}
+assistant = autogen.AssistantAgent(
+    name="assistant", llm_config=llm_config,
+    system_message="You are a helpful AI coding assistant."
+)
+user_proxy = autogen.UserProxyAgent(
+    name="user_proxy", human_input_mode="NEVER",
+    max_consecutive_auto_reply=10,
+    code_execution_config={"work_dir": "coding", "use_docker": False},
+    is_termination_msg=lambda x: "TERMINATE" in x.get("content","")
+)
+user_proxy.initiate_chat(assistant, message="Write a Python script to scrape HN headlines.")`},
+{id:"ai-ag-2",cat:"ai",type:"code",title:"AutoGen — Group Chat",filename:"autogen_group.py",
+code:`import autogen
+llm_config = {"config_list": [{"model": "gpt-4o", "api_key": "..."}]}
+planner = autogen.AssistantAgent("planner", llm_config=llm_config,
+    system_message="Break down tasks into clear steps.")
+coder   = autogen.AssistantAgent("coder", llm_config=llm_config,
+    system_message="Write clean, efficient Python code.")
+critic  = autogen.AssistantAgent("critic", llm_config=llm_config,
+    system_message="Review code for bugs and suggest improvements.")
+user_proxy = autogen.UserProxyAgent("user", human_input_mode="TERMINATE",
+    code_execution_config={"work_dir": "work", "use_docker": False})
+group_chat = autogen.GroupChat(
+    agents=[user_proxy, planner, coder, critic], messages=[],
+    max_round=12, speaker_selection_method="auto"
+)
+manager = autogen.GroupChatManager(groupchat=group_chat, llm_config=llm_config)
+user_proxy.initiate_chat(manager, message="Build a REST API with FastAPI")`},
+{id:"ai-pk-1",cat:"ai",type:"code",title:"Pydantic AI — Typed Agents",filename:"pydantic_ai.py",
+code:`# pip install pydantic-ai
+from pydantic_ai import Agent
+from pydantic import BaseModel
+# Simple agent
+agent = Agent('openai:gpt-4o', system_prompt='You are a helpful assistant.')
+result = await agent.run('What is the capital of France?')
+print(result.data)  # "Paris"
+# Structured output
+class WeatherReport(BaseModel):
+    city: str; temperature: float; description: str
+weather_agent = Agent(
+    'openai:gpt-4o', result_type=WeatherReport,
+    system_prompt='Extract weather data from user input.'
+)
+@weather_agent.tool
+async def get_weather(city: str) -> str:
+    """Fetch weather from API."""
+    return f"{city}: 22°C, partly cloudy"
+result = await weather_agent.run("What's the weather in Tokyo?")
+print(result.data.temperature)  # 22.0`},
+{id:"ai-hs-1",cat:"ai",type:"code",title:"Haystack — Pipeline",filename:"haystack_pipeline.py",
+code:`# pip install haystack-ai
+from haystack import Pipeline, Document
+from haystack.components.retrievers.in_memory import InMemoryBM25Retriever
+from haystack.components.generators import OpenAIGenerator
+from haystack.components.builders import PromptBuilder
+from haystack.document_stores.in_memory import InMemoryDocumentStore
+store = InMemoryDocumentStore()
+store.write_documents([
+    Document(content="LangChain is a framework for building LLM apps."),
+    Document(content="LangGraph adds stateful graph workflows to LangChain."),
+])
+template = """Answer using context:\n{% for d in documents %}{{d.content}}{% endfor %}\nQ: {{question}}"""
+pipeline = Pipeline()
+pipeline.add_component("retriever", InMemoryBM25Retriever(document_store=store))
+pipeline.add_component("prompt",    PromptBuilder(template=template))
+pipeline.add_component("llm",       OpenAIGenerator(model="gpt-4o"))
+pipeline.connect("retriever", "prompt.documents")
+pipeline.connect("prompt",    "llm.prompt")
+result = pipeline.run({"retriever": {"query": "LangGraph?"}, "prompt": {"question": "What is LangGraph?"}})
+print(result["llm"]["replies"][0])`},
+{id:"ai-compare",cat:"ai",type:"table",title:"Library Comparison",rows:[
+  ["LangChain","Chains, RAG, agents, 100+ integrations"],
+  ["LangGraph","Stateful graphs, multi-agent, HITL, memory"],
+  ["LlamaIndex","Advanced RAG, data connectors, query engines"],
+  ["CrewAI","Role-based multi-agent, collaborative tasks"],
+  ["AutoGen","Conversational multi-agent, code execution"],
+  ["Pydantic AI","Type-safe agents, structured output, async"],
+  ["Haystack","Pipelines, document QA, production-ready"],
+  ["Semantic Kernel","Microsoft SDK, C#/Python, enterprise"],
+]},
+{id:"ai-concepts",cat:"ai",type:"table",title:"Key AI Concepts",rows:[
+  ["ReAct","Reason + Act: think then use tools"],
+  ["RAG","Retrieval Augmented Generation"],
+  ["Tool calling","LLM decides which function to invoke"],
+  ["Chain","Sequential steps: prompt → LLM → parser"],
+  ["Graph / DAG","Nodes + conditional edges for workflows"],
+  ["Checkpointing","Save/restore agent state across turns"],
+  ["Human-in-loop","Pause agent for human review/approval"],
+  ["Structured output","Force LLM to return valid JSON schema"],
+  ["Embeddings","Vector representations for semantic search"],
+  ["Vector store","DB for similarity search (FAISS, Chroma)"],
+]},
+]; // end BUILTIN_CARDS
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════════════════════════════════ */
+const BUILTIN_CATS = ["git","js","py","cpp","cmd","linux","ai"];
+const CAT_META = {
+  git:{label:"Git",emoji:"🔴",color:"#f05033"},
+  js:{label:"JS/TS",emoji:"🟡",color:"#c9b800"},
+  py:{label:"Python",emoji:"🔵",color:"#5ba3d9"},
+  cpp:{label:"C++",emoji:"🔷",color:"#4da6ff"},
+  cmd:{label:"CMD",emoji:"🟢",color:"#23d18b"},
+  linux:{label:"Linux",emoji:"🐧",color:"#e95420"},
+  ai:{label:"AI",emoji:"🤖",color:"#a855f7"},
+  custom:{label:"My Cards",emoji:"✨",color:"#7c83fd"},
+};
+const PRESET_EMOJIS = ["📌","🚀","⚡","🔥","💡","🛠","📦","🔒","🌐","📊","🎯","🐳","☁️","🔑","📝","🎓","🧪","⚙️","🗄","📐"];
+
+let state = {
+  bookmarks: new Set(),
+  customCards: [],
+  customCategories: [],
+  deletedIds: new Set(),
+  expandedCards: new Set(),
+  collapsedSections: new Set(),
+  builtinOverrides: {},
+  filter: "all",
+  view: "grid",
+  editingId: null,
+  editingCatId: null,
+  pendingImageData: null,
+  selectedEmoji: "📌",
+};
+
+function loadState() {
+  try {
+    const parse = (k, def) => { try { const v=localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch{ return def; } };
+    state.bookmarks = new Set(parse("cs3_bookmarks",[]));
+    state.customCards = parse("cs3_customCards",[]);
+    state.customCategories = parse("cs3_customCategories",[]);
+    state.deletedIds = new Set(parse("cs3_deletedIds",[]));
+    state.expandedCards = new Set(parse("cs3_expandedCards",[]));
+    state.collapsedSections = new Set(parse("cs3_collapsedSections",[]));
+    state.view = parse("cs3_view","grid");
+    state.builtinOverrides = parse("cs3_builtinOverrides",{});
+  } catch(e){}
+}
+function saveState() {
+  const s = (k,v) => localStorage.setItem(k, JSON.stringify(v));
+  s("cs3_bookmarks",[...state.bookmarks]);
+  s("cs3_customCards",state.customCards);
+  s("cs3_customCategories",state.customCategories);
+  s("cs3_deletedIds",[...state.deletedIds]);
+  s("cs3_expandedCards",[...state.expandedCards]);
+  s("cs3_collapsedSections",[...state.collapsedSections]);
+  s("cs3_view",state.view);
+  s("cs3_builtinOverrides",state.builtinOverrides);
+}
+
+function allCards() {
+  const builtins = BUILTIN_CARDS.filter(c => !state.deletedIds.has(c.id));
+  return [...builtins, ...state.customCards];
+}
+function isBuiltin(id) { return !!BUILTIN_CARDS.find(c => c.id === id); }
+function catMeta(cat) {
+  if (CAT_META[cat]) return CAT_META[cat];
+  return state.customCategories.find(c => c.id === cat) || {label:cat,emoji:"📌",color:"#7c83fd"};
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   RENDER
+══════════════════════════════════════════════════════════════════════════════ */
+function renderCard(card) {
+  const isBm = state.bookmarks.has(card.id);
+  const isExpanded = state.expandedCards.has(card.id);
+  let bodyHtml = "";
+  if (card.type === "table") {
+    bodyHtml = "<table>" + (card.rows||[]).map(([cmd,desc]) =>
+      `<tr><td data-cmd="${escAttr(cmd)}" title="Click to copy" onclick="copyTextFlash(this)">${hl(cmd)}</td><td>${hl(desc)}</td></tr>`
+    ).join("") + "</table>";
+  } else if (card.type === "code") {
+    const code = card.code || "";
+    bodyHtml = `<div class="codeblock">
+      <div class="codeblock-header">
+        <div class="codeblock-dots"><span></span><span></span><span></span></div>
+        <span class="codeblock-filename">${escHtml(card.filename||"snippet")}</span>
+        <button class="copy-code-btn" onclick="copyCode(this,${JSON.stringify(code)})">⎘ Copy</button>
+      </div>
+      <pre title="Click to copy code" onclick="copyCardContent(this)">${hl(code)}</pre></div>`;
+  } else if (card.type === "image") {
+    bodyHtml = `<div class="card-image-wrap"><img src="${escHtml(card.imageData||"")}" alt="${escHtml(card.caption||"")}" loading="lazy"/></div>
+      ${card.caption ? `<div class="card-caption">${escHtml(card.caption)}</div>` : ""}`;
+  } else if (card.type === "note") {
+    bodyHtml = `<div class="card-note" title="Click to copy note" onclick="copyCardContent(this)">${hl(card.note||"")}</div>`;
+  }
+  const bmFill = isBm ? "#fb923c" : "none";
+  const bmStroke = isBm ? "#fb923c" : "currentColor";
+  const expandLabel = isExpanded ? "▲ Collapse" : "▼ Show more";
+  return `<div class="card${isBm?" bookmarked":""}${isExpanded?" expanded":""}" data-id="${card.id}" data-cat="${card.cat}" data-search="${escAttr((card.title+" "+getCardText(card)).toLowerCase())}">
+    <div class="card-head">
+      <span class="card-title-text" title="${escAttr(card.title)}">${hl(card.title)}</span>
+      <div class="card-actions">
+        <button class="btn-icon" onclick="openExpandModal('${card.id}')" title="Maximize">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+        </button>
+        <button class="btn-icon" onclick="copyCard('${card.id}')" title="Copy all">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+        <button class="btn-icon" onclick="toggleBookmark('${card.id}')" title="Bookmark">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="${bmFill}" stroke="${bmStroke}" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        </button>
+        <button class="btn-icon" onclick="openEdit('${card.id}')" title="Edit">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button class="btn-icon" style="color:var(--text-muted)" onclick="deleteCard('${card.id}')" title="Delete">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="card-body">${bodyHtml}<div class="card-fade"></div></div>
+    <div class="card-expand-row">
+      <button class="card-expand-btn" onclick="toggleExpand('${card.id}')">${expandLabel}</button>
+    </div>
+  </div>`;
+}
+
+function getCardText(card) {
+  if (card.type === "table")  return (card.rows||[]).flat().join(" ");
+  if (card.type === "note")   return card.note||"";
+  if (card.type === "image")  return (card.caption||"") + " image";
+  return (card.code||"") + (card.filename||"");
+}
+
+function renderAll() {
+  // Built-in categories
+  BUILTIN_CATS.forEach(cat => {
+    const grid = document.getElementById("grid-"+cat);
+    if (!grid) return;
+    const cards = BUILTIN_CARDS.filter(c => c.cat === cat && !state.deletedIds.has(c.id));
+    grid.innerHTML = cards.map(renderCard).join("");
+    const cnt = document.getElementById("cnt-"+cat);
+    if (cnt) cnt.textContent = cards.length;
+  });
+
+  // Custom category sections
+  renderDynamicSections();
+
+  // My Cards
+  const customGrid = document.getElementById("grid-custom");
+  const myCards = state.customCards.filter(c => !state.customCategories.find(cc => cc.id === c.cat));
+  if (myCards.length === 0 && state.customCards.filter(c => c.cat === "custom").length === 0) {
+    const visCustom = state.customCards.filter(c => c.cat === "custom" || !state.customCategories.find(cc=>cc.id===c.cat));
+    if (visCustom.length === 0) {
+      customGrid.innerHTML = `<div class="empty-state" id="customEmpty"><div class="icon">✨</div><h3>No custom cards yet</h3><p>Press <span class="kbd">Ctrl+N</span> to create one.</p></div>`;
+    } else {
+      customGrid.innerHTML = visCustom.map(renderCard).join("");
+    }
+  } else {
+    const allCustom = state.customCards.filter(c => c.cat === "custom" || !state.customCategories.find(cc=>cc.id===c.cat));
+    if (allCustom.length === 0) {
+      customGrid.innerHTML = `<div class="empty-state"><div class="icon">✨</div><h3>No custom cards yet</h3><p>Press <span class="kbd">Ctrl+N</span> or click <strong>+ New Card</strong>.</p></div>`;
+    } else {
+      customGrid.innerHTML = allCustom.map(renderCard).join("");
+    }
+  }
+  const cntCus = document.getElementById("cnt-custom");
+  if (cntCus) cntCus.textContent = state.customCards.filter(c => c.cat === "custom").length;
+
+  // Bookmarks
+  renderBookmarks();
+  // Section collapse states
+  state.collapsedSections.forEach(id => {
+    const sec = document.getElementById(id);
+    if (sec) sec.classList.add("collapsed");
+  });
+  // Check overflow after render
+  setTimeout(checkAllOverflow, 60);
+  updateStats();
+  applyBuiltinOverrides();
+}
+
+function renderDynamicSections() {
+  const container = document.getElementById("dynamicSections");
+  container.innerHTML = "";
+  state.customCategories.forEach(cat => {
+    const cards = state.customCards.filter(c => c.cat === cat.id);
+    const secId = "cat-" + cat.id;
+    const isCollapsed = state.collapsedSections.has(secId);
+    const sec = document.createElement("section");
+    sec.className = "section" + (isCollapsed ? " collapsed" : "");
+    sec.id = secId;
+    sec.dataset.category = cat.id;
+    sec.innerHTML = `
+      <div class="section-header" onclick="toggleSection('${secId}')" style="border-bottom-color:${cat.color}22">
+        <div class="section-icon" style="background:${cat.color}22;font-size:1.1rem">${cat.emoji}</div>
+        <div class="section-title-group">
+          <h2 style="color:${cat.color}">${escHtml(cat.name)} <span class="section-count">${cards.length}</span></h2>
+          <small>Custom category</small>
+        </div>
+        <button class="btn btn-sm" onclick="event.stopPropagation();editCategory('${cat.id}')" style="margin-right:8px;font-size:.7rem">✏ Edit</button>
+        <button class="section-collapse-btn" tabindex="-1">▾</button>
+      </div>
+      <div class="grid" id="grid-${cat.id}">${cards.length ? cards.map(renderCard).join("") : '<div class="empty-state" style="padding:24px"><p>No cards in this category yet. Add one with <strong>+ New Card</strong>.</p></div>'}</div>`;
+    container.appendChild(sec);
+  });
+}
+
+function renderBookmarks() {
+  const grid = document.getElementById("grid-bookmarks");
+  const bmCards = allCards().filter(c => state.bookmarks.has(c.id));
+  grid.innerHTML = bmCards.length === 0
+    ? `<div class="empty-state"><div class="icon">🔖</div><h3>No bookmarks yet</h3><p>Click the bookmark icon on any card.</p></div>`
+    : bmCards.map(renderCard).join("");
+  const cnt = document.getElementById("cnt-bookmarks");
+  if (cnt) cnt.textContent = bmCards.length;
+}
+
+function updateStats() {
+  const cards = allCards();
+  document.getElementById("statCards").textContent = cards.length;
+  const rows = cards.filter(c=>c.type==="table").reduce((s,c)=>s+(c.rows||[]).length,0);
+  document.getElementById("statRows").textContent = rows;
+  document.getElementById("statBookmarks").textContent = state.bookmarks.size;
+  document.getElementById("statCustom").textContent = state.customCards.length;
+  document.getElementById("statCategories").textContent = BUILTIN_CATS.length + state.customCategories.length;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   CARD EXPAND / MAXIMIZE
+══════════════════════════════════════════════════════════════════════════════ */
+function checkAllOverflow() {
+  if (state.view === "list") return;
+  document.querySelectorAll(".card").forEach(el => {
+    if (el.classList.contains("expanded")) return;
+    const body = el.querySelector(".card-body");
+    if (!body) return;
+    const isClipped = body.scrollHeight > body.clientHeight + 24;
+    el.classList.toggle("clipped", isClipped);
+  });
+}
+
+function toggleExpand(id) {
+  const el = document.querySelector(`.card[data-id="${id}"]`);
+  if (!el) return;
+  if (state.expandedCards.has(id)) {
+    state.expandedCards.delete(id);
+    el.classList.remove("expanded");
+    el.querySelector(".card-expand-btn").textContent = "▼ Show more";
+    // Wait for the max-height CSS transition (300ms) to finish before measuring
+    setTimeout(() => {
+      const body = el.querySelector(".card-body");
+      if (body) el.classList.toggle("clipped", body.scrollHeight > body.clientHeight + 24);
+    }, 340);
+  } else {
+    state.expandedCards.add(id);
+    el.classList.add("expanded");
+    el.classList.remove("clipped");
+    el.querySelector(".card-expand-btn").textContent = "▲ Collapse";
+  }
+  saveState();
+}
+
+function openExpandModal(id) {
+  const card = allCards().find(c => c.id === id);
+  if (!card) return;
+  document.getElementById("expandModalTitle").textContent = card.title;
+  document.getElementById("expandEditBtn").onclick = () => { closeModal("expandModal"); openEdit(id); };
+  const body = document.getElementById("expandModalBody");
+  // Re-render card body without height restrictions
+  let html = "";
+  if (card.type === "table") {
+    html = `<div style="padding:0"><table style="width:100%;border-collapse:collapse">` +
+      (card.rows||[]).map(([cmd,desc]) =>
+        `<tr style="border-bottom:1px solid var(--border);transition:background .1s" onmouseover="this.style.background='var(--hover)'" onmouseout="this.style.background=''">
+          <td data-cmd="${escAttr(cmd)}" title="Click to copy" onclick="copyTextFlash(this)" style="padding:9px 16px;font-family:'Fira Code','Consolas',monospace;font-size:.82rem;color:#a5f3fc;background:var(--code-bg);width:45%;white-space:pre-wrap;cursor:pointer;transition:opacity .12s" onmouseover="this.style.opacity='.5'" onmouseout="this.style.opacity=''">${escHtml(cmd)}</td>
+          <td style="padding:9px 16px;font-size:.84rem;color:var(--text-dim)">${escHtml(desc)}</td>
+        </tr>`
+      ).join("") + `</table></div>`;
+  } else if (card.type === "code") {
+    html = `<div class="codeblock" style="border:none;border-radius:0">
+      <div class="codeblock-header"><div class="codeblock-dots"><span></span><span></span><span></span></div>
+      <span class="codeblock-filename">${escHtml(card.filename||"snippet")}</span>
+      <button class="copy-code-btn" onclick="copyCode(this,${JSON.stringify(card.code||"")})">⎘ Copy</button></div>
+      <pre style="max-height:70vh;overflow:auto;white-space:pre;font-size:.83rem">${escHtml(card.code||"")}</pre></div>`;
+  } else if (card.type === "image") {
+    html = `<div style="padding:20px;text-align:center"><img src="${escHtml(card.imageData||"")}" style="max-width:100%;max-height:75vh;border-radius:8px"/>${card.caption?`<p style="margin-top:10px;color:var(--text-dim)">${escHtml(card.caption)}</p>`:""}</div>`;
+  } else if (card.type === "note") {
+    html = `<div class="card-note" style="padding:20px;font-size:.9rem;max-height:75vh;overflow:auto">${escHtml(card.note||"")}</div>`;
+  }
+  body.innerHTML = html;
+  openModal("expandModal");
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   SECTION COLLAPSE
+══════════════════════════════════════════════════════════════════════════════ */
+function toggleSection(id) {
+  const sec = document.getElementById(id);
+  if (!sec) return;
+  const isNowCollapsed = !sec.classList.contains("collapsed");
+  sec.classList.toggle("collapsed", isNowCollapsed);
+  if (isNowCollapsed) state.collapsedSections.add(id);
+  else { state.collapsedSections.delete(id); setTimeout(checkAllOverflow, 80); }
+  saveState();
+}
+
+let allCollapsed = false;
+function toggleAllSections() {
+  allCollapsed = !allCollapsed;
+  document.querySelectorAll(".section").forEach(sec => {
+    sec.classList.toggle("collapsed", allCollapsed);
+    if (allCollapsed) state.collapsedSections.add(sec.id);
+    else state.collapsedSections.delete(sec.id);
+  });
+  saveState();
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   SEARCH PALETTE
+══════════════════════════════════════════════════════════════════════════════ */
+let palQuery = "";
+let palActive = -1;
+let palResults = [];
+
+function openPalette() {
+  document.getElementById("paletteOverlay").classList.add("open");
+  const inp = document.getElementById("paletteInput");
+  inp.value = ""; palQuery = ""; palActive = -1;
+  document.getElementById("paletteResults").innerHTML = '<div class="pal-hint">Start typing to search across all cards…</div>';
+  setTimeout(() => inp.focus(), 80);
+}
+function closePaletteBtn() { document.getElementById("paletteOverlay").classList.remove("open"); }
+function closePalette(e) { if (e.target === document.getElementById("paletteOverlay")) closePaletteBtn(); }
+
+function paletteSearch(q) {
+  palQuery = q.trim().toLowerCase();
+  palActive = -1;
+  if (!palQuery) {
+    document.getElementById("paletteResults").innerHTML = '<div class="pal-hint">Start typing to search across all cards…</div>';
+    return;
+  }
+  const cards = allCards().filter(c => {
+    const txt = (c.title + " " + getCardText(c)).toLowerCase();
+    return txt.includes(palQuery);
+  });
+  palResults = cards;
+  if (cards.length === 0) {
+    document.getElementById("paletteResults").innerHTML = '<div class="pal-empty">No cards found for <strong>' + escHtml(palQuery) + '</strong></div>';
+    return;
+  }
+  // Group by category
+  const grouped = {};
+  cards.forEach(c => { if (!grouped[c.cat]) grouped[c.cat] = []; grouped[c.cat].push(c); });
+  let html = "";
+  let idx = 0;
+  Object.entries(grouped).forEach(([cat, catCards]) => {
+    const meta = catMeta(cat);
+    html += `<div class="pal-section-label">${meta.emoji} ${meta.label}</div>`;
+    catCards.forEach(card => {
+      const snippet = getSnippet(card, palQuery);
+      const bgStyle = `background:${meta.color}22`;
+      html += `<div class="pal-result" data-idx="${idx}" onclick="selectPaletteResult('${card.id}')">
+        <div class="pal-result-icon" style="${bgStyle}">${meta.emoji}</div>
+        <div class="pal-result-body">
+          <div class="pal-result-title">${hlPal(card.title)}</div>
+          <div class="pal-result-snippet">${hlPal(snippet)}</div>
+        </div>
+      </div>`;
+      idx++;
+    });
+  });
+  document.getElementById("paletteResults").innerHTML = html;
+}
+
+function getSnippet(card, q) {
+  const text = getCardText(card);
+  const idx = text.toLowerCase().indexOf(q);
+  if (idx < 0) return text.slice(0, 80);
+  const start = Math.max(0, idx - 30);
+  return (start > 0 ? "…" : "") + text.slice(start, idx + q.length + 50);
+}
+
+function hlPal(text) {
+  if (!palQuery) return escHtml(text);
+  return escHtml(text).replace(new RegExp("("+escRegex(palQuery)+")", "gi"), '<mark class="hl">$1</mark>');
+}
+
+function selectPaletteResult(id) {
+  closePaletteBtn();
+  // Always reset to "all" filter so the card's section is visible
+  state.filter = "all";
+  document.querySelectorAll(".nav-pill").forEach(p => p.classList.toggle("active", p.dataset.filter === "all"));
+  renderAll();
+  applyFilters();
+  setTimeout(() => {
+    const el = document.querySelector(`.card[data-id="${id}"]`);
+    if (!el) return;
+    // Expand collapsed section containing the card
+    const sec = el.closest(".section");
+    if (sec && sec.classList.contains("collapsed")) {
+      sec.classList.remove("collapsed");
+      state.collapsedSections.delete(sec.id);
+      saveState();
+    }
+    el.scrollIntoView({behavior:"smooth", block:"center"});
+    el.style.outline = "2px solid var(--accent)";
+    el.style.outlineOffset = "3px";
+    el.style.borderRadius = "12px";
+    setTimeout(() => { el.style.outline = ""; el.style.outlineOffset = ""; }, 2000);
+  }, 80);
+}
+
+function paletteKey(e) {
+  const items = document.querySelectorAll(".pal-result");
+  if (e.key === "ArrowDown") {
+    e.preventDefault();
+    palActive = Math.min(palActive + 1, items.length - 1);
+    items.forEach((el, i) => el.classList.toggle("active", i === palActive));
+    if (items[palActive]) items[palActive].scrollIntoView({block:"nearest"});
+  } else if (e.key === "ArrowUp") {
+    e.preventDefault();
+    palActive = Math.max(palActive - 1, 0);
+    items.forEach((el, i) => el.classList.toggle("active", i === palActive));
+    if (items[palActive]) items[palActive].scrollIntoView({block:"nearest"});
+  } else if (e.key === "Enter") {
+    e.preventDefault();
+    if (palActive >= 0 && palResults[palActive]) {
+      selectPaletteResult(palResults[palActive].id);
+    } else if (palResults.length > 0) {
+      selectPaletteResult(palResults[0].id);
+    }
+  } else if (e.key === "Escape") {
+    closePaletteBtn();
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   FILTER / VIEW
+══════════════════════════════════════════════════════════════════════════════ */
+function setFilter(f, btn) {
+  state.filter = f;
+  document.querySelectorAll(".nav-pill").forEach(p => p.classList.remove("active"));
+  btn.classList.add("active");
+  renderAll(); applyFilters();
+}
+
+function applyFilters() {
+  const f = state.filter;
+  document.querySelectorAll(".card").forEach(el => {
+    const cat = el.dataset.cat;
+    let show = true;
+    if (f === "bookmarks") show = state.bookmarks.has(el.dataset.id);
+    else if (f === "custom") show = !!state.customCards.find(c => c.id === el.dataset.id);
+    else if (f !== "all") show = (cat === f);
+    el.style.display = show ? "" : "none";
+  });
+  document.getElementById("bookmarks-section").style.display = (f === "bookmarks") ? "" : "none";
+  document.querySelectorAll(".section:not(#bookmarks-section)").forEach(sec => {
+    if (f === "bookmarks") { sec.style.display = "none"; return; }
+    if (f === "custom") { sec.style.display = (sec.id === "custom-section") ? "" : "none"; return; }
+    if (f === "all") { sec.style.display = ""; return; }
+    const secCat = sec.dataset.category;
+    sec.style.display = (secCat === f) ? "" : "none";
+  });
+  // No results check
+  const visible = document.querySelectorAll(".card:not([style*='display: none'])").length;
+  document.getElementById("noResults").style.display = visible ? "none" : "block";
+}
+
+function setView(v) {
+  state.view = v;
+  document.documentElement.dataset.view = v;
+  ["grid","list","compact"].forEach(k => {
+    document.getElementById("vb-"+k).classList.toggle("active", k === v);
+  });
+  saveState();
+  setTimeout(checkAllOverflow, 80);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   ACTIONS
+══════════════════════════════════════════════════════════════════════════════ */
+function toggleBookmark(id) {
+  if (state.bookmarks.has(id)) { state.bookmarks.delete(id); showToast("Bookmark removed","info"); }
+  else { state.bookmarks.add(id); showToast("🔖 Bookmarked!","success"); }
+  saveState(); renderAll(); applyFilters();
+}
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => showToast("⎘ Copied!","success"));
+}
+function copyTextFlash(td) {
+  const text = td.dataset.cmd || td.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    td.style.opacity = "1";
+    td.style.background = "rgba(74,222,128,.2)";
+    setTimeout(() => { td.style.background = ""; }, 700);
+    showToast("⎘ Copied!","success");
+  });
+}
+function copyCardContent(el) {
+  // Walk up to the card element to get its ID, then look up the source data
+  const cardEl = el.closest(".card");
+  const id = cardEl && cardEl.dataset.id;
+  const card = id ? allCards().find(c => c.id === id) : null;
+  const text = card ? (card.code || card.note || "") : el.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    el.style.opacity = "1";
+    el.style.background = "rgba(74,222,128,.12)";
+    setTimeout(() => { el.style.background = ""; }, 700);
+    showToast("⎘ Copied!","success");
+  });
+}
+function copyCode(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = "✓ Copied"; btn.classList.add("copied");
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove("copied"); }, 1800);
+  });
+}
+function copyCard(id) {
+  const card = allCards().find(c => c.id === id);
+  if (!card) return;
+  let t = card.title + "\n" + "─".repeat(40) + "\n";
+  if (card.type === "table") t += (card.rows||[]).map(([a,b]) => `${a.padEnd(35)} ${b}`).join("\n");
+  else if (card.type === "note") t += card.note||"";
+  else t += card.code||"";
+  navigator.clipboard.writeText(t).then(() => showToast("⎘ Card copied!","success"));
+}
+function deleteCard(id) {
+  // Check customCards FIRST — edited builtins live here with the same ID
+  const customIdx = state.customCards.findIndex(c => c.id === id);
+  if (customIdx !== -1) {
+    const removed = state.customCards.splice(customIdx, 1)[0];
+    state.bookmarks.delete(id);
+    // If it was an edited builtin, restore the original by clearing deletedIds entry
+    if (isBuiltin(id)) state.deletedIds.delete(id);
+    saveState(); renderAll(); applyFilters();
+    showToastWithUndo("🗑 Card deleted", () => {
+      state.customCards.splice(customIdx, 0, removed);
+      if (isBuiltin(id)) state.deletedIds.add(id);
+      saveState(); renderAll(); applyFilters();
+    });
+  } else if (isBuiltin(id)) {
+    // Pure builtin (never edited) — hide it
+    state.deletedIds.add(id);
+    state.bookmarks.delete(id);
+    saveState(); renderAll(); applyFilters();
+    showToastWithUndo("🗑 Card hidden", () => { state.deletedIds.delete(id); saveState(); renderAll(); applyFilters(); });
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   CREATE / EDIT MODAL
+══════════════════════════════════════════════════════════════════════════════ */
+let editorRows = [];
+function populateCategorySelect() {
+  const sel = document.getElementById("cardCategoryInput");
+  sel.innerHTML = "";
+  const opts = [
+    {value:"custom",label:"✨ My Cards"},
+    {value:"git",label:"🔴 Git"},
+    {value:"js",label:"🟡 JavaScript / TS"},
+    {value:"py",label:"🔵 Python"},
+    {value:"cpp",label:"🔷 C++"},
+    {value:"cmd",label:"🟢 CMD / PowerShell"},
+    {value:"linux",label:"🐧 Linux / Bash"},
+    {value:"ai",label:"🤖 AI Agents"},
+    ...state.customCategories.map(c => ({value:c.id,label:`${c.emoji} ${c.name}`}))
+  ];
+  opts.forEach(o => { const el = document.createElement("option"); el.value=o.value; el.textContent=o.label; sel.appendChild(el); });
+}
+
+function openModal(id) {
+  if (id === "createModal") {
+    state.editingId = null;
+    state.pendingImageData = null;
+    document.getElementById("modalTitle").textContent = "Add New Card";
+    document.getElementById("cardTitleInput").value = "";
+    document.getElementById("cardTypeInput").value = "table";
+    document.getElementById("codeFilename").value = "";
+    document.getElementById("codeContent").value = "";
+    document.getElementById("noteContent").value = "";
+    document.getElementById("imgCaption").value = "";
+    document.getElementById("imgPreview").innerHTML = "";
+    editorRows = [["",""]]; renderEditorRows(); toggleCardType();
+    populateCategorySelect();
+  }
+  document.getElementById(id).classList.add("open");
+  if (id === "createModal") setTimeout(() => document.getElementById("cardTitleInput").focus(), 100);
+}
+
+function openEdit(id) {
+  const card = allCards().find(c => c.id === id);
+  if (!card) return;
+  state.editingId = id;
+  state.pendingImageData = card.imageData || null;
+  document.getElementById("modalTitle").textContent = "Edit Card";
+  document.getElementById("cardTitleInput").value = card.title;
+  document.getElementById("cardTypeInput").value = card.type;
+  document.getElementById("codeFilename").value = card.filename || "";
+  document.getElementById("codeContent").value = card.code || "";
+  document.getElementById("noteContent").value = card.note || "";
+  document.getElementById("imgCaption").value = card.caption || "";
+  document.getElementById("imgPreview").innerHTML = card.imageData ? `<img src="${escHtml(card.imageData)}" style="max-width:100%;max-height:150px;border-radius:6px;border:1px solid var(--border)"/>` : "";
+  editorRows = (card.rows || []).map(r => [...r]);
+  if (!editorRows.length) editorRows = [["",""]];
+  renderEditorRows(); toggleCardType();
+  populateCategorySelect();
+  document.getElementById("cardCategoryInput").value = card.cat;
+  document.getElementById("createModal").classList.add("open");
+  setTimeout(() => document.getElementById("cardTitleInput").focus(), 100);
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove("open");
+  if (id === "catModal") state.editingCatId = null;
+}
+
+function toggleCardType() {
+  const t = document.getElementById("cardTypeInput").value;
+  document.getElementById("tableEditor").style.display = t === "table" ? "" : "none";
+  document.getElementById("codeEditor").style.display = t === "code" ? "" : "none";
+  document.getElementById("noteEditor").style.display = t === "note" ? "" : "none";
+  document.getElementById("imageEditor").style.display = t === "image" ? "" : "none";
+}
+function renderEditorRows() {
+  document.getElementById("rowsEditor").innerHTML = editorRows.map((row, i) => `
+    <div class="row-editor-item">
+      <input placeholder="command / value" value="${escAttr(row[0])}" oninput="editorRows[${i}][0]=this.value"/>
+      <input placeholder="description" value="${escAttr(row[1])}" style="font-family:inherit" oninput="editorRows[${i}][1]=this.value"/>
+      <button class="row-del-btn" onclick="removeEditorRow(${i})">✕</button>
+    </div>`).join("");
+}
+function addEditorRow() {
+  editorRows.push(["",""]); renderEditorRows();
+  const inputs = document.querySelectorAll(".row-editor-item:last-child input");
+  if (inputs[0]) inputs[0].focus();
+}
+function removeEditorRow(i) {
+  if (editorRows.length === 1) editorRows[0] = ["",""];
+  else editorRows.splice(i, 1);
+  renderEditorRows();
+}
+
+function saveCard() {
+  const title = document.getElementById("cardTitleInput").value.trim();
+  const cat   = document.getElementById("cardCategoryInput").value;
+  const type  = document.getElementById("cardTypeInput").value;
+  if (!title) { showToast("⚠ Please enter a title","warning"); return; }
+  const buildCard = (id) => {
+    const base = {id, cat, type, title};
+    if (type === "table") return {...base, rows: editorRows.filter(r => r[0].trim() || r[1].trim())};
+    if (type === "code")  return {...base, filename: document.getElementById("codeFilename").value.trim()||"snippet", code: document.getElementById("codeContent").value};
+    if (type === "note")  return {...base, note: document.getElementById("noteContent").value};
+    if (type === "image") return {...base, imageData: state.pendingImageData||"", caption: document.getElementById("imgCaption").value.trim()};
+    return base;
+  };
+  if (state.editingId) {
+    if (isBuiltin(state.editingId)) {
+      state.deletedIds.add(state.editingId);
+      const existing = state.customCards.findIndex(c => c.id === state.editingId);
+      if (existing !== -1) state.customCards[existing] = buildCard(state.editingId);
+      else state.customCards.push(buildCard(state.editingId));
+      showToast("✏ Card updated!","success");
+    } else {
+      const idx = state.customCards.findIndex(c => c.id === state.editingId);
+      if (idx !== -1) { state.customCards[idx] = buildCard(state.editingId); showToast("✏ Card updated!","success"); }
+    }
+  } else {
+    state.customCards.push(buildCard("custom-" + Date.now()));
+    showToast("✨ Card created!","success");
+  }
+  saveState(); closeModal("createModal"); renderAll(); applyFilters();
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   IMAGE UPLOAD / PASTE
+══════════════════════════════════════════════════════════════════════════════ */
+function imgFileSelect(input) {
+  const file = input.files[0];
+  if (file) loadImageFile(file);
+}
+function imgDragOver(e) { e.preventDefault(); document.getElementById("imgDropZone").classList.add("drag-over"); }
+function imgDrop(e) {
+  e.preventDefault();
+  document.getElementById("imgDropZone").classList.remove("drag-over");
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith("image/")) loadImageFile(file);
+}
+function loadImageFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    state.pendingImageData = e.target.result;
+    document.getElementById("imgPreview").innerHTML = `<img src="${escHtml(e.target.result)}" style="max-width:100%;max-height:180px;border-radius:6px;border:1px solid var(--border)"/>`;
+    showToast("Image loaded","success");
+  };
+  reader.readAsDataURL(file);
+}
+// Paste image anywhere in the image editor
+document.addEventListener("paste", e => {
+  const overlay = document.getElementById("createModal");
+  if (!overlay.classList.contains("open")) return;
+  if (document.getElementById("cardTypeInput").value !== "image") return;
+  const items = Array.from(e.clipboardData.items || []);
+  const imgItem = items.find(i => i.type.startsWith("image/"));
+  if (!imgItem) return;
+  loadImageFile(imgItem.getAsFile());
+});
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   CUSTOM CATEGORIES
+══════════════════════════════════════════════════════════════════════════════ */
+function populateEmojiGrid(selected) {
+  const grid = document.getElementById("emojiGrid");
+  grid.innerHTML = PRESET_EMOJIS.map(em =>
+    `<button class="emoji-btn${em===selected?" selected":""}" onclick="selectEmoji('${em}',this)">${em}</button>`
+  ).join("");
+}
+
+function selectEmoji(em, btn) {
+  state.selectedEmoji = em;
+  document.querySelectorAll(".emoji-btn").forEach(b => b.classList.remove("selected"));
+  btn.classList.add("selected");
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   BUILTIN SECTION MANAGEMENT
+══════════════════════════════════════════════════════════════════════════════ */
+const BUILTIN_SECTIONS = [
+  {id:"git",   name:"Git",                     subtitle:"Version Control System",                                                icon:"🔴"},
+  {id:"js",    name:"JavaScript / TypeScript",  subtitle:"ES2023+ · Node.js · TS Essentials",                                   icon:"🟡"},
+  {id:"py",    name:"Python",                   subtitle:"Python 3.12+ · Patterns · Stdlib",                                    icon:"🔵"},
+  {id:"cpp",   name:"C++",                      subtitle:"C++17 / C++20 Modern Features",                                       icon:"🔷"},
+  {id:"cmd",   name:"Windows CMD / PowerShell", subtitle:"Command Prompt · PowerShell",                                         icon:"🟢"},
+  {id:"linux", name:"Linux / Bash",             subtitle:"Shell Commands · Scripting · Permissions",                            icon:"🐧"},
+  {id:"ai",    name:"AI Agent Libraries",       subtitle:"LangChain · LangGraph · LlamaIndex · CrewAI · AutoGen · Pydantic AI", icon:"🤖"},
+];
+
+let _editingBuiltinId = null;
+
+function applyBuiltinOverrides() {
+  BUILTIN_SECTIONS.forEach(def => {
+    const ov = state.builtinOverrides[def.id] || {};
+    const sec = document.getElementById(def.id);
+    if (!sec) return;
+    // Show / hide the whole section
+    sec.style.display = ov.hidden ? "none" : "";
+    // Patch name — find the bare text node inside h2 (preserves the count <span>)
+    const h2 = sec.querySelector(".section-title-group h2");
+    if (h2) {
+      const textNode = [...h2.childNodes].find(n => n.nodeType === 3);
+      if (textNode) textNode.nodeValue = (ov.name || def.name) + " ";
+    }
+    // Patch subtitle
+    const small = sec.querySelector(".section-title-group small");
+    if (small) small.textContent = ov.subtitle !== undefined ? ov.subtitle : def.subtitle;
+    // Inject ✏ Edit button once (guard against duplicate injection)
+    const header = sec.querySelector(".section-header");
+    if (header && !header.querySelector(".builtin-edit-btn")) {
+      const btn = document.createElement("button");
+      btn.className = "btn btn-sm builtin-edit-btn";
+      btn.style.cssText = "margin-right:8px;font-size:.7rem";
+      btn.textContent = "✏ Edit";
+      btn.onclick = e => { e.stopPropagation(); editBuiltinSection(def.id); };
+      const colBtn = header.querySelector(".section-collapse-btn");
+      header.insertBefore(btn, colBtn);
+    }
+  });
+}
+
+function editBuiltinSection(id) {
+  const def = BUILTIN_SECTIONS.find(s => s.id === id);
+  if (!def) return;
+  _editingBuiltinId = id;
+  const ov = state.builtinOverrides[id] || {};
+  document.getElementById("builtinModalTitle").textContent = "Edit: " + (ov.name || def.name);
+  document.getElementById("builtinNameInput").value = ov.name || def.name;
+  document.getElementById("builtinSubtitleInput").value = ov.subtitle !== undefined ? ov.subtitle : def.subtitle;
+  document.getElementById("builtinEditModal").classList.add("open");
+  setTimeout(() => document.getElementById("builtinNameInput").focus(), 100);
+}
+
+function saveBuiltinSection() {
+  if (!_editingBuiltinId) return;
+  const name = document.getElementById("builtinNameInput").value.trim();
+  if (!name) { showToast("⚠ Name cannot be empty", "warning"); return; }
+  const subtitle = document.getElementById("builtinSubtitleInput").value.trim();
+  if (!state.builtinOverrides[_editingBuiltinId]) state.builtinOverrides[_editingBuiltinId] = {};
+  state.builtinOverrides[_editingBuiltinId].name = name;
+  state.builtinOverrides[_editingBuiltinId].subtitle = subtitle;
+  saveState(); applyBuiltinOverrides(); closeModal("builtinEditModal");
+  showToast("✏ Section renamed!", "success");
+}
+
+function hideBuiltinSection() {
+  if (!_editingBuiltinId) return;
+  if (!state.builtinOverrides[_editingBuiltinId]) state.builtinOverrides[_editingBuiltinId] = {};
+  state.builtinOverrides[_editingBuiltinId].hidden = true;
+  saveState(); applyBuiltinOverrides(); closeModal("builtinEditModal");
+  showToast("🙈 Section hidden — restore it via ⚙ Sections", "warning");
+}
+
+function resetBuiltinSection() {
+  if (!_editingBuiltinId) return;
+  delete state.builtinOverrides[_editingBuiltinId];
+  saveState(); applyBuiltinOverrides(); closeModal("builtinEditModal");
+  showToast("↺ Section reset to default", "success");
+}
+
+function renderSectionsList() {
+  const list = document.getElementById("sectionsList");
+  if (!list) return;
+  list.innerHTML = BUILTIN_SECTIONS.map(def => {
+    const ov = state.builtinOverrides[def.id] || {};
+    const displayName = ov.name || def.name;
+    const isHidden = !!ov.hidden;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid var(--border)">
+      <span style="font-size:1.15rem;width:26px;text-align:center">${def.icon}</span>
+      <span style="flex:1;font-weight:600;color:${isHidden ? "var(--text-muted)" : "var(--text)"};text-decoration:${isHidden ? "line-through" : "none"}">${escHtml(displayName)}</span>
+      ${isHidden
+        ? `<button class="btn btn-sm" style="color:#4ade80;border-color:#4ade80" onclick="showBuiltinSection('${def.id}')">👁 Show</button>`
+        : `<button class="btn btn-sm" style="font-size:.7rem" onclick="editBuiltinSection('${def.id}');closeModal('sectionsModal')">✏ Edit</button>
+           <button class="btn btn-sm" style="color:#f87171;border-color:#f87171;font-size:.7rem" onclick="quickHideBuiltin('${def.id}')">🙈 Hide</button>`
+      }
+    </div>`;
+  }).join("");
+}
+
+function showBuiltinSection(id) {
+  if (!state.builtinOverrides[id]) state.builtinOverrides[id] = {};
+  state.builtinOverrides[id].hidden = false;
+  saveState(); applyBuiltinOverrides(); renderSectionsList();
+  showToast("👁 Section restored!", "success");
+}
+
+function quickHideBuiltin(id) {
+  if (!state.builtinOverrides[id]) state.builtinOverrides[id] = {};
+  state.builtinOverrides[id].hidden = true;
+  saveState(); applyBuiltinOverrides(); renderSectionsList();
+  showToast("🙈 Section hidden", "warning");
+}
+
+function openModal_catModal() { /* handled below */ }
+
+// Override openModal for catModal
+const _origOpenModal = window.openModal;
+window.openModal = function(id) {
+  if (id === "sectionsModal") {
+    renderSectionsList();
+    document.getElementById("sectionsModal").classList.add("open");
+    return;
+  }
+  if (id === "catModal") {
+    // Called from "New Category" button — always reset to fresh state
+    state.editingCatId = null;
+    document.getElementById("catModalTitle").textContent = "New Category";
+    document.getElementById("catNameInput").value = "";
+    document.getElementById("catColorInput").value = "#7c83fd";
+    state.selectedEmoji = "📌";
+    document.getElementById("catDeleteRow").style.display = "none";
+    populateEmojiGrid("📌");
+    document.getElementById("catModal").classList.add("open");
+    setTimeout(() => document.getElementById("catNameInput").focus(), 100);
+    return;
+  }
+  document.getElementById(id).classList.add("open");
+  if (id === "createModal") {
+    state.editingId = null; state.pendingImageData = null;
+    document.getElementById("modalTitle").textContent = "Add New Card";
+    document.getElementById("cardTitleInput").value = "";
+    document.getElementById("cardTypeInput").value = "table";
+    document.getElementById("codeFilename").value = "";
+    document.getElementById("codeContent").value = "";
+    document.getElementById("noteContent").value = "";
+    document.getElementById("imgCaption").value = "";
+    document.getElementById("imgPreview").innerHTML = "";
+    editorRows = [["",""]]; renderEditorRows(); toggleCardType();
+    populateCategorySelect();
+    setTimeout(() => document.getElementById("cardTitleInput").focus(), 100);
+  }
+};
+
+function editCategory(id) {
+  const cat = state.customCategories.find(c => c.id === id);
+  if (!cat) return;
+  state.editingCatId = id;
+  document.getElementById("catModalTitle").textContent = "Edit Category";
+  document.getElementById("catNameInput").value = cat.name;
+  document.getElementById("catColorInput").value = cat.color;
+  state.selectedEmoji = cat.emoji;
+  document.getElementById("catDeleteRow").style.display = "block";
+  populateEmojiGrid(cat.emoji);
+  document.getElementById("catModal").classList.add("open");
+  setTimeout(() => document.getElementById("catNameInput").focus(), 100);
+}
+
+function saveCategory() {
+  const name = document.getElementById("catNameInput").value.trim();
+  if (!name) { showToast("⚠ Please enter a category name","warning"); return; }
+  const color = document.getElementById("catColorInput").value;
+  const emoji = state.selectedEmoji;
+  if (state.editingCatId) {
+    const idx = state.customCategories.findIndex(c => c.id === state.editingCatId);
+    if (idx !== -1) { state.customCategories[idx] = {...state.customCategories[idx], name, color, emoji}; }
+    state.editingCatId = null;
+    showToast("✏ Category updated!","success");
+  } else {
+    const id = "cat-" + Date.now();
+    state.customCategories.push({id, name, color, emoji});
+    showToast("🗂 Category created!","success");
+    // Update nav pills
+    renderNavPills();
+  }
+  saveState();
+  closeModal("catModal");
+  renderNavPills();
+  renderAll();
+  applyFilters();
+}
+
+function deleteCurrentCategory() {
+  if (!state.editingCatId) return;
+  const id = state.editingCatId;
+  const catName = state.customCategories.find(c=>c.id===id)?.name || "Category";
+  state.customCategories = state.customCategories.filter(c => c.id !== id);
+  // Move orphaned cards to "custom"
+  state.customCards.forEach(c => { if (c.cat === id) c.cat = "custom"; });
+  state.editingCatId = null;
+  saveState(); closeModal("catModal");
+  renderNavPills(); renderAll(); applyFilters();
+  showToast(`🗑 "${catName}" deleted, cards moved to My Cards`,"warning");
+}
+
+function renderNavPills() {
+  const pills = document.getElementById("navPills");
+  pills.querySelectorAll(".nav-pill-dynamic").forEach(el => el.remove());
+  state.customCategories.forEach(cat => {
+    // wrapper keeps pill + edit icon together
+    const wrap = document.createElement("span");
+    wrap.style.cssText = "display:inline-flex;align-items:center;gap:2px";
+    wrap.className = "nav-pill-dynamic";
+    const btn = document.createElement("button");
+    btn.className = "nav-pill";
+    btn.style.cssText = `border-color:${cat.color};border-radius:20px 0 0 20px;padding-right:8px`;
+    btn.dataset.filter = cat.id;
+    btn.textContent = `${cat.emoji} ${cat.name}`;
+    btn.onclick = function() { setFilter(cat.id, btn); };
+    btn.addEventListener("mouseover", () => { btn.style.background = cat.color+"22"; btn.style.color = cat.color; });
+    btn.addEventListener("mouseout", () => { if (!btn.classList.contains("active")) { btn.style.background=""; btn.style.color=""; } });
+    const editBtn = document.createElement("button");
+    editBtn.className = "nav-pill";
+    editBtn.style.cssText = `border-color:${cat.color};border-radius:0 20px 20px 0;padding:4px 7px;border-left:none;font-size:.7rem`;
+    editBtn.title = "Rename / delete category";
+    editBtn.textContent = "✏";
+    editBtn.onclick = function(e) { e.stopPropagation(); editCategory(cat.id); };
+    wrap.appendChild(btn); wrap.appendChild(editBtn);
+    pills.appendChild(wrap);
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   EXPORT / IMPORT
+══════════════════════════════════════════════════════════════════════════════ */
+function exportData() {
+  const data = {
+    version: 3,
+    exported: new Date().toISOString(),
+    customCards: state.customCards,
+    customCategories: state.customCategories,
+    bookmarks: [...state.bookmarks],
+    deletedIds: [...state.deletedIds],
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href=url; a.download="cheatsheet-export.json"; a.click();
+  URL.revokeObjectURL(url);
+  showToast("⬇ Exported successfully!","success");
+}
+
+function saveAsHtml() {
+  // Collect all current state to bake in
+  const data = {
+    version: 3,
+    saved: new Date().toISOString(),
+    theme: document.documentElement.dataset.theme || "dark",
+    view: state.view,
+    customCards: state.customCards,
+    customCategories: state.customCategories,
+    bookmarks: [...state.bookmarks],
+    deletedIds: [...state.deletedIds],
+    expandedCards: [...state.expandedCards],
+    collapsedSections: [...state.collapsedSections],
+    builtinOverrides: state.builtinOverrides,
+  };
+
+  // Clone the live document so we can modify it without touching the UI
+  const clone = document.cloneNode(true);
+
+  // Inject the data into the preload script tag
+  const preload = clone.querySelector("#cs3-preload");
+  if (preload) preload.textContent = JSON.stringify(data);
+
+  // Strip rendered dynamic content so the saved file stays lean
+  // (grids are re-rendered on load anyway; keep only the static empty-state markers)
+  clone.querySelectorAll(".grid").forEach(g => {
+    const empties = [...g.querySelectorAll(".empty-state")];
+    g.innerHTML = "";
+    empties.forEach(e => g.appendChild(e));
+  });
+  const navPills = clone.querySelector("#navPills");
+  if (navPills) navPills.innerHTML = "";
+  const toast = clone.querySelector("#toast");
+  if (toast) toast.innerHTML = "";
+  const statsBar = clone.querySelector("#statsBar");
+  if (statsBar) statsBar.textContent = "";
+
+  // Close any open modals in the clone
+  clone.querySelectorAll(".modal-overlay.open").forEach(m => m.classList.remove("open"));
+
+  const html = "<!DOCTYPE html>\n" + clone.querySelector("html").outerHTML;
+  const blob = new Blob([html], {type: "text/html"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "developer-cheatsheet.html";
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast("💾 Saved! Open this HTML file on any machine.", "success");
+}
+
+function importData(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.customCards) state.customCards = [...state.customCards, ...data.customCards.filter(nc => !state.customCards.find(c=>c.id===nc.id))];
+      if (data.customCategories) state.customCategories = [...state.customCategories, ...data.customCategories.filter(nc=>!state.customCategories.find(c=>c.id===nc.id))];
+      if (data.bookmarks) data.bookmarks.forEach(id => state.bookmarks.add(id));
+      saveState(); renderNavPills(); renderAll(); applyFilters();
+      showToast("⬆ Imported successfully!","success");
+    } catch { showToast("⚠ Invalid JSON file","warning"); }
+  };
+  reader.readAsText(file);
+  input.value = "";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THEME
+══════════════════════════════════════════════════════════════════════════════ */
+function toggleTheme() {
+  const isDark = document.documentElement.dataset.theme === "dark";
+  document.documentElement.dataset.theme = isDark ? "light" : "dark";
+  document.getElementById("themeLabel").textContent = isDark ? "Dark" : "Light";
+  localStorage.setItem("cs3_theme", document.documentElement.dataset.theme);
+}
+function loadTheme() {
+  const t = localStorage.getItem("cs3_theme") || "dark";
+  document.documentElement.dataset.theme = t;
+  document.getElementById("themeLabel").textContent = t === "dark" ? "Light" : "Dark";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════════════════════════════════════ */
+let toastTimer;
+function showToast(msg, type="info") {
+  const t = document.getElementById("toast");
+  t.className = `show ${type}`; t.innerHTML = msg;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 2800);
+}
+function showToastWithUndo(msg, undoFn) {
+  const t = document.getElementById("toast");
+  t.className = "show warning";
+  t.innerHTML = `${msg} &nbsp;<button onclick="(${undoFn.toString()})();document.getElementById('toast').classList.remove('show')" style="background:none;border:1px solid #fbbf24;border-radius:5px;padding:2px 8px;cursor:pointer;color:#fbbf24;font-size:.74rem">Undo</button>`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 5000);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════════════════════════════════ */
+let _hlQuery = "";
+function hl(text) {
+  if (!_hlQuery) return escHtml(text);
+  return escHtml(text).replace(new RegExp("("+escRegex(_hlQuery)+")", "gi"), '<mark class="hl">$1</mark>');
+}
+function escHtml(s)  { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function escAttr(s)  { return String(s).replace(/'/g,"&#39;").replace(/\n/g,"\\n").replace(/"/g,"&quot;"); }
+function escRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"); }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   KEYBOARD SHORTCUTS
+══════════════════════════════════════════════════════════════════════════════ */
+document.addEventListener("keydown", e => {
+  const anyOpen = document.querySelector(".modal-overlay.open");
+  if ((e.ctrlKey||e.metaKey) && e.key === "k") { e.preventDefault(); openPalette(); }
+  if ((e.ctrlKey||e.metaKey) && e.key === "n") { e.preventDefault(); if (!anyOpen) window.openModal("createModal"); }
+  if ((e.ctrlKey||e.metaKey) && e.key === "e") { e.preventDefault(); exportData(); }
+  if (e.altKey && e.key === "t") { e.preventDefault(); toggleTheme(); }
+  if (e.altKey && e.key === "c") { e.preventDefault(); toggleAllSections(); }
+  if (e.key === "Escape") {
+    if (document.getElementById("paletteOverlay").classList.contains("open")) { closePaletteBtn(); return; }
+    document.querySelectorAll(".modal-overlay.open").forEach(m => m.classList.remove("open"));
+  }
+});
+document.querySelectorAll(".modal-overlay").forEach(o => {
+  o.addEventListener("click", e => { if (e.target === o) o.classList.remove("open"); });
+});
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════════════════════════════ */
+loadTheme();
+// ── Seed localStorage from baked-in data (only if this machine has no existing data) ──
+(function() {
+  try {
+    const el = document.getElementById("cs3-preload");
+    const data = el && JSON.parse(el.textContent);
+    if (!data || !data.version) return;
+    // Only seed when localStorage has no cs3 data (fresh machine / browser)
+    if (localStorage.getItem("cs3_customCards") !== null) return;
+    const put = (k,v) => localStorage.setItem(k, JSON.stringify(v));
+    if (data.customCards)      put("cs3_customCards",      data.customCards);
+    if (data.customCategories) put("cs3_customCategories", data.customCategories);
+    if (data.bookmarks)        put("cs3_bookmarks",        data.bookmarks);
+    if (data.deletedIds)       put("cs3_deletedIds",       data.deletedIds);
+    if (data.expandedCards)    put("cs3_expandedCards",    data.expandedCards);
+    if (data.collapsedSections) put("cs3_collapsedSections",data.collapsedSections);
+    if (data.builtinOverrides)  put("cs3_builtinOverrides", data.builtinOverrides);
+    if (data.view)              put("cs3_view",             data.view);
+    if (data.theme)             localStorage.setItem("cs3_theme", data.theme);
+  } catch(e) {}
+})();
+loadState();
+// Apply saved view
+document.documentElement.dataset.view = state.view;
+["grid","list","compact"].forEach(k => {
+  document.getElementById("vb-"+k).classList.toggle("active", k === state.view);
+});
+renderNavPills();
+renderAll();
+applyFilters();
+</script>
+</body>
+</html>

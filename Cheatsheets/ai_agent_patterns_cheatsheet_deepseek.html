@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent Patterns Cheat Sheet | End‑to‑End Workflows & Testing</title>
+    <!-- Fuse.js for fuzzy search -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/7.0.0/fuse.min.js"></script>
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+    <!-- Mermaid for diagrams -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --bg-card: #f8fafc;
+            --bg-code: #1e293b;
+            --text: #1e293b;
+            --text-secondary: #475569;
+            --border: #e2e8f0;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --accent: #8b5cf6;
+            --tag-bg: #e0e7ff;
+            --tag-text: #3730a3;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.15);
+            --radius: 8px;
+            --transition: 0.2s ease;
+            --favorite-color: #f59e0b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+        .dark {
+            --bg: #0f172a;
+            --bg-card: #1e293b;
+            --bg-code: #0f172a;
+            --text: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --primary: #60a5fa;
+            --primary-hover: #3b82f6;
+            --accent: #a78bfa;
+            --tag-bg: #312e81;
+            --tag-text: #c7d2fe;
+            --shadow: 0 1px 3px rgba(0,0,0,0.5);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.5);
+            --favorite-color: #fbbf24;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background var(--transition), color var(--transition);
+        }
+
+        /* Header & Toolbar */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            max-width: 400px;
+            position: relative;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 0.6rem 1rem 0.6rem 2.5rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--bg-card);
+            color: var(--text);
+            font-size: 0.95rem;
+            transition: all var(--transition);
+        }
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            pointer-events: none;
+        }
+        .toolbar-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--bg-card);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .btn:hover { border-color: var(--primary); color: var(--primary); }
+        .btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .btn.favorite-btn.active { background: var(--favorite-color); border-color: var(--favorite-color); color: #000; }
+
+        /* Tag Filter Bar */
+        .tag-filter-bar {
+            padding: 0.75rem 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-card);
+        }
+        .tag-chip {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            background: var(--tag-bg);
+            color: var(--tag-text);
+            border: 1px solid transparent;
+            transition: all var(--transition);
+            white-space: nowrap;
+        }
+        .tag-chip:hover { border-color: var(--primary); }
+        .tag-chip.active { background: var(--primary); color: white; }
+
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem;
+        }
+        .section {
+            margin-bottom: 2rem;
+        }
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .section-title .icon { font-size: 1.3rem; }
+
+        /* Pattern Cards */
+        .patterns-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        @media (min-width: 768px) {
+            .patterns-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        .pattern-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            box-shadow: var(--shadow);
+            transition: all var(--transition);
+            position: relative;
+        }
+        .pattern-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+        .pattern-card.collapsed .card-body { display: none; }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+        .card-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+        .card-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+            margin: 0.5rem 0;
+        }
+        .card-tag {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 12px;
+            background: var(--tag-bg);
+            color: var(--tag-text);
+        }
+        .card-body {
+            margin-top: 0.75rem;
+            border-top: 1px solid var(--border);
+            padding-top: 0.75rem;
+        }
+        .card-actions {
+            display: flex;
+            gap: 0.4rem;
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+        }
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            padding: 0.2rem;
+            border-radius: 4px;
+            transition: all var(--transition);
+        }
+        .icon-btn:hover { color: var(--primary); }
+        .icon-btn.favorited { color: var(--favorite-color); }
+        .copy-btn.copied { color: var(--success); }
+
+        /* Diagram container */
+        .diagram {
+            margin: 0.75rem 0;
+            background: white;
+            border-radius: var(--radius);
+            padding: 0.5rem;
+            text-align: center;
+            overflow-x: auto;
+        }
+        .dark .diagram { background: #1e293b; }
+
+        /* Code blocks */
+        pre {
+            border-radius: var(--radius);
+            margin: 0.5rem 0;
+            font-size: 0.85rem;
+            position: relative;
+        }
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.4rem 0.75rem;
+            background: #334155;
+            color: #e2e8f0;
+            border-radius: var(--radius) var(--radius) 0 0;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        pre.code-block { margin-top: 0; border-radius: 0 0 var(--radius) var(--radius); }
+
+        /* Collapsible trigger */
+        .collapse-trigger {
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .collapse-trigger::before {
+            content: '▼';
+            font-size: 0.7rem;
+            transition: transform var(--transition);
+        }
+        .collapsed .collapse-trigger::before { transform: rotate(-90deg); }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #1e293b;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(0.5rem);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+
+        /* No results */
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .header { flex-direction: column; align-items: stretch; }
+            .header h1 { text-align: center; }
+            .search-box { max-width: none; }
+            .tag-filter-bar { padding: 0.5rem 1rem; }
+            .container { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header" id="header">
+        <h1>🤖 AI Agent Patterns Cheat Sheet</h1>
+        <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="Fuzzy search patterns, tags, concepts..." autocomplete="off">
+        </div>
+        <div class="toolbar-buttons">
+            <button class="btn" id="darkModeToggle" title="Toggle dark/light mode">🌓</button>
+            <button class="btn favorite-btn" id="favoritesToggle" title="Show favorites only">⭐ Favorites</button>
+            <button class="btn" id="collapseAllBtn" title="Collapse all sections">📁 Collapse All</button>
+        </div>
+    </div>
+
+    <!-- Tag Filter Bar -->
+    <div class="tag-filter-bar" id="tagFilterBar"></div>
+
+    <!-- Main Container -->
+    <div class="container" id="mainContainer">
+        <!-- Content injected by JavaScript -->
+    </div>
+
+    <!-- Toast for copy feedback -->
+    <div class="toast" id="toast">Copied to clipboard ✓</div>
+
+    <script>
+        // ==================== DATA ====================
+        const patternsData = [
+            // ---------- END‑TO‑END WORKFLOW ----------
+            {
+                id: "e2e-workflow",
+                section: "End‑to‑End Workflow",
+                icon: "🔄",
+                title: "Complete Agent Development Lifecycle",
+                subtitle: "From scoping to post‑launch optimization",
+                tags: ["workflow", "enterprise", "beginner"],
+                favorite: false,
+                content: `
+                    <p>The production‑grade AI agent lifecycle follows seven stages:</p>
+                    <ol>
+                        <li><strong>Scope & Data‑Driven Design</strong> – Analyze historical logs to identify high‑value use cases.</li>
+                        <li><strong>World Modeling</strong> – Build a realistic simulation of the agent's environment.</li>
+                        <li><strong>Agent Architecture</strong> – Choose single‑agent or multi‑agent pattern; define tools and APIs.</li>
+                        <li><strong>Prompt & Tool Engineering</strong> – Write clear, structured prompts; design MCP‑compatible tools.</li>
+                        <li><strong>Testing & Evaluation</strong> – Run unit tests, integration tests, multi‑turn scenario tests, and red‑teaming.</li>
+                        <li><strong>Deployment & Monitoring</strong> – Containerize, configure guardrails, enable observability.</li>
+                        <li><strong>Feedback & Optimization</strong> – Use production traces to refine prompts, tools, and orchestration.</li>
+                    </ol>
+                    <div class="diagram">
+                        <div class="mermaid">
+                            graph LR
+                                A[🔍 Scope & Data Design] --> B[🌍 World Modeling]
+                                B --> C[🏗️ Architecture]
+                                C --> D[✍️ Prompt & Tool Engineering]
+                                D --> E[🧪 Testing & Evaluation]
+                                E --> F[🚀 Deployment & Monitoring]
+                                F --> G[📈 Feedback & Optimization]
+                                G -.-> D
+                        </div>
+                    </div>
+                `,
+                code: null,
+            },
+            // ---------- CORE AGENT PATTERNS ----------
+            {
+                id: "prompt-chaining",
+                section: "Core Agent Patterns",
+                icon: "🔗",
+                title: "Prompt Chaining",
+                subtitle: "Sequential LLM calls where output becomes input for the next step",
+                tags: ["sequential", "deterministic", "beginner"],
+                favorite: false,
+                content: `
+                    <p>A workflow where the output of one LLM call serves as the input for the next. Each step performs a specific transformation, enabling structured reasoning and step‑by‑step task completion.</p>
+                    <p><strong>When to use:</strong> Tasks that naturally decompose into sequential stages (e.g., document processing, multi‑step reasoning).</p>
+                    <p><strong>Considerations:</strong> Easy to debug; state management is straightforward. Latency adds up with each step.</p>
+                    <div class="diagram">
+                        <div class="mermaid">
+                            graph LR
+                                A[Input] --> B[Step 1: Extract]
+                                B --> C[Step 2: Transform]
+                                C --> D[Step 3: Generate]
+                                D --> E[Output]
+                        </div>
+                    </div>
+                `,
+                code: `# Prompt Chaining Pattern
+def prompt_chain(input_text):
+    # Step 1: Extract key entities
+    step1 = llm.call("Extract entities from: " + input_text)
+    # Step 2: Enrich with knowledge base
+    step2 = llm.call("Enrich: " + step1)
+    # Step 3: Generate final response
+    final = llm.call("Summarize: " + step2)
+    return final`,
+            },
+            {
+                id: "routing",
+                section: "Core Agent Patterns",
+                icon: "🔀",
+                title: "Routing Workflow",
+                subtitle: "Dynamic dispatching of inputs to specialized handlers",
+                tags: ["low-latency", "specialization", "beginner"],
+                favorite: false,
+                content: `
+                    <p>Inputs are classified and dynamically routed to the most appropriate LLM instance or configuration, optimizing efficiency and specialization.</p>
+                    <p><strong>When to use:</strong> Customer service bots, multi‑domain applications where different experts handle different queries.</p>
+                    <p><strong>Considerations:</strong> Requires accurate intent classification; mis‑routing can degrade experience.</p>
+                    <div class="diagram">
+                        <div class="mermaid">
+                            graph TD
+                                A[User Input] --> B{Classifier}
+                                B -->|Billing| C[Billing Agent]
+                                B -->|Tech| D[Tech Support Agent]
+                                B -->|General| E[General Agent]
+                                C --> F[Response]
+                                D --> F
+                                E --> F
+                        </div>
+                    </div>
+                `,
+                code: `# Routing Pattern
+def route_query(query):
+    intent = classifier.classify(query)
+    if intent == "billing":
+        return billing_agent.run(query)
+    elif intent == "tech_support":
+        return tech_support_agent.run(query)
+    else:
+        return general_agent.run(query)`,
+            },
+            {
+                id: "parallelization",
+                section: "Core Agent Patterns",
+                icon: "⚡",
+                title: "Parallelization",
+                subtitle: "Fan‑out tasks to multiple workers, then gather results",
+                tags: ["speed", "scale", "intermediate"],
+                favorite: false,
+                content: `
+                    <p>Distributes independent subtasks across multiple LLM calls simultaneously, then aggregates the results. Ideal for tasks like code review, data validation, or multi‑perspective analysis.</p>
+                    <p><strong>When to use:</strong> Independent subtasks that can run concurrently; need for speed or diverse perspectives.</p>
+                    <p><strong>Considerations:</strong> Avoid race conditions by writing outputs to unique state keys; aggregation logic must be robust.</p>
+                    <div class="diagram">
+                        <div class="mermaid">
+                            graph TD
+                                A[Task] --> B[Worker 1: Security]
+                                A --> C[Worker 2: Style]
+                                A --> D[Worker 3: Performance]
+                                B --> E[Synthesizer]
+                                C --> E
+                                D --> E
+                                E --> F[Unified Result]
+                        </div>
+                    </div>
+                `,
+                code: `# Parallel Fan-out / Gather
+import concurrent.futures
+
+def parallel_execute(task):
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = {
+            executor.submit(security_check, task),
+            executor.submit(style_check, task),
+            executor.submit(perf_check, task)
+        }
+        results = [f.result() for f in futures]
+    return synthesize(results)`,
+            },
+            {
+                id: "orchestrator-workers",
+                section: "Core Agent Patterns",
+                icon: "🎼",
+                title: "Orchestrator‑Workers",
+                subtitle: "Central orchestrator decomposes tasks and delegates to specialists",
+                tags: ["multi-agent", "dynamic", "advanced"],
+                favorite: false,
+                content: `
+                    <p>A central LLM dynamically decomposes complex tasks, delegates subtasks to worker agents, and synthesises their outputs into a coherent result.</p>
+                    <p><strong>When to use:</strong> Business intelligence, software development pipelines, any scenario where subtasks are not pre‑defined.</p>
+                    <p><strong>Considerations:</strong> Orchestrator can become a bottleneck; requires careful error handling and context management.</p>
+                    <div class="diagram">
+                        <div class="mermaid">
+                            graph TD
+                                O[Orchestrator] --> W1[Worker: Research]
+                                O --> W2[Worker: Code Gen]
+                                O --> W3[Worker: Testing]
+                                W1 --> O
+                                W2 --> O
+                                W3 --> O
+                                O --> R[Final Output]
+                        </div>
+                    </div>
+                `,
+                code: `# Orchestrator-Workers Pattern
+def orchestrator_workflow(task):
+    subtasks = orchestrator.decompose(task)
+    results = {}
+    for st in subtasks:
+        worker = select_worker(st.type)
+        results[st.id] = worker.run(st)
+    final = orchestrator.synthesize(results)
+    return final`,
+            },
+            {
+                id: "evaluator-optimizer",
+                section: "Core Agent Patterns",
+                icon: "🔄",
+                title: "Evaluator‑Optimizer",
+                subtitle: "Iterative feedback loop for self‑improving outputs",
+                tags: ["reflection", "quality", "intermediate"],
+                favorite: false,
+                content: `
+                    <p>One LLM generates an output, another (or the same) evaluates it against quality criteria, and the generator refines the output until it meets standards.</p>
+                    <p><strong>When to use:</strong> Code generation requiring correctness, high‑stakes writing tasks, analytical reports.</p>
+                    <p><strong>Considerations:</strong> Each iteration costs tokens and latency; define clear stopping criteria to avoid infinite loops.</p>
+                    <div class="diagram">
+                        <div class="mermaid">
+                            graph LR
+                                G[Generator] --> E[Evaluator]
+                                E -->|Fail| G
+                                E -->|Pass| O[Output]
+                        </div>
+                    </div>
+                `,
+                code: `# Evaluator-Optimizer Pattern
+def evaluator_optimizer(prompt, max_iters=5):
+    output = generator.generate(prompt)
+    for _ in range(max_iters):
+        feedback = evaluator.evaluate(output)
+        if feedback["score"] >= threshold:
+            break
+        output = generator.refine(output, feedback["comments"])
+    return output`,
+            },
+            {
+                id: "autonomous-agent",
+                section: "Core Agent Patterns",
+                icon: "🤖",
+                title: "Autonomous Agent (ReAct)",
+                subtitle: "Agent reasons, acts, observes, and adapts in a continuous loop",
+                tags: ["autonomous", "loop", "advanced"],
+                favorite: false,
+                content: `
+                    <p>An LLM‑powered agent operates within an environment loop: it reasons about its goal, chooses a tool/action, observes the result, and repeats until the goal is met or a stopping condition is reached.</p>
+                    <p><strong>When to use:</strong> Open‑ended research, complex multi‑step tasks, interactive problem‑solving.</p>
+                    <p><strong>Considerations:</strong> Must include guardrails (time/budget limits, human‑in‑the‑loop) to prevent runaway behaviour.</p>
+                    <div class="diagram">
+                        <div class="mermaid">
+                            graph TD
+                                A[Goal] --> B[Reason]
+                                B --> C[Act]
+                                C --> D[Observe]
+                                D --> E{Goal Met?}
+                                E -->|No| B
+                                E -->|Yes| F[Done]
+                        </div>
+                    </div>
+                `,
+                code: `# Autonomous Agent Loop (ReAct)
+def autonomous_agent(goal, max_steps=10):
+    step = 0
+    while step < max_steps:
+        thought = llm.think(goal, history)
+        action = llm.act(thought)
+        observation = environment.execute(action)
+        history.append((thought, action, observation))
+        if goal_achieved(observation):
+            break
+        step += 1
+    return summarize(history)`,
+            },
+            // ---------- MULTI‑AGENT PATTERNS ----------
+            {
+                id: "sequential-pipeline",
+                section: "Multi‑Agent Patterns",
+                icon: "🏭",
+                title: "Sequential Pipeline (Assembly Line)",
+                subtitle: "Multiple specialized agents process data in a fixed order",
+                tags: ["multi-agent", "deterministic", "enterprise"],
+                favorite: false,
+                content: `
+                    <p>Each agent performs a specific transformation and passes the result to the next via shared state. Mimics a manufacturing assembly line.</p>
+                    <p><strong>When to use:</strong> Document processing pipelines, data ETL, QA workflows with stage gates.</p>
+                    <p><strong>Considerations:</strong> Simple to debug; failures cascade downstream.</p>
+                    <div class="diagram">
+                        <div class="mermaid">
+                            graph LR
+                                A[Parser Agent] --> B[Extractor Agent]
+                                B --> C[Summarizer Agent]
+                                C --> D[Final Output]
+                        </div>
+                    </div>
+                `,
+                code: `# Sequential Pipeline (ADK style)
+pipeline = SequentialAgent(
+    name="DocProcessingPipeline",
+    sub_agents=[parser, extractor, summarizer]
+)`,
+            },
+            {
+                id: "coordinator-dispatcher",
+                section: "Multi‑Agent Patterns",
+                icon: "📞",
+                title: "Coordinator / Dispatcher (Concierge)",
+                subtitle: "Intelligent router delegates requests to specialist sub‑agents",
+                tags: ["multi-agent", "routing", "enterprise"],
+                favorite: false,
+                content: `
+                    <p>A central Coordinator agent analyses user intent and dispatches the request to the most suitable specialist agent.</p>
+                    <p><strong>When to use:</strong> Complex customer service bots, IT help desks, any multi‑domain system.</p>
+                    <p><strong>Considerations:</strong> Coordinator must accurately understand intent; fallback handling for unknown intents.</p>
+                    <div class="diagram">
+                        <div class="mermaid">
+                            graph TD
+                                C[Coordinator] --> BS[Billing Specialist]
+                                C --> TS[Tech Support Specialist]
+                                C --> RS[Returns Specialist]
+                        </div>
+                    </div>
+                `,
+                code: `# Coordinator/Dispatcher (ADK style)
+coordinator = LlmAgent(
+    name="CoordinatorAgent",
+    instruction="Route billing issues to BillingSpecialist...",
+    sub_agents=[billing_specialist, tech_support]
+)`,
+            },
+            {
+                id: "hierarchical-decomposition",
+                section: "Multi‑Agent Patterns",
+                icon: "🪆",
+                title: "Hierarchical Decomposition (Russian Doll)",
+                subtitle: "Top‑level agent delegates subtasks to nested sub‑agents",
+                tags: ["multi-agent", "complex", "advanced"],
+                favorite: false,
+                content: `
+                    <p>A parent agent breaks down a complex goal into sub‑goals and delegates them to child agents, which may themselves delegate further.</p>
+                    <p><strong>When to use:</strong> Very large tasks that exceed a single context window; multi‑step research projects.</p>
+                    <p><strong>Considerations:</strong> Increased latency; each delegation level adds complexity and risk of information loss.</p>
+                    <div class="diagram">
+                        <div class="mermaid">
+                            graph TD
+                                RW[Report Writer] --> RA[Research Assistant]
+                                RA --> WS[Web Searcher]
+                                RA --> SM[Summarizer]
+                        </div>
+                    </div>
+                `,
+                code: `# Hierarchical Decomposition (ADK style)
+web_searcher = LlmAgent(name="WebSearchAgent")
+summarizer = LlmAgent(name="SummarizerAgent")
+research_assistant = LlmAgent(
+    name="ResearchAssistant",
+    sub_agents=[web_searcher, summarizer]
+)
+report_writer = LlmAgent(
+    name="ReportWriter",
+    tools=[AgentTool(research_assistant)]
+)`,
+            },
+            // ---------- ENTERPRISE ARCHITECTURE PATTERNS ----------
+            {
+                id: "semantic-router",
+                section: "Enterprise Architecture",
+                icon: "🧭",
+                title: "Semantic Router with LLM Fallback",
+                subtitle: "Lightweight NLU classifier with LLM escalation",
+                tags: ["enterprise", "cost-optimization", "architecture"],
+                favorite: false,
+                content: `
+                    <p>Use a lightweight NLU or small language model (SLM) for initial intent classification. If confidence is low, escalate to a more powerful (and expensive) LLM.</p>
+                    <p><strong>Benefit:</strong> Reduces LLM usage and cost while maintaining accuracy.</p>
+                    <p><strong>Used by:</strong> Microsoft Multi‑Agent Reference Architecture.</p>
+                `,
+                code: `# Semantic Router with Fallback
+def smart_route(query):
+    intent, confidence = slm_classifier.classify(query)
+    if confidence < 0.8:
+        intent = llm_classifier.classify(query)
+    return route_to_agent(intent)`,
+            },
+            {
+                id: "dynamic-agent-registry",
+                section: "Enterprise Architecture",
+                icon: "📋",
+                title: "Dynamic Agent Registry (Service Mesh)",
+                subtitle: "Plug‑and‑play agent discovery based on capabilities",
+                tags: ["enterprise", "scalability", "architecture"],
+                favorite: false,
+                content: `
+                    <p>Agents register with descriptors (capabilities, tags, embeddings). The orchestrator resolves agents at runtime, enabling self‑healing and extensibility.</p>
+                    <p><strong>Benefit:</strong> Supports plug‑and‑play extensibility; new agents can be added without changing orchestration logic.</p>
+                `,
+            },
+            {
+                id: "layered-onion",
+                section: "Enterprise Architecture",
+                icon: "🧅",
+                title: "Layered (Onion) Architecture",
+                subtitle: "Separation of concerns by functional domain",
+                tags: ["enterprise", "maintainability", "architecture"],
+                favorite: false,
+                content: `
+                    <p>Organise the system into layers: Orchestration, Agent, Knowledge, Storage, Integration. Each layer has bounded responsibilities and well‑defined APIs.</p>
+                    <p><strong>Benefit:</strong> Improves maintainability, scalability, and testability.</p>
+                `,
+            },
+            {
+                id: "mcp-integration",
+                section: "Enterprise Architecture",
+                icon: "🔌",
+                title: "MCP Integration Layer",
+                subtitle: "Decoupled agent‑to‑tool invocation with governance",
+                tags: ["enterprise", "security", "architecture"],
+                favorite: false,
+                content: `
+                    <p>The Model Context Protocol (MCP) server abstracts tool APIs from agents. Policies control access, parameters, and invocation flow, providing auditability and centralized governance.</p>
+                    <p><strong>Benefit:</strong> Adds auditability, policy enforcement, and centralized logic for tool access.</p>
+                    <div class="diagram">
+                        <div class="mermaid">
+                            graph TD
+                                A[Agent] --> M[MCP Server]
+                                M --> T1[Tool API 1]
+                                M --> T2[Tool API 2]
+                                M --> P[Policy Engine]
+                        </div>
+                    </div>
+                `,
+            },
+            // ---------- TESTING STRATEGIES ----------
+            {
+                id: "testing-tiers",
+                section: "Testing Strategies",
+                icon: "🧪",
+                title: "Three‑Tier Testing Strategy",
+                subtitle: "Unit → Integration → End‑to‑End evaluation for agents",
+                tags: ["testing", "enterprise", "beginner"],
+                favorite: false,
+                content: `
+                    <p><strong>Tier 1: Unit Tests</strong> – Test individual agent tools, prompts, and parsing logic in isolation.</p>
+                    <p><strong>Tier 2: Integration Tests</strong> – Test agent‑to‑tool interactions and multi‑agent communication with simulated APIs.</p>
+                    <p><strong>Tier 3: End‑to‑End Scenario Tests</strong> – Run realistic multi‑turn conversations with noise (interruptions, clarifications) and validate outcomes.</p>
+                    <p><strong>Avoid "vibes‑based" testing</strong> – Use automated metrics (faithfulness, answer relevance, factual accuracy) and LLM‑as‑a‑judge evaluations.</p>
+                `,
+                code: `# Agent Testing Example (ADK)
+from google.adk.evaluation import AgentEvaluator
+
+evaluator = AgentEvaluator(agent=my_agent)
+results = evaluator.evaluate(
+    test_cases=dataset,
+    metrics=["tool_accuracy", "faithfulness", "latency"]
+)
+print(results.summary())`,
+            },
+            {
+                id: "multi-turn-testing",
+                section: "Testing Strategies",
+                icon: "💬",
+                title: "Multi‑Turn Testing",
+                subtitle: "Validate agent reliability across entire conversations",
+                tags: ["testing", "advanced", "enterprise"],
+                favorite: false,
+                content: `
+                    <p>Single‑turn accuracy is insufficient. Agents must maintain context, handle interruptions, and follow procedures across multiple turns.</p>
+                    <p><strong>Approach:</strong> Generate conversation graphs from procedures, inject noise (clarifying questions, context shifts), and validate expected API calls and responses at each turn.</p>
+                `,
+            },
+            {
+                id: "red-teaming",
+                section: "Testing Strategies",
+                icon: "🛡️",
+                title: "Agentic Red Teaming",
+                subtitle: "Adversarial testing to uncover security and reliability gaps",
+                tags: ["testing", "security", "advanced"],
+                favorite: false,
+                content: `
+                    <p>Systematically probe agents with adversarial inputs: prompt injection, tool misuse, privilege escalation attempts, and edge cases.</p>
+                    <p><strong>Frameworks:</strong> OWASP Top 10 for Agentic Applications; CSA Agentic AI Red Teaming Guide; IntenTest; Agent‑Testing Agent (ATA).</p>
+                `,
+            },
+            // ---------- SECURITY & GOVERNANCE ----------
+            {
+                id: "security-principles",
+                section: "Security & Governance",
+                icon: "🔒",
+                title: "Security Principles for AI Agents",
+                subtitle: "Zero trust, least privilege, and continuous verification",
+                tags: ["security", "enterprise", "governance"],
+                favorite: false,
+                content: `
+                    <ul>
+                        <li><strong>Identity & Least Privilege:</strong> Each agent gets its own identity and minimal tool permissions. Start from deny‑all.</li>
+                        <li><strong>Tool Access Control:</strong> Allowlist specific commands; require confirmations for sensitive actions (git push, infrastructure changes).</li>
+                        <li><strong>Secrets Management:</strong> Never pass secrets in agent context; use short‑lived tokens injected via secure environment variables.</li>
+                        <li><strong>Audit Logging:</strong> Log every tool invocation with inputs, outputs, timestamps, and calling agent.</li>
+                        <li><strong>Guardrails:</strong> Implement pre‑tool hooks to intercept risky actions; use policy engines for real‑time intent controls.</li>
+                    </ul>
+                `,
+            },
+            {
+                id: "owasp-top10-agents",
+                section: "Security & Governance",
+                icon: "⚠️",
+                title: "OWASP Top 10 for Agentic Applications (2025)",
+                subtitle: "Key risks: hijacking, tool misuse, privilege abuse",
+                tags: ["security", "owasp", "enterprise"],
+                favorite: false,
+                content: `
+                    <ol>
+                        <li>Agent Behavior Hijacking</li>
+                        <li>Tool Misuse & Exploitation</li>
+                        <li>Identity & Privilege Abuse</li>
+                        <li>Prompt Injection</li>
+                        <li>Memory Leakage</li>
+                        <li>Unbounded Autonomy</li>
+                        <li>Supply Chain Vulnerabilities</li>
+                        <li>Data Poisoning</li>
+                        <li>Model Theft</li>
+                        <li>Lack of Human Oversight</li>
+                    </ol>
+                    <p>Reference: OWASP GenAI Security Project (Dec 2025).</p>
+                `,
+            },
+            // ---------- BEST PRACTICES ----------
+            {
+                id: "best-practices-tools",
+                section: "Best Practices",
+                icon: "💡",
+                title: "Tool Design Best Practices",
+                subtitle: "Build robust, LLM‑friendly tools for agents",
+                tags: ["best-practice", "tools", "engineering"],
+                favorite: false,
+                content: `
+                    <ul>
+                        <li><strong>Consistent Naming:</strong> Use snake_case; avoid ambiguous names.</li>
+                        <li><strong>Strong Typing:</strong> Use Pydantic models or enums for parameters.</li>
+                        <li><strong>Single Responsibility:</strong> Each tool does one thing well.</li>
+                        <li><strong>Explicit Descriptions:</strong> Write clear docstrings that help the LLM choose the right tool.</li>
+                        <li><strong>MCP Compatibility:</strong> Expose tools via MCP servers for governance and auditability.</li>
+                    </ul>
+                `,
+                code: `# Good Tool Design Example
+from pydantic import BaseModel, Field
+
+class SearchParams(BaseModel):
+    query: str = Field(..., description="Search query string")
+    max_results: int = Field(10, ge=1, le=50)
+
+def search_knowledge_base(params: SearchParams) -> list:
+    """Search the internal knowledge base for relevant articles.
+    
+    Returns a list of matching documents with titles and snippets.
+    """
+    results = vector_db.search(params.query, k=params.max_results)
+    return [{"title": r.title, "snippet": r.snippet} for r in results]`,
+            },
+            {
+                id: "best-practices-context",
+                section: "Best Practices",
+                icon: "📝",
+                title: "Context & Memory Management",
+                subtitle: "Keep agents focused and prevent drift",
+                tags: ["best-practice", "context", "engineering"],
+                favorite: false,
+                content: `
+                    <ul>
+                        <li><strong>Isolate per‑subagent context:</strong> Let the orchestrator maintain compact global state.</li>
+                        <li><strong>Use CLAUDE.md / project files:</strong> Encode conventions, test commands, and architecture notes for agent alignment.</li>
+                        <li><strong>Periodic context reset:</strong> Prune context during long sessions; prefer retrieval over raw logs.</li>
+                        <li><strong>Compress state aggressively:</strong> Store only the plan, key decisions, and latest artifacts.</li>
+                    </ul>
+                `,
+            },
+            {
+                id: "best-practices-prompting",
+                section: "Best Practices",
+                icon: "✍️",
+                title: "Prompt Engineering for Agents",
+                subtitle: "Clear, structured, and test‑first prompting",
+                tags: ["best-practice", "prompting", "beginner"],
+                favorite: false,
+                content: `
+                    <ul>
+                        <li>Write prompts in English (best performance across models).</li>
+                        <li>Break complex tasks into clear, numbered steps.</li>
+                        <li>Use specific language: "Ask for 10‑digit account number" not "Request account info".</li>
+                        <li>Externalize prompt templates (version‑controlled YAML/JSON).</li>
+                        <li>Test prompts as rigorously as code; use evaluation datasets.</li>
+                    </ul>
+                `,
+                code: `# Prompt Template (YAML)
+agent_prompt:
+  role: "Customer billing specialist"
+  steps:
+    - greet: "Welcome the customer warmly"
+    - verify: "Ask for 10-digit account number"
+    - diagnose: "Look up recent charges and explain each"
+    - resolve: "Offer refund if charge is erroneous, else explain policy"
+  constraints:
+    - "Never share account balance via unsecured channel"
+    - "Escalate disputes >$500 to human supervisor"`,
+            },
+        ];
+
+        // ==================== STATE ====================
+        let darkMode = localStorage.getItem('darkMode') === 'true';
+        let favoritesOnly = false;
+        let activeTag = null;
+        let collapsedCards = new Set();
+
+        // ==================== INIT ====================
+        function init() {
+            applyDarkMode();
+            renderAll();
+            setupEventListeners();
+            mermaid.initialize({ startOnLoad: true, theme: darkMode ? 'dark' : 'default' });
+        }
+
+        function applyDarkMode() {
+            if (darkMode) {
+                document.body.classList.add('dark');
+                document.getElementById('darkModeToggle').textContent = '☀️';
+            } else {
+                document.body.classList.remove('dark');
+                document.getElementById('darkModeToggle').textContent = '🌓';
+            }
+        }
+
+        function toggleDarkMode() {
+            darkMode = !darkMode;
+            localStorage.setItem('darkMode', darkMode);
+            applyDarkMode();
+            // Re-render Mermaid diagrams with new theme
+            renderAll();
+        }
+
+        // ==================== RENDER ====================
+        function renderAll() {
+            renderTagFilters();
+            renderPatterns();
+            if (typeof mermaid !== 'undefined') {
+                mermaid.run({ querySelector: '.mermaid' });
+            }
+            if (typeof Prism !== 'undefined') {
+                Prism.highlightAll();
+            }
+        }
+
+        function getFilteredPatterns() {
+            let filtered = patternsData;
+            // Filter by favorites
+            if (favoritesOnly) {
+                filtered = filtered.filter(p => p.favorite);
+            }
+            // Filter by active tag
+            if (activeTag) {
+                filtered = filtered.filter(p => p.tags.includes(activeTag));
+            }
+            // Fuzzy search
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            if (query) {
+                const fuse = new Fuse(filtered, {
+                    keys: ['title', 'subtitle', 'tags', 'section', 'content'],
+                    threshold: 0.4,
+                    distance: 100,
+                });
+                filtered = fuse.search(query).map(r => r.item);
+            }
+            return filtered;
+        }
+
+        function renderPatterns() {
+            const container = document.getElementById('mainContainer');
+            const filtered = getFilteredPatterns();
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="no-results">No patterns match your filter/search criteria. Try adjusting your query or clearing filters.</div>';
+                return;
+            }
+
+            // Group by section
+            const sections = {};
+            filtered.forEach(p => {
+                if (!sections[p.section]) sections[p.section] = [];
+                sections[p.section].push(p);
+            });
+
+            let html = '';
+            for (const [sectionName, patterns] of Object.entries(sections)) {
+                const icon = patterns[0]?.icon || '📌';
+                html += `<div class="section">
+                    <div class="section-title"><span class="icon">${icon}</span> ${sectionName}</div>
+                    <div class="patterns-grid">`;
+                patterns.forEach(p => {
+                    const isCollapsed = collapsedCards.has(p.id);
+                    const isFav = p.favorite;
+                    const tagsHtml = p.tags.map(t => `<span class="card-tag">#${t}</span>`).join('');
+                    html += `
+                    <div class="pattern-card${isCollapsed ? ' collapsed' : ''}" id="card-${p.id}" data-id="${p.id}">
+                        <div class="card-actions">
+                            <button class="icon-btn copy-btn" title="Copy content" onclick="copyCardContent('${p.id}')">📋</button>
+                            <button class="icon-btn${isFav ? ' favorited' : ''}" title="Toggle favorite" onclick="toggleFavorite('${p.id}')">⭐</button>
+                        </div>
+                        <div class="card-header collapse-trigger" onclick="toggleCollapse('${p.id}')">
+                            <div>
+                                <div class="card-title">${p.title}</div>
+                                <div class="card-subtitle">${p.subtitle}</div>
+                                <div class="card-tags">${tagsHtml}</div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            ${p.content || ''}
+                            ${p.code ? `
+                                <div class="code-header">
+                                    <span>🐍 Python Example</span>
+                                    <button class="icon-btn" onclick="copyCode('${p.id}')" title="Copy code">📋</button>
+                                </div>
+                                <pre class="code-block language-python"><code id="code-${p.id}">${escapeHtml(p.code)}</code></pre>
+                            ` : ''}
+                        </div>
+                    </div>`;
+                });
+                html += '</div></div>';
+            }
+            container.innerHTML = html;
+            // Re-run Prism and Mermaid
+            setTimeout(() => {
+                if (typeof Prism !== 'undefined') Prism.highlightAll();
+                if (typeof mermaid !== 'undefined') mermaid.run({ querySelector: '.mermaid' });
+            }, 100);
+        }
+
+        function renderTagFilters() {
+            const allTags = new Set();
+            patternsData.forEach(p => p.tags.forEach(t => allTags.add(t)));
+            const sortedTags = Array.from(allTags).sort();
+            const bar = document.getElementById('tagFilterBar');
+            bar.innerHTML = sortedTags.map(t => {
+                const isActive = activeTag === t;
+                return `<span class="tag-chip${isActive ? ' active' : ''}" data-tag="${t}" onclick="toggleTag('${t}')">#${t}</span>`;
+            }).join('') + (activeTag ? '<span class="tag-chip" onclick="clearTag()">✕ Clear filter</span>' : '');
+        }
+
+        // ==================== ACTIONS ====================
+        function toggleFavorite(id) {
+            const pattern = patternsData.find(p => p.id === id);
+            if (pattern) {
+                pattern.favorite = !pattern.favorite;
+                renderAll();
+            }
+        }
+
+        function toggleCollapse(id) {
+            if (collapsedCards.has(id)) {
+                collapsedCards.delete(id);
+            } else {
+                collapsedCards.add(id);
+            }
+            renderAll();
+        }
+
+        function collapseAll() {
+            const filtered = getFilteredPatterns();
+            if (collapsedCards.size === filtered.length) {
+                collapsedCards.clear();
+            } else {
+                filtered.forEach(p => collapsedCards.add(p.id));
+            }
+            renderAll();
+        }
+
+        function toggleTag(tag) {
+            activeTag = activeTag === tag ? null : tag;
+            renderAll();
+        }
+
+        function clearTag() {
+            activeTag = null;
+            renderAll();
+        }
+
+        function copyCardContent(id) {
+            const card = document.getElementById(`card-${id}`);
+            if (!card) return;
+            const body = card.querySelector('.card-body');
+            const text = body ? body.innerText : '';
+            copyToClipboard(text);
+        }
+
+        function copyCode(id) {
+            const codeElem = document.getElementById(`code-${id}`);
+            if (codeElem) {
+                copyToClipboard(codeElem.innerText);
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast();
+            });
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // ==================== EVENT LISTENERS ====================
+        function setupEventListeners() {
+            document.getElementById('darkModeToggle').addEventListener('click', toggleDarkMode);
+            document.getElementById('favoritesToggle').addEventListener('click', () => {
+                favoritesOnly = !favoritesOnly;
+                document.getElementById('favoritesToggle').classList.toggle('active', favoritesOnly);
+                renderAll();
+            });
+            document.getElementById('collapseAllBtn').addEventListener('click', collapseAll);
+            document.getElementById('searchInput').addEventListener('input', renderAll);
+            // Keyboard shortcut for search
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    document.getElementById('searchInput').focus();
+                }
+            });
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(str));
+            return div.innerHTML;
+        }
+
+        // ==================== START ====================
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent Patterns Cheat Sheet</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #1e40af;
+            --bg-light: #f8fafc;
+            --bg-white: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border-light: #e2e8f0;
+            --card-bg: #ffffff;
+            --accent: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        body.dark-mode {
+            --bg-light: #0f172a;
+            --bg-white: #1e293b;
+            --text-dark: #f1f5f9;
+            --text-light: #cbd5e1;
+            --border-light: #334155;
+            --card-bg: #1e293b;
+        }
+
+        body {
+            font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--bg-light) 0%, #e0e7ff 100%);
+            color: var(--text-dark);
+            line-height: 1.6;
+            transition: background 0.3s ease;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #0f172a 0%, #1a1a2e 100%);
+        }
+
+        /* Header */
+        header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-light);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode header {
+            background: rgba(30, 41, 59, 0.8);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .logo-text h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .logo-text p {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            color: var(--text-dark);
+        }
+
+        .theme-toggle:hover {
+            background: var(--border-light);
+        }
+
+        /* Search Bar */
+        .search-container {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: none;
+            border-radius: 8px;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            background: var(--card-bg);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        /* Filters */
+        .filters-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-light);
+            background: var(--card-bg);
+            color: var(--text-dark);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .tag-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag-btn {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .tag-btn:hover {
+            background: var(--border-light);
+        }
+
+        .tag-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Main Container */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Patterns List */
+        .patterns-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .pattern-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .pattern-card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .pattern-header {
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .pattern-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .pattern-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .category-badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: var(--bg-light);
+            color: var(--text-dark);
+        }
+
+        .difficulty-badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: var(--bg-light);
+            color: var(--text-dark);
+        }
+
+        .difficulty-badge.beginner {
+            background: #dbeafe;
+            color: #0c4a6e;
+        }
+
+        body.dark-mode .difficulty-badge.beginner {
+            background: #1e3a8a;
+            color: #93c5fd;
+        }
+
+        .difficulty-badge.intermediate {
+            background: #fef3c7;
+            color: #78350f;
+        }
+
+        body.dark-mode .difficulty-badge.intermediate {
+            background: #78350f;
+            color: #fcd34d;
+        }
+
+        .difficulty-badge.advanced {
+            background: #fecaca;
+            color: #7f1d1d;
+        }
+
+        body.dark-mode .difficulty-badge.advanced {
+            background: #7f1d1d;
+            color: #fca5a5;
+        }
+
+        .pattern-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+            color: var(--text-dark);
+        }
+
+        .pattern-description {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            margin-bottom: 0.75rem;
+        }
+
+        .pattern-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .pattern-tag {
+            padding: 0.3rem 0.6rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .pattern-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 6px;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+
+        .action-btn:hover {
+            background: var(--bg-light);
+            color: var(--primary);
+        }
+
+        .action-btn.favorite {
+            color: #ef4444;
+        }
+
+        .action-btn.favorite.active {
+            color: #ef4444;
+        }
+
+        .chevron {
+            transition: transform 0.3s ease;
+        }
+
+        .pattern-card.expanded .chevron {
+            transform: rotate(180deg);
+        }
+
+        /* Pattern Content */
+        .pattern-content {
+            display: none;
+            padding: 0 1.5rem 1.5rem;
+            border-top: 1px solid var(--border-light);
+            background: var(--bg-light);
+        }
+
+        .pattern-card.expanded .pattern-content {
+            display: block;
+        }
+
+        .content-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .content-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .content-label {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .content-text {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .code-block {
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            overflow-x: auto;
+            margin: 0.75rem 0;
+        }
+
+        .code-block code {
+            font-family: 'Geist Mono', 'Monaco', 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: var(--text-dark);
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.5;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--border-light);
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-light);
+        }
+
+        /* Footer */
+        footer {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-light);
+            border-top: 1px solid var(--border-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 1rem;
+            }
+
+            .header-top {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            main {
+                padding: 1rem;
+            }
+
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .pattern-header {
+                flex-direction: column;
+            }
+
+            .pattern-meta {
+                flex-wrap: wrap;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* No results */
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-light);
+        }
+
+        .no-results-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="header-top">
+                <div class="logo">
+                    <div class="logo-icon">⚙️</div>
+                    <div class="logo-text">
+                        <h1>AI Agent Patterns</h1>
+                        <p>Enterprise Cheat Sheet</p>
+                    </div>
+                </div>
+                <button class="theme-toggle" id="themeToggle" title="Toggle dark mode">🌙</button>
+            </div>
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" id="searchInput" placeholder="Search patterns, prompts, tools... (fuzzy search enabled)">
+            </div>
+            <div class="filters-section">
+                <div class="filter-group" id="categoryFilters"></div>
+                <div class="tag-filters" id="tagFilters"></div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-label">Total Patterns</div>
+                <div class="stat-value" id="totalCount">18</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Matching</div>
+                <div class="stat-value" id="matchingCount">18</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Favorites</div>
+                <div class="stat-value" id="favoritesCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Categories</div>
+                <div class="stat-value">7</div>
+            </div>
+        </div>
+
+        <div class="patterns-list" id="patternsList"></div>
+    </main>
+
+    <footer>
+        <p>AI Agent Patterns Cheat Sheet • Enterprise Edition</p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem;">Built for advanced AI agent development workflows</p>
+    </footer>
+
+    <script>
+        // Data
+        const PATTERNS = [
+            {
+                id: 'f1',
+                title: 'What is an AI Agent?',
+                category: 'foundations',
+                difficulty: 'beginner',
+                tags: ['basics', 'architecture', 'definition'],
+                description: 'Understanding the core concept of AI agents and their components',
+                content: `An AI Agent is an autonomous system that:
+1. Perceives its environment through sensors or APIs
+2. Reasons about goals and current state
+3. Takes actions to achieve objectives
+4. Learns from outcomes and adapts behavior
+
+Key Components:
+- LLM Core: Reasoning engine
+- Tools/Actions: External capabilities
+- Memory: Context and state management
+- Orchestration: Execution control loop`,
+                useCase: 'Getting started with AI agent concepts'
+            },
+            {
+                id: 'f2',
+                title: 'Agent vs Chatbot Comparison',
+                category: 'foundations',
+                difficulty: 'beginner',
+                tags: ['basics', 'comparison', 'architecture'],
+                description: 'Key differences between agents and chatbots',
+                content: `AGENTS:
+- Goal-oriented and autonomous
+- Maintain state across interactions
+- Use tools and take real actions
+- Plan multi-step solutions
+- Operate independently
+
+CHATBOTS:
+- Reactive and turn-based
+- Stateless (no memory between turns)
+- Respond to user input
+- Limited to conversation
+- Always user-initiated`,
+                useCase: 'Understanding when to build agents vs chatbots'
+            },
+            {
+                id: 'f3',
+                title: 'Core Agent Architecture',
+                category: 'foundations',
+                difficulty: 'intermediate',
+                tags: ['architecture', 'design', 'components'],
+                description: 'The fundamental building blocks of an AI agent system',
+                content: `┌─────────────────────────────────────┐
+│      User Input / Goal              │
+└────────────────┬────────────────────┘
+                 │
+┌────────────────▼────────────────────┐
+│    Orchestration Loop               │
+│  (Decision & Execution Engine)      │
+└────────────────┬────────────────────┘
+                 │
+    ┌────────────┼────────────┐
+    │            │            │
+┌───▼──┐   ┌────▼─────┐  ┌──▼────┐
+│ LLM  │   │  Tools   │  │Memory │
+│Core  │   │ & APIs   │  │ State │
+└──────┘   └──────────┘  └───────┘`,
+                useCase: 'Designing agent system architecture'
+            },
+            {
+                id: 'p1',
+                title: 'Reflection/Self-Correction Pattern',
+                category: 'patterns',
+                difficulty: 'intermediate',
+                tags: ['pattern', 'quality', 'self-improvement'],
+                description: 'Agent reviews and improves its own output before returning',
+                content: `WHEN TO USE:
+- Quality-critical tasks
+- Content generation and editing
+- Analysis and research
+- Code review and debugging
+
+PROMPT TEMPLATE:
+You are a {role}. After generating output, review it for:
+1. Accuracy and factuality
+2. Clarity and completeness
+3. Alignment with requirements
+4. Potential improvements
+
+If issues found, revise and improve. Provide final output.`,
+                useCase: 'Ensuring high-quality agent outputs'
+            },
+            {
+                id: 'p2',
+                title: 'Tool Use Pattern',
+                category: 'patterns',
+                difficulty: 'intermediate',
+                tags: ['pattern', 'tools', 'integration'],
+                description: 'Agent dynamically selects and uses tools based on task requirements',
+                content: `WHEN TO USE:
+- Tasks requiring external data
+- API integrations
+- Complex calculations
+- Database queries
+- Real-time information
+
+KEY PRINCIPLES:
+1. Clear tool descriptions
+2. Well-defined parameters
+3. Meaningful error messages
+4. Token-efficient returns
+5. Limited tool scope (4-6 tools)
+
+TOOL SELECTION LOGIC:
+IF task requires external data → search tool
+IF task requires calculation → code interpreter
+IF task requires API access → specific API tool
+IF task requires verification → validation tool`,
+                useCase: 'Building agents with external capabilities'
+            },
+            {
+                id: 'p3',
+                title: 'ReAct (Reason + Act) Pattern',
+                category: 'patterns',
+                difficulty: 'advanced',
+                tags: ['pattern', 'reasoning', 'multi-step'],
+                description: 'Interleave explicit reasoning with iterative action and observation',
+                content: `WHEN TO USE:
+- Complex multi-step problems
+- Debugging and troubleshooting
+- Research and analysis
+- Decision-making with uncertainty
+
+EXECUTION CYCLE:
+Thought: [Analyze current state and goal]
+  ↓
+Action: [Use tool or make decision]
+  ↓
+Observation: [Process result]
+  ↓
+[Repeat until goal reached]
+  ↓
+Final Answer: [Provide solution]
+
+BENEFITS:
+- Transparency in reasoning
+- Adaptive problem-solving
+- Better error recovery
+- Explainable decisions`,
+                useCase: 'Complex problem-solving and reasoning tasks'
+            },
+            {
+                id: 'p4',
+                title: 'Planning Pattern',
+                category: 'patterns',
+                difficulty: 'advanced',
+                tags: ['pattern', 'planning', 'orchestration'],
+                description: 'Break down complex goals into phases with dependencies and execution order',
+                content: `WHEN TO USE:
+- Multi-phase projects
+- Resource-constrained tasks
+- High-cost operations
+- Workflows with dependencies
+
+PLANNING STEPS:
+1. Analyze the goal
+2. Identify phases/subtasks
+3. Determine dependencies
+4. Allocate resources
+5. Execute sequentially
+6. Monitor and adapt
+
+EXAMPLE STRUCTURE:
+Phase 1: Analysis
+  - Subtask 1.1
+  - Subtask 1.2
+Phase 2: Implementation
+  - Subtask 2.1 (depends on 1.1, 1.2)
+Phase 3: Verification
+  - Subtask 3.1 (depends on 2.1)`,
+                useCase: 'Managing complex multi-step workflows'
+            },
+            {
+                id: 'p5',
+                title: 'Multi-Agent Orchestration',
+                category: 'patterns',
+                difficulty: 'advanced',
+                tags: ['pattern', 'multi-agent', 'collaboration'],
+                description: 'Multiple specialized agents collaborate under central coordination',
+                content: `WHEN TO USE:
+- Diverse expertise required
+- Parallel processing beneficial
+- Specialized roles needed
+- Large-scale problems
+
+AGENT TYPES:
+1. Specialist Agents
+   - Domain experts (Research, Code, Data)
+   - Optimized for specific tasks
+   
+2. Critic/Review Agents
+   - Quality control
+   - Validation and verification
+   
+3. Orchestrator Agent
+   - Coordinates workflow
+   - Delegates tasks
+   - Synthesizes results
+
+COMMUNICATION PATTERN:
+Orchestrator → Specialist 1 → Result
+Orchestrator → Specialist 2 → Result
+Orchestrator → Critic → Feedback
+Orchestrator → Final Output`,
+                useCase: 'Complex projects requiring multiple expertise areas'
+            },
+            {
+                id: 'sp1',
+                title: 'System Prompt Structure Template',
+                category: 'system-prompts',
+                difficulty: 'intermediate',
+                tags: ['system-prompt', 'template', 'structure'],
+                description: 'Best-practice structure for comprehensive system prompts',
+                content: `<role_definition>
+You are a {specific_role} with expertise in {domain}.
+Your goal is to {primary_objective}.
+
+<background_information>
+Context: {domain_context}
+Constraints: {limitations}
+Environment: {operational_context}
+
+<instructions>
+Step-by-step guidance:
+1. {First step}
+2. {Second step}
+3. {Third step}
+
+<tool_guidance>
+Available tools: {list_tools}
+When to use each:
+- Tool A: {use case}
+- Tool B: {use case}
+
+<output_format>
+Provide responses in {format}:
+{example_structure}
+
+<constraints>
+Safety guidelines:
+- {guideline_1}
+- {guideline_2}`,
+                useCase: 'Creating well-structured system prompts'
+            },
+            {
+                id: 'sp2',
+                title: 'Research Agent System Prompt',
+                category: 'system-prompts',
+                difficulty: 'intermediate',
+                tags: ['system-prompt', 'research', 'example'],
+                description: 'Complete system prompt for a research-focused agent',
+                content: `You are an expert Research Agent specialized in finding and synthesizing information.
+
+ROLE & EXPERTISE:
+- Information discovery and analysis
+- Source evaluation and credibility assessment
+- Synthesis of complex information
+- Citation and reference management
+
+INSTRUCTIONS:
+1. Break down research queries into specific search terms
+2. Use search tools to find relevant sources
+3. Evaluate source credibility (peer-reviewed, authoritative, recent)
+4. Extract key findings and synthesize insights
+5. Provide citations for all claims
+6. Identify gaps and limitations
+
+TOOLS AVAILABLE:
+- web_search: Find current information
+- academic_search: Peer-reviewed papers
+- fact_check: Verify claims
+
+OUTPUT FORMAT:
+Provide structured research findings with:
+- Executive summary
+- Key findings (with citations)
+- Supporting evidence
+- Limitations and caveats
+- Recommended next steps`,
+                useCase: 'Building research-focused agents'
+            },
+            {
+                id: 'sp3',
+                title: 'Code Generation Agent System Prompt',
+                category: 'system-prompts',
+                difficulty: 'intermediate',
+                tags: ['system-prompt', 'coding', 'example'],
+                description: 'System prompt for code generation and debugging',
+                content: `You are an expert Code Generation Agent with deep knowledge of software engineering.
+
+ROLE & EXPERTISE:
+- Code generation and refactoring
+- Debugging and problem-solving
+- Best practices and design patterns
+- Testing and documentation
+
+INSTRUCTIONS:
+1. Understand requirements thoroughly
+2. Plan architecture before coding
+3. Write clean, maintainable code
+4. Add comprehensive comments
+5. Include error handling
+6. Write unit tests
+7. Document edge cases
+
+CODING STANDARDS:
+- Follow language conventions
+- Use meaningful variable names
+- Keep functions focused and small
+- DRY principle (Don't Repeat Yourself)
+- Proper error handling
+
+TOOLS AVAILABLE:
+- code_executor: Run and test code
+- linter: Check code quality
+- test_runner: Execute tests
+
+OUTPUT FORMAT:
+1. Explanation of approach
+2. Complete code implementation
+3. Usage examples
+4. Testing strategy
+5. Potential improvements`,
+                useCase: 'Creating coding-focused agents'
+            },
+            {
+                id: 't1',
+                title: 'Tool Definition Best Practices',
+                category: 'tools',
+                difficulty: 'intermediate',
+                tags: ['tools', 'design', 'integration'],
+                description: 'Guidelines for defining effective tools for agent use',
+                content: `TOOL DESIGN PRINCIPLES:
+1. Clear Contract
+   - Input schema well-defined
+   - Output format consistent
+   - Error cases documented
+
+2. Token Efficiency
+   - Return only necessary data
+   - Avoid verbose responses
+   - Summarize large results
+
+3. Scope Limitation
+   - 4-6 relevant tools per context
+   - Too many tools → confusion
+   - Group related tools
+
+4. Error Handling
+   - Meaningful error messages
+   - Suggest alternatives
+   - Provide recovery options
+
+5. Discoverability
+   - Clear naming conventions
+   - Descriptive documentation
+   - Usage examples`,
+                useCase: 'Designing tools for agent integration'
+            },
+            {
+                id: 't2',
+                title: 'Tool Definition JSON Schema',
+                category: 'tools',
+                difficulty: 'intermediate',
+                tags: ['tools', 'schema', 'json'],
+                description: 'Standard JSON schema for tool definitions',
+                content: `{
+  "name": "search_documents",
+  "description": "Search through document database for relevant information",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "query": {
+        "type": "string",
+        "description": "Search query (2-10 words)"
+      },
+      "filters": {
+        "type": "object",
+        "properties": {
+          "date_range": {
+            "type": "string",
+            "description": "ISO 8601 format: YYYY-MM-DD"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["technical", "business", "research"]
+          }
+        }
+      },
+      "limit": {
+        "type": "integer",
+        "description": "Max results (1-50)",
+        "default": 10
+      }
+    },
+    "required": ["query"]
+  }
+}`,
+                useCase: 'Defining tools for agent systems'
+            },
+            {
+                id: 'e1',
+                title: 'Agent Evaluation Metrics',
+                category: 'evaluation',
+                difficulty: 'intermediate',
+                tags: ['evaluation', 'metrics', 'testing'],
+                description: 'Key metrics for evaluating agent performance',
+                content: `CRITICAL METRICS:
+
+1. Task Completion Rate
+   - Percentage of user intents resolved autonomously
+   - Target: >95% for production
+   - Measure: successful_tasks / total_tasks
+
+2. Tool Selection Accuracy
+   - Frequency of valid tool choices
+   - Target: >90%
+   - Measure: correct_tools / total_tool_calls
+
+3. Hallucination Rate
+   - Percentage of ungrounded outputs
+   - Target: <5%
+   - Measure: false_claims / total_claims
+
+4. Latency
+   - Time to complete task
+   - Target: <5s for most tasks
+   - Measure: end_time - start_time
+
+5. Cost per Success
+   - Total compute cost / successful outcomes
+   - Target: Varies by use case
+   - Measure: token_cost / successful_tasks
+
+6. Tool Calling Accuracy
+   - Correct argument formatting
+   - Target: >95%
+   - Measure: valid_calls / total_calls`,
+                useCase: 'Measuring agent performance'
+            },
+            {
+                id: 'e2',
+                title: 'LLM-as-Judge Evaluation Prompt',
+                category: 'evaluation',
+                difficulty: 'advanced',
+                tags: ['evaluation', 'llm-judge', 'testing'],
+                description: 'Use an LLM to evaluate agent outputs',
+                content: `You are an expert evaluator. Assess this agent response on multiple dimensions.
+
+EVALUATION CRITERIA:
+
+1. Correctness (1-5)
+   - Is the answer factually accurate?
+   - Are claims verifiable?
+   - Any hallucinations or errors?
+
+2. Completeness (1-5)
+   - Did it address all requirements?
+   - Are there missing pieces?
+   - Is context sufficient?
+
+3. Safety (1-5)
+   - Any harmful content?
+   - Proper handling of sensitive data?
+   - Appropriate guardrails applied?
+
+4. Efficiency (1-5)
+   - Were tools used appropriately?
+   - Minimal unnecessary steps?
+   - Good resource utilization?
+
+5. Clarity (1-5)
+   - Easy to understand?
+   - Well-structured output?
+   - Proper formatting?
+
+PROVIDE:
+- Score for each dimension (1-5)
+- Brief justification
+- Specific issues found
+- Suggestions for improvement`,
+                useCase: 'Evaluating agent quality at scale'
+            },
+            {
+                id: 'g1',
+                title: 'Safety Guardrails Template',
+                category: 'guardrails',
+                difficulty: 'advanced',
+                tags: ['safety', 'guardrails', 'security'],
+                description: 'Comprehensive safety guidelines for agent systems',
+                content: `SAFETY GUIDELINES:
+
+1. Data Protection
+   - Do NOT process PII without explicit consent
+   - Mask sensitive information in logs
+   - Encrypt data in transit and at rest
+   - Follow data residency requirements
+
+2. Code Execution Safety
+   - Do NOT execute untrusted code
+   - Sandbox all code execution
+   - Limit resource access (CPU, memory)
+   - Timeout long-running operations
+
+3. Authorization & Access
+   - Do NOT access unauthorized resources
+   - Verify permissions before operations
+   - Maintain audit logs
+   - Implement rate limiting
+
+4. Output Safety
+   - Do NOT generate harmful content
+   - Filter outputs for policy violations
+   - Remove sensitive data before returning
+   - Validate all external outputs
+
+5. Tool Safety
+   - Validate all tool inputs
+   - Limit tool scope and permissions
+   - Monitor tool usage patterns
+   - Alert on anomalies
+
+RESPONSE TO VIOLATIONS:
+IF safety violation detected:
+1. STOP execution immediately
+2. Log the violation with context
+3. Alert security team
+4. Explain to user why action blocked`,
+                useCase: 'Implementing safety in agent systems'
+            },
+            {
+                id: 'a1',
+                title: 'Memory & State Management',
+                category: 'advanced',
+                difficulty: 'advanced',
+                tags: ['advanced', 'memory', 'state'],
+                description: 'Managing agent memory across interactions',
+                content: `MEMORY TYPES:
+
+1. Short-term Memory
+   - Current conversation context
+   - Recent tool results
+   - Active task state
+   - Duration: Single interaction
+
+2. Long-term Memory
+   - Persistent knowledge base
+   - User preferences
+   - Historical interactions
+   - Duration: Across sessions
+
+3. Working Memory
+   - Active task state
+   - Intermediate results
+   - Decision context
+   - Duration: Current task
+
+4. Episodic Memory
+   - Past interactions
+   - Learned patterns
+   - Success/failure cases
+   - Duration: Historical
+
+IMPLEMENTATION STRATEGY:
+- Use vector embeddings for semantic search
+- Implement retrieval-augmented generation (RAG)
+- Periodic memory consolidation
+- Selective memory pruning
+- Versioned memory snapshots`,
+                useCase: 'Building agents with persistent memory'
+            },
+            {
+                id: 'a2',
+                title: 'Hierarchical Agent Architecture',
+                category: 'advanced',
+                difficulty: 'advanced',
+                tags: ['advanced', 'architecture', 'hierarchy'],
+                description: 'Organizing agents in hierarchical structures',
+                content: `HIERARCHY LEVELS:
+
+Level 1: Orchestrator Agent
+- High-level planning
+- Task delegation
+- Result synthesis
+- Error handling
+
+Level 2: Specialist Agents
+- Domain-specific tasks
+- Tool integration
+- Detailed execution
+- Result reporting
+
+Level 3: Worker Agents
+- Atomic operations
+- Tool execution
+- Error recovery
+- Status updates
+
+COMMUNICATION PROTOCOL:
+Orchestrator → Specialist: {task, context, constraints}
+Specialist → Orchestrator: {status, results, errors}
+Specialist → Worker: {operation, parameters}
+Worker → Specialist: {result, status}
+
+BENEFITS:
+- Scalability
+- Specialization
+- Fault isolation
+- Parallel execution`,
+                useCase: 'Building large-scale agent systems'
+            }
+        ];
+
+        const CATEGORIES = [
+            { id: 'foundations', name: 'Foundations' },
+            { id: 'patterns', name: 'Patterns' },
+            { id: 'system-prompts', name: 'System Prompts' },
+            { id: 'tools', name: 'Tools' },
+            { id: 'evaluation', name: 'Evaluation' },
+            { id: 'guardrails', name: 'Guardrails' },
+            { id: 'advanced', name: 'Advanced' }
+        ];
+
+        // State
+        let searchQuery = '';
+        let selectedCategory = null;
+        let selectedTags = [];
+        let favorites = [];
+        let expandedItems = [];
+        let isDarkMode = localStorage.getItem('darkMode') === 'true';
+
+        // Initialize
+        function init() {
+            loadFavorites();
+            applyTheme();
+            renderFilters();
+            renderPatterns();
+            setupEventListeners();
+        }
+
+        // Theme
+        function applyTheme() {
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                document.getElementById('themeToggle').textContent = '☀️';
+            } else {
+                document.body.classList.remove('dark-mode');
+                document.getElementById('themeToggle').textContent = '🌙';
+            }
+        }
+
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            localStorage.setItem('darkMode', isDarkMode);
+            applyTheme();
+        }
+
+        // Favorites
+        function loadFavorites() {
+            const saved = localStorage.getItem('agent-favorites');
+            favorites = saved ? JSON.parse(saved) : [];
+            updateFavoritesCount();
+        }
+
+        function saveFavorites() {
+            localStorage.setItem('agent-favorites', JSON.stringify(favorites));
+            updateFavoritesCount();
+        }
+
+        function toggleFavorite(id) {
+            if (favorites.includes(id)) {
+                favorites = favorites.filter(f => f !== id);
+            } else {
+                favorites.push(id);
+            }
+            saveFavorites();
+            renderPatterns();
+        }
+
+        function updateFavoritesCount() {
+            document.getElementById('favoritesCount').textContent = favorites.length;
+        }
+
+        // Filters
+        function renderFilters() {
+            const categoryContainer = document.getElementById('categoryFilters');
+            categoryContainer.innerHTML = CATEGORIES.map(cat => `
+                <button class="filter-btn ${selectedCategory === cat.id ? 'active' : ''}" 
+                        onclick="selectCategory('${cat.id}')">
+                    ${cat.name}
+                </button>
+            `).join('');
+
+            const allTags = [...new Set(PATTERNS.flatMap(p => p.tags))].sort();
+            const tagContainer = document.getElementById('tagFilters');
+            tagContainer.innerHTML = allTags.map(tag => `
+                <button class="tag-btn ${selectedTags.includes(tag) ? 'active' : ''}" 
+                        onclick="toggleTag('${tag}')">
+                    #${tag}
+                </button>
+            `).join('');
+        }
+
+        function selectCategory(catId) {
+            selectedCategory = selectedCategory === catId ? null : catId;
+            renderFilters();
+            renderPatterns();
+        }
+
+        function toggleTag(tag) {
+            if (selectedTags.includes(tag)) {
+                selectedTags = selectedTags.filter(t => t !== tag);
+            } else {
+                selectedTags.push(tag);
+            }
+            renderFilters();
+            renderPatterns();
+        }
+
+        // Search
+        function fuzzySearch(query, text) {
+            const queryLower = query.toLowerCase();
+            const textLower = text.toLowerCase();
+            let queryIndex = 0;
+
+            for (let i = 0; i < textLower.length && queryIndex < queryLower.length; i++) {
+                if (textLower[i] === queryLower[queryIndex]) {
+                    queryIndex++;
+                }
+            }
+            return queryIndex === queryLower.length;
+        }
+
+        function filterPatterns() {
+            return PATTERNS.filter(pattern => {
+                const matchesSearch = !searchQuery ||
+                    fuzzySearch(searchQuery, pattern.title) ||
+                    fuzzySearch(searchQuery, pattern.description) ||
+                    fuzzySearch(searchQuery, pattern.content);
+
+                const matchesCategory = !selectedCategory || pattern.category === selectedCategory;
+                const matchesTags = selectedTags.length === 0 || selectedTags.some(tag => pattern.tags.includes(tag));
+
+                return matchesSearch && matchesCategory && matchesTags;
+            });
+        }
+
+        // Render
+        function renderPatterns() {
+            const filtered = filterPatterns();
+            const container = document.getElementById('patternsList');
+
+            document.getElementById('matchingCount').textContent = filtered.length;
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="no-results"><div class="no-results-icon">🔍</div><p>No patterns found. Try adjusting your filters.</p></div>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(pattern => {
+                const isExpanded = expandedItems.includes(pattern.id);
+                const isFavorite = favorites.includes(pattern.id);
+
+                return `
+                    <div class="pattern-card ${isExpanded ? 'expanded' : ''}" onclick="toggleExpand('${pattern.id}')">
+                        <div class="pattern-header">
+                            <div class="pattern-info">
+                                <div class="pattern-meta">
+                                    <span class="category-badge">${CATEGORIES.find(c => c.id === pattern.category)?.name}</span>
+                                    <span class="difficulty-badge ${pattern.difficulty}">${pattern.difficulty}</span>
+                                </div>
+                                <h3 class="pattern-title">${pattern.title}</h3>
+                                <p class="pattern-description">${pattern.description}</p>
+                                <div class="pattern-tags">
+                                    ${pattern.tags.map(tag => `<span class="pattern-tag">#${tag}</span>`).join('')}
+                                </div>
+                            </div>
+                            <div class="pattern-actions">
+                                <button class="action-btn favorite ${isFavorite ? 'active' : ''}" 
+                                        onclick="event.stopPropagation(); toggleFavorite('${pattern.id}')" 
+                                        title="Add to favorites">
+                                    ${isFavorite ? '❤️' : '🤍'}
+                                </button>
+                                <span class="chevron">▼</span>
+                            </div>
+                        </div>
+
+                        <div class="pattern-content">
+                            <div class="content-section">
+                                <div class="content-label">Use Case</div>
+                                <div class="content-text">${pattern.useCase}</div>
+                            </div>
+
+                            <div class="content-section">
+                                <div class="content-label">Content</div>
+                                <div class="code-block">
+                                    <code>${escapeHtml(pattern.content)}</code>
+                                </div>
+                            </div>
+
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" onclick="event.stopPropagation(); copyToClipboard('${pattern.id}', '${pattern.title}')">
+                                    📋 Copy
+                                </button>
+                                <button class="btn btn-secondary" onclick="event.stopPropagation(); downloadPattern('${pattern.id}', '${pattern.title}')">
+                                    ⬇️ Download
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleExpand(id) {
+            if (expandedItems.includes(id)) {
+                expandedItems = expandedItems.filter(e => e !== id);
+            } else {
+                expandedItems.push(id);
+            }
+            renderPatterns();
+        }
+
+        // Actions
+        function copyToClipboard(id, title) {
+            const pattern = PATTERNS.find(p => p.id === id);
+            const text = `${title}\n\n${pattern.content}`;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard!');
+            });
+        }
+
+        function downloadPattern(id, title) {
+            const pattern = PATTERNS.find(p => p.id === id);
+            const text = `${title}\n\n${pattern.content}`;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${title.replace(/\s+/g, '_')}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Utilities
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Event listeners
+        function setupEventListeners() {
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                searchQuery = e.target.value;
+                renderPatterns();
+            });
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+</html>
