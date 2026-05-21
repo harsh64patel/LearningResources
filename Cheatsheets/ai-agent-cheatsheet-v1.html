@@ -1,0 +1,2288 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Agent Patterns — Cheat Sheet</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.0/mermaid.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg2: #161b27;
+    --bg3: #1e2433;
+    --border: #2d3748;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --accent: #3b82f6;
+    --accent2: #8b5cf6;
+    --accent3: #10b981;
+    --accent4: #f59e0b;
+    --accent5: #ef4444;
+    --accent6: #06b6d4;
+    --tag-bg: #1e2433;
+    --tag-border: #2d3748;
+    --card: #161b27;
+    --card-hover: #1e2433;
+    --code-bg: #0d1117;
+    --badge-text: #fff;
+  }
+  [data-theme="light"] {
+    --bg: #f1f5f9;
+    --bg2: #ffffff;
+    --bg3: #e2e8f0;
+    --border: #cbd5e1;
+    --text: #1e293b;
+    --text2: #475569;
+    --text3: #94a3b8;
+    --accent: #2563eb;
+    --accent2: #7c3aed;
+    --accent3: #059669;
+    --accent4: #d97706;
+    --accent5: #dc2626;
+    --accent6: #0891b2;
+    --tag-bg: #e2e8f0;
+    --tag-border: #cbd5e1;
+    --card: #ffffff;
+    --card-hover: #f8fafc;
+    --code-bg: #1e293b;
+    --badge-text: #fff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+  a { color: var(--accent); text-decoration: none; }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; transition: background 0.2s, box-shadow 0.2s; }
+  .card:hover { background: var(--card-hover); box-shadow: 0 4px 24px rgba(0,0,0,0.18); }
+  .tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; border: 1px solid var(--tag-border); background: var(--tag-bg); color: var(--text2); cursor: pointer; transition: all 0.15s; user-select: none; }
+  .tag:hover, .tag.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .tag.cat-pattern { border-color: #3b82f6; color: #3b82f6; }
+  .tag.cat-pattern.active { background: #3b82f6; color: #fff; }
+  .tag.cat-concept { border-color: #8b5cf6; color: #8b5cf6; }
+  .tag.cat-concept.active { background: #8b5cf6; color: #fff; }
+  .tag.cat-tool { border-color: #10b981; color: #10b981; }
+  .tag.cat-tool.active { background: #10b981; color: #fff; }
+  .tag.cat-testing { border-color: #f59e0b; color: #f59e0b; }
+  .tag.cat-testing.active { background: #f59e0b; color: #fff; }
+  .tag.cat-memory { border-color: #06b6d4; color: #06b6d4; }
+  .tag.cat-memory.active { background: #06b6d4; color: #fff; }
+  .tag.cat-pitfall { border-color: #ef4444; color: #ef4444; }
+  .tag.cat-pitfall.active { background: #ef4444; color: #fff; }
+  .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--badge-text); }
+  .badge-beginner { background: #10b981; }
+  .badge-intermediate { background: #f59e0b; }
+  .badge-advanced { background: #ef4444; }
+  .badge-concept { background: #8b5cf6; }
+  .badge-pattern { background: #3b82f6; }
+  .badge-testing { background: #06b6d4; }
+  .section-header { display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; padding: 16px 20px; border-radius: 10px; transition: background 0.15s; }
+  .section-header:hover { background: var(--bg3); }
+  .chevron { transition: transform 0.25s; display: inline-block; font-size: 18px; color: var(--text3); }
+  .chevron.open { transform: rotate(90deg); }
+  .collapsible-body { overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.3s; opacity: 1; }
+  .collapsible-body.collapsed { max-height: 0 !important; opacity: 0; }
+  pre[class*="language-"] { border-radius: 8px !important; font-size: 13px !important; margin: 0 !important; padding: 16px !important; background: var(--code-bg) !important; border: 1px solid var(--border) !important; overflow-x: auto; }
+  code[class*="language-"] { font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace !important; }
+  .copy-btn { position: absolute; top: 10px; right: 10px; background: var(--bg3); border: 1px solid var(--border); color: var(--text2); border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer; transition: all 0.15s; z-index: 10; }
+  .copy-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .copy-btn.copied { background: #10b981; color: #fff; border-color: #10b981; }
+  .code-wrap { position: relative; }
+  .fav-btn { background: none; border: none; cursor: pointer; font-size: 18px; line-height: 1; transition: transform 0.2s; padding: 4px; color: var(--text3); }
+  .fav-btn:hover { transform: scale(1.2); }
+  .fav-btn.active { color: #f59e0b; }
+  .search-input { background: var(--bg2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 10px 14px 10px 40px; font-size: 14px; width: 100%; outline: none; transition: border-color 0.2s; }
+  .search-input:focus { border-color: var(--accent); }
+  .search-wrap { position: relative; }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text3); pointer-events: none; }
+  .mermaid-wrap { background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px; padding: 20px; overflow-x: auto; }
+  [data-theme="light"] .mermaid-wrap { background: #f8fafc; }
+  .pattern-card { border-left: 4px solid var(--accent); }
+  .pattern-card.color-purple { border-left-color: var(--accent2); }
+  .pattern-card.color-green { border-left-color: var(--accent3); }
+  .pattern-card.color-amber { border-left-color: var(--accent4); }
+  .pattern-card.color-red { border-left-color: var(--accent5); }
+  .pattern-card.color-cyan { border-left-color: var(--accent6); }
+  .toc-item { padding: 6px 12px; border-radius: 6px; cursor: pointer; color: var(--text2); font-size: 13px; transition: all 0.15s; display: flex; align-items: center; gap: 8px; }
+  .toc-item:hover { background: var(--bg3); color: var(--text); }
+  .toc-item.active { background: var(--accent); color: #fff; }
+  .step-badge { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+  .highlight-box { border-radius: 8px; padding: 12px 16px; border-left: 4px solid; }
+  .highlight-box.info { background: rgba(59,130,246,0.08); border-color: #3b82f6; }
+  .highlight-box.warning { background: rgba(245,158,11,0.08); border-color: #f59e0b; }
+  .highlight-box.success { background: rgba(16,185,129,0.08); border-color: #10b981; }
+  .highlight-box.danger { background: rgba(239,68,68,0.08); border-color: #ef4444; }
+  .highlight-box.purple { background: rgba(139,92,246,0.08); border-color: #8b5cf6; }
+  .mindmap-svg { width: 100%; overflow-x: auto; }
+  #sidebar { position: fixed; top: 0; left: 0; height: 100vh; width: 240px; background: var(--bg2); border-right: 1px solid var(--border); overflow-y: auto; z-index: 100; transition: transform 0.3s; }
+  #main-content { margin-left: 240px; min-height: 100vh; }
+  @media (max-width: 900px) {
+    #sidebar { transform: translateX(-100%); }
+    #sidebar.open { transform: translateX(0); }
+    #main-content { margin-left: 0; }
+    #menu-toggle { display: flex !important; }
+  }
+  #menu-toggle { display: none; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .progress-ring { font-size: 11px; color: var(--text3); }
+  .tab { padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text2); transition: all 0.15s; border: 1px solid transparent; }
+  .tab:hover { color: var(--text); background: var(--bg3); }
+  .tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .hidden { display: none !important; }
+  .fade-in { animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .tooltip { position: relative; }
+  .tooltip:hover::after { content: attr(data-tip); position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%); background: #1e293b; color: #e2e8f0; padding: 4px 8px; border-radius: 4px; font-size: 11px; white-space: nowrap; pointer-events: none; z-index: 999; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+  .section-divider { height: 1px; background: var(--border); margin: 32px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--bg3); color: var(--text2); padding: 10px 14px; text-align: left; font-weight: 600; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+  tr:hover td { background: var(--bg3); }
+  .flow-step { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--bg3); border-radius: 8px; }
+  .flow-arrow { color: var(--text3); font-size: 18px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div style="padding: 20px 16px 12px; border-bottom: 1px solid var(--border);">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+      <span style="font-size:22px;">🤖</span>
+      <span style="font-weight:700;font-size:15px;color:var(--text);">AI Agent Patterns</span>
+    </div>
+    <div class="badge badge-beginner" style="margin-bottom:8px;">Beginner Edition</div>
+    <div style="font-size:11px;color:var(--text3);margin-top:6px;">v1.0 · Beginner Track</div>
+  </div>
+  <div style="padding: 12px 8px;" id="toc-list">
+    <!-- JS will populate -->
+  </div>
+  <div style="padding: 16px; border-top: 1px solid var(--border); margin-top: auto;">
+    <div style="font-size:11px;color:var(--text3);margin-bottom:8px;">THEME</div>
+    <button onclick="toggleTheme()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 14px;cursor:pointer;font-size:12px;width:100%;" id="theme-btn">☀️ Light Mode</button>
+  </div>
+</nav>
+
+<!-- MOBILE MENU TOGGLE -->
+<button id="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')"
+  style="position:fixed;top:16px;left:16px;z-index:200;background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:18px;align-items:center;gap:6px;">
+  ☰
+</button>
+
+<!-- MAIN -->
+<div id="main-content">
+  <!-- TOP BAR -->
+  <div style="background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 32px;position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:200px;" class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-box" class="search-input" placeholder="Fuzzy search patterns, concepts, code..." oninput="doSearch(this.value)">
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;" id="filter-bar">
+      <span style="font-size:12px;color:var(--text3);font-weight:600;">FILTER:</span>
+      <span class="tag active" data-filter="all" onclick="setFilter('all',this)">All</span>
+      <span class="tag cat-pattern" data-filter="pattern" onclick="setFilter('pattern',this)">Patterns</span>
+      <span class="tag cat-concept" data-filter="concept" onclick="setFilter('concept',this)">Concepts</span>
+      <span class="tag cat-tool" data-filter="tool" onclick="setFilter('tool',this)">Tools</span>
+      <span class="tag cat-memory" data-filter="memory" onclick="setFilter('memory',this)">Memory</span>
+      <span class="tag cat-testing" data-filter="testing" onclick="setFilter('testing',this)">Testing</span>
+      <span class="tag cat-pitfall" data-filter="pitfall" onclick="setFilter('pitfall',this)">Pitfalls</span>
+      <span class="tag" data-filter="favorites" onclick="setFilter('favorites',this)" style="border-color:#f59e0b;color:#f59e0b;">⭐ Favorites</span>
+    </div>
+    <button onclick="toggleTheme()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 12px;cursor:pointer;font-size:13px;" class="tooltip" data-tip="Toggle theme">🌙</button>
+    <button onclick="expandAll()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 12px;cursor:pointer;font-size:11px;font-weight:600;">EXPAND ALL</button>
+    <button onclick="collapseAll()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 12px;cursor:pointer;font-size:11px;font-weight:600;">COLLAPSE</button>
+  </div>
+
+  <div style="padding: 32px 32px 80px; max-width: 1100px; margin: 0 auto;" id="content-area">
+
+    <!-- HERO -->
+    <div style="margin-bottom:40px;" class="fade-in">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:16px;">
+        <div>
+          <h1 style="font-size:28px;font-weight:800;letter-spacing:-0.5px;color:var(--text);margin-bottom:6px;">🤖 AI Agent Patterns <span style="color:var(--accent);">Cheat Sheet</span></h1>
+          <p style="color:var(--text2);font-size:15px;">End-to-end guide for building, testing & deploying enterprise AI agents · <span class="badge badge-beginner">Beginner Track</span></p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <div class="card" style="padding:12px 20px;text-align:center;">
+            <div style="font-size:22px;font-weight:800;color:var(--accent);" id="pattern-count">0</div>
+            <div style="font-size:11px;color:var(--text3);font-weight:600;">PATTERNS</div>
+          </div>
+          <div class="card" style="padding:12px 20px;text-align:center;">
+            <div style="font-size:22px;font-weight:800;color:var(--accent3);" id="fav-count">0</div>
+            <div style="font-size:11px;color:var(--text3);font-weight:600;">FAVORITES</div>
+          </div>
+        </div>
+      </div>
+      <div class="highlight-box info" style="margin-bottom:16px;">
+        <strong>📌 How to use:</strong> Search with fuzzy search · Filter by tags · Star your favorites · Click section headers to collapse · Click "Copy" on any code block · Diagrams auto-render.
+      </div>
+      <div class="highlight-box warning">
+        <strong>🗓️ Version Note:</strong> This is the <strong>Beginner Track</strong> covering fundamentals through intermediate patterns. Intermediate & Advanced patterns will be added in the next session.
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 0: MIND MAP OVERVIEW -->
+    <!-- ============================================================ -->
+    <div class="card" id="sec-mindmap" data-tags="concept,pattern" style="margin-bottom:24px;" data-id="mindmap">
+      <div class="section-header" onclick="toggleSection('mindmap')">
+        <span style="font-size:22px;">🗺️</span>
+        <div style="flex:1;">
+          <h2 style="font-size:18px;font-weight:700;">AI Agent Universe — Mind Map Overview</h2>
+          <p style="color:var(--text3);font-size:13px;">Big picture: everything you need to know</p>
+        </div>
+        <button class="fav-btn" onclick="event.stopPropagation();toggleFav('mindmap',this)" id="fav-mindmap">☆</button>
+        <span class="badge badge-concept">Concept</span>
+        <span class="chevron open" id="chev-mindmap">›</span>
+      </div>
+      <div class="collapsible-body" id="body-mindmap" style="max-height:2000px;padding:0 20px 20px;">
+        <div class="mermaid-wrap">
+          <div class="mermaid">
+mindmap
+  root((AI Agent))
+    Core Components
+      LLM Brain
+      Tools & APIs
+      Memory
+        Short-term Context
+        Long-term Vector DB
+      Planning
+      Execution Loop
+    Beginner Patterns
+      ReAct
+      Tool Use
+      Chain of Thought
+      Plan & Execute
+      Sequential Chain
+      Human-in-the-Loop
+    Agent Types
+      Single Agent
+      Multi-Agent
+      Supervisor Agent
+      Peer Agents
+    Memory Types
+      In-context
+      External DB
+      Episodic
+      Semantic
+    Testing
+      Unit Tests
+      Integration
+      Evaluation Harness
+      Tracing & Logs
+    Key Frameworks
+      LangChain
+      LlamaIndex
+      AutoGen
+      CrewAI
+      Semantic Kernel
+          </div>
+        </div>
+        <div class="highlight-box info" style="margin-top:16px;">
+          <strong>Reading this mind map:</strong> Everything in an AI agent system connects back to these five pillars: <em>Brain (LLM), Tools, Memory, Planning,</em> and <em>Execution Loop</em>. Master these and you can build any enterprise agent.
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 1: WHAT IS AN AI AGENT? -->
+    <!-- ============================================================ -->
+    <div class="card" id="sec-what" data-tags="concept" style="margin-bottom:24px;" data-id="what">
+      <div class="section-header" onclick="toggleSection('what')">
+        <span style="font-size:22px;">🧠</span>
+        <div style="flex:1;">
+          <h2 style="font-size:18px;font-weight:700;">What is an AI Agent?</h2>
+          <p style="color:var(--text3);font-size:13px;">Foundation concepts every developer must know</p>
+        </div>
+        <button class="fav-btn" onclick="event.stopPropagation();toggleFav('what',this)" id="fav-what">☆</button>
+        <span class="badge badge-concept">Concept</span>
+        <span class="chevron open" id="chev-what">›</span>
+      </div>
+      <div class="collapsible-body" id="body-what" style="max-height:3000px;padding:0 20px 20px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;" class="grid-2">
+          <div class="highlight-box success">
+            <h3 style="font-size:14px;font-weight:700;margin-bottom:8px;">✅ An Agent IS:</h3>
+            <ul style="font-size:13px;color:var(--text2);list-style:none;display:flex;flex-direction:column;gap:4px;">
+              <li>• An LLM that <strong>decides</strong> what actions to take</li>
+              <li>• Can <strong>use tools</strong> to interact with the world</li>
+              <li>• Runs in a <strong>loop</strong> until task is done</li>
+              <li>• Has access to <strong>memory</strong> across steps</li>
+              <li>• Can <strong>plan, reason,</strong> and <strong>adapt</strong></li>
+              <li>• Goal-directed: works toward an <strong>objective</strong></li>
+            </ul>
+          </div>
+          <div class="highlight-box danger">
+            <h3 style="font-size:14px;font-weight:700;margin-bottom:8px;">❌ An Agent is NOT:</h3>
+            <ul style="font-size:13px;color:var(--text2);list-style:none;display:flex;flex-direction:column;gap:4px;">
+              <li>• Just a single LLM call</li>
+              <li>• A simple chatbot with no tools</li>
+              <li>• A rigid scripted pipeline</li>
+              <li>• Something that always follows the same steps</li>
+              <li>• A black box you can't trace or debug</li>
+              <li>• A replacement for all human judgment</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:12px;color:var(--text);">🔄 The Agent Loop (Core Cycle)</h3>
+        <div class="mermaid-wrap" style="margin-bottom:16px;">
+          <div class="mermaid">
+flowchart LR
+    A([🎯 User Goal]) --> B[Observe\nEnvironment]
+    B --> C{LLM\nReasoning}
+    C -->|Need Tool| D[Select & Call\nTool]
+    D --> E[Get Tool\nResult]
+    E --> B
+    C -->|Done| F([✅ Final Answer])
+    C -->|Clarify| G[Ask Human]
+    G --> B
+    style A fill:#3b82f6,color:#fff,stroke:#2563eb
+    style F fill:#10b981,color:#fff,stroke:#059669
+    style C fill:#8b5cf6,color:#fff,stroke:#7c3aed
+    style G fill:#f59e0b,color:#fff,stroke:#d97706
+          </div>
+        </div>
+
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:12px;color:var(--text);">🏗️ Core Agent Architecture</h3>
+        <div class="mermaid-wrap" style="margin-bottom:16px;">
+          <div class="mermaid">
+graph TD
+    subgraph Agent["🤖 AI Agent"]
+        LLM["🧠 LLM\n(GPT-4 / Claude / Gemini)"]
+        Planner["📋 Planner\n(Task decomposition)"]
+        Executor["⚙️ Executor\n(Run actions)"]
+        Memory["💾 Memory\n(Context + History)"]
+    end
+    subgraph Tools["🔧 Tool Layer"]
+        Search["🔍 Web Search"]
+        DB["🗄️ Database"]
+        API["🌐 External API"]
+        Code["💻 Code Runner"]
+        Files["📁 File System"]
+    end
+    subgraph Memory2["💾 Memory Layer"]
+        STM["Short-term\n(Conversation)"]
+        LTM["Long-term\n(Vector DB)"]
+        Episodic["Episodic\n(Past runs)"]
+    end
+    User(["👤 User"]) -->|Prompt + Goal| LLM
+    LLM --> Planner
+    Planner --> Executor
+    Executor -->|Tool calls| Tools
+    Tools -->|Results| Executor
+    Executor -->|Updates| Memory
+    Memory --> LLM
+    Memory2 --> Memory
+    Executor -->|Final response| User
+    style Agent fill:#1e2433,stroke:#3b82f6,stroke-width:2px
+    style Tools fill:#1e2433,stroke:#10b981,stroke-width:2px
+    style Memory2 fill:#1e2433,stroke:#06b6d4,stroke-width:2px
+          </div>
+        </div>
+
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:12px;color:var(--text);">📊 Agents vs LLMs vs Pipelines — Quick Comparison</h3>
+        <div style="overflow-x:auto;border-radius:8px;border:1px solid var(--border);margin-bottom:16px;">
+          <table>
+            <thead><tr><th>Feature</th><th>Plain LLM</th><th>LLM Pipeline</th><th>AI Agent</th></tr></thead>
+            <tbody>
+              <tr><td>Decision-making</td><td style="color:#ef4444;">Static prompt</td><td style="color:#f59e0b;">Fixed steps</td><td style="color:#10b981;">Dynamic, adaptive</td></tr>
+              <tr><td>Tool use</td><td style="color:#ef4444;">None</td><td style="color:#f59e0b;">Pre-defined</td><td style="color:#10b981;">On-demand</td></tr>
+              <tr><td>Memory</td><td style="color:#ef4444;">None</td><td style="color:#f59e0b;">Manual</td><td style="color:#10b981;">Built-in, multi-type</td></tr>
+              <tr><td>Loop / Retry</td><td style="color:#ef4444;">No</td><td style="color:#f59e0b;">Limited</td><td style="color:#10b981;">Yes, goal-driven</td></tr>
+              <tr><td>Autonomy</td><td style="color:#ef4444;">Very low</td><td style="color:#f59e0b;">Medium</td><td style="color:#10b981;">High</td></tr>
+              <tr><td>Debugging</td><td style="color:#10b981;">Easy</td><td style="color:#f59e0b;">Medium</td><td style="color:#ef4444;">Needs tracing</td></tr>
+              <tr><td>Enterprise use</td><td style="color:#f59e0b;">Limited</td><td style="color:#f59e0b;">Common</td><td style="color:#10b981;">Best for complex tasks</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 2: REACT PATTERN -->
+    <!-- ============================================================ -->
+    <div class="card pattern-card" id="sec-react" data-tags="pattern,concept" style="margin-bottom:24px;" data-id="react">
+      <div class="section-header" onclick="toggleSection('react')">
+        <span style="font-size:22px;">⚛️</span>
+        <div style="flex:1;">
+          <h2 style="font-size:18px;font-weight:700;">Pattern #1 — ReAct <span style="color:var(--text3);font-size:14px;font-weight:400;">(Reason + Act)</span></h2>
+          <p style="color:var(--text3);font-size:13px;">The most important beginner pattern. The foundation of most agents.</p>
+        </div>
+        <button class="fav-btn" onclick="event.stopPropagation();toggleFav('react',this)" id="fav-react">☆</button>
+        <span class="badge badge-beginner">Beginner</span>
+        <span class="badge badge-pattern" style="margin-left:4px;">Pattern</span>
+        <span class="chevron open" id="chev-react">›</span>
+      </div>
+      <div class="collapsible-body" id="body-react" style="max-height:5000px;padding:0 20px 20px;">
+        <div class="highlight-box purple" style="margin-bottom:16px;">
+          <strong>🎯 When to use ReAct:</strong> Any task where the agent needs to gather information, reason about it, and take iterative actions. It's the default pattern for most agents.
+        </div>
+
+        <div class="grid-2" style="margin-bottom:16px;">
+          <div>
+            <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">How ReAct Works</h3>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div class="flow-step"><span class="step-badge">1</span><div><strong>Thought:</strong> LLM reasons about the problem</div></div>
+              <div class="flow-arrow" style="padding-left:16px;">↓</div>
+              <div class="flow-step"><span class="step-badge">2</span><div><strong>Action:</strong> Decides which tool to call</div></div>
+              <div class="flow-arrow" style="padding-left:16px;">↓</div>
+              <div class="flow-step"><span class="step-badge" style="background:var(--accent3);">3</span><div><strong>Observation:</strong> Gets tool result</div></div>
+              <div class="flow-arrow" style="padding-left:16px;">↓</div>
+              <div class="flow-step" style="border:1px dashed var(--border);background:transparent;"><span>🔁</span><div>Repeat until done</div></div>
+            </div>
+          </div>
+          <div class="mermaid-wrap">
+            <div class="mermaid">
+sequenceDiagram
+    participant U as 👤 User
+    participant A as 🧠 Agent LLM
+    participant T as 🔧 Tool
+
+    U->>A: "What's the weather in Tokyo?"
+    Note over A: Thought: I need to\ncall the weather tool
+    A->>T: weather_search("Tokyo")
+    T-->>A: {"temp": "22°C", "cond": "Sunny"}
+    Note over A: Thought: I have the data,\ncan answer now
+    A-->>U: "Tokyo is 22°C and sunny"
+            </div>
+          </div>
+        </div>
+
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">ReAct Prompt Format</h3>
+        <div class="code-wrap" style="margin-bottom:16px;">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-python">system_prompt = """You are a helpful AI agent. Use the following format:
+
+Thought: Think about what you need to do next
+Action: The tool to use (one of: {tool_names})
+Action Input: The input to the tool
+Observation: The result of the tool call
+... (Thought/Action/Observation can repeat N times)
+Thought: I now have enough information to answer
+Final Answer: The complete answer to the user's question
+
+Available tools:
+{tools_description}
+"""
+
+# Example ReAct trace:
+# Thought: I need to find the population of Tokyo
+# Action: web_search
+# Action Input: "population of Tokyo 2024"
+# Observation: Tokyo has a population of approximately 13.9 million
+# Thought: I now know the answer
+# Final Answer: Tokyo's population is approximately 13.9 million people.</code></pre>
+        </div>
+
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">Python Implementation with LangChain</h3>
+        <div class="code-wrap" style="margin-bottom:16px;">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-python">from langchain.agents import AgentExecutor, create_react_agent
+from langchain_openai import ChatOpenAI
+from langchain.tools import Tool
+from langchain import hub
+
+# 1. Define your tools
+def search_web(query: str) -> str:
+    """Search the web for information."""
+    # Replace with real search implementation
+    return f"Results for: {query}"
+
+def calculator(expression: str) -> str:
+    """Evaluate a math expression."""
+    try:
+        return str(eval(expression))
+    except Exception as e:
+        return f"Error: {e}"
+
+tools = [
+    Tool(name="web_search", func=search_web,
+         description="Search the web for current information"),
+    Tool(name="calculator", func=calculator,
+         description="Evaluate math expressions"),
+]
+
+# 2. Create the LLM
+llm = ChatOpenAI(model="gpt-4o", temperature=0)
+
+# 3. Pull the ReAct prompt from LangChain Hub
+prompt = hub.pull("hwchase17/react")
+
+# 4. Create the agent
+agent = create_react_agent(llm, tools, prompt)
+
+# 5. Create executor with safety limits
+agent_executor = AgentExecutor(
+    agent=agent,
+    tools=tools,
+    verbose=True,          # Print reasoning steps
+    max_iterations=10,     # Prevent infinite loops
+    handle_parsing_errors=True,  # Handle LLM format errors
+    return_intermediate_steps=True,  # For debugging
+)
+
+# 6. Run the agent
+result = agent_executor.invoke({
+    "input": "What is 15% of the population of Japan?"
+})
+print(result["output"])</code></pre>
+        </div>
+
+        <div class="grid-2">
+          <div class="highlight-box success">
+            <h4 style="font-size:13px;font-weight:700;margin-bottom:6px;">✅ ReAct Strengths</h4>
+            <ul style="font-size:12px;color:var(--text2);list-style:none;display:flex;flex-direction:column;gap:3px;">
+              <li>• Transparent reasoning you can read</li>
+              <li>• Works with almost any LLM</li>
+              <li>• Easy to debug (trace the thoughts)</li>
+              <li>• Flexible tool integration</li>
+              <li>• Self-corrects on tool errors</li>
+            </ul>
+          </div>
+          <div class="highlight-box danger">
+            <h4 style="font-size:13px;font-weight:700;margin-bottom:6px;">⚠️ ReAct Limitations</h4>
+            <ul style="font-size:12px;color:var(--text2);list-style:none;display:flex;flex-direction:column;gap:3px;">
+              <li>• Can get stuck in loops</li>
+              <li>• Slow with many tool calls</li>
+              <li>• Weaker LLMs struggle with format</li>
+              <li>• Context fills up on long tasks</li>
+              <li>• No parallel tool execution</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 3: TOOL USE PATTERN -->
+    <!-- ============================================================ -->
+    <div class="card pattern-card color-green" id="sec-tooluse" data-tags="pattern,tool" style="margin-bottom:24px;" data-id="tooluse">
+      <div class="section-header" onclick="toggleSection('tooluse')">
+        <span style="font-size:22px;">🔧</span>
+        <div style="flex:1;">
+          <h2 style="font-size:18px;font-weight:700;">Pattern #2 — Function Calling / Tool Use</h2>
+          <p style="color:var(--text3);font-size:13px;">Structured way for LLMs to call external functions & APIs</p>
+        </div>
+        <button class="fav-btn" onclick="event.stopPropagation();toggleFav('tooluse',this)" id="fav-tooluse">☆</button>
+        <span class="badge badge-beginner">Beginner</span>
+        <span class="badge badge-pattern" style="margin-left:4px;">Pattern</span>
+        <span class="chevron open" id="chev-tooluse">›</span>
+      </div>
+      <div class="collapsible-body" id="body-tooluse" style="max-height:5000px;padding:0 20px 20px;">
+        <div class="highlight-box success" style="margin-bottom:16px;">
+          <strong>💡 Key Insight:</strong> Function calling is how you give your agent <em>superpowers</em>. Instead of the LLM guessing, it calls real APIs, databases, and services with structured inputs.
+        </div>
+
+        <div class="mermaid-wrap" style="margin-bottom:16px;">
+          <div class="mermaid">
+flowchart TD
+    A["👤 User: 'Book a flight to NYC'"] --> B["🧠 LLM analyzes request"]
+    B --> C{"Does it need\na tool?"}
+    C -->|Yes| D["📋 Generate tool call JSON\n{name: search_flights,\nargs: {to: NYC, date: ...}}"]
+    C -->|No| H["💬 Direct text response"]
+    D --> E["⚙️ Execute Function\nsearch_flights(to='NYC')"]
+    E --> F["📊 Return Results\n[{flight: AA101, price: $250}]"]
+    F --> G["🧠 LLM processes results\n+ generates response"]
+    G --> I["✅ 'Found flights: AA101 for $250'"]
+    style A fill:#3b82f6,color:#fff
+    style D fill:#10b981,color:#fff
+    style I fill:#10b981,color:#fff
+          </div>
+        </div>
+
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">Defining Tools — OpenAI Format</h3>
+        <div class="code-wrap" style="margin-bottom:16px;">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-python">import openai
+import json
+
+client = openai.OpenAI()
+
+# Define tools with JSON Schema
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_weather",
+            "description": "Get current weather for a city",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "city": {
+                        "type": "string",
+                        "description": "City name, e.g. 'Tokyo'"
+                    },
+                    "unit": {
+                        "type": "string",
+                        "enum": ["celsius", "fahrenheit"],
+                        "description": "Temperature unit"
+                    }
+                },
+                "required": ["city"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "create_calendar_event",
+            "description": "Create a calendar event",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "title": {"type": "string"},
+                    "date": {"type": "string", "description": "ISO 8601 format"},
+                    "duration_minutes": {"type": "integer"}
+                },
+                "required": ["title", "date"]
+            }
+        }
+    }
+]
+
+# Actual function implementations
+def get_weather(city: str, unit: str = "celsius") -> dict:
+    # Call real weather API here
+    return {"city": city, "temp": 22, "unit": unit, "condition": "sunny"}
+
+def create_calendar_event(title: str, date: str, duration_minutes: int = 60) -> dict:
+    return {"success": True, "event_id": "evt_123", "title": title}
+
+# Map function names to implementations
+available_functions = {
+    "get_weather": get_weather,
+    "create_calendar_event": create_calendar_event,
+}
+
+def run_agent(user_message: str):
+    messages = [{"role": "user", "content": user_message}]
+
+    while True:
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=messages,
+            tools=tools,
+            tool_choice="auto"  # Let model decide
+        )
+        msg = response.choices[0].message
+
+        # If no tool calls, we're done
+        if not msg.tool_calls:
+            return msg.content
+
+        # Execute each tool call
+        messages.append(msg)  # Add assistant message
+
+        for tool_call in msg.tool_calls:
+            func_name = tool_call.function.name
+            func_args = json.loads(tool_call.function.arguments)
+
+            # Execute the function
+            result = available_functions[func_name](**func_args)
+
+            # Add result to messages
+            messages.append({
+                "role": "tool",
+                "tool_call_id": tool_call.id,
+                "content": json.dumps(result)
+            })
+
+# Usage
+result = run_agent("What's the weather in Tokyo and schedule a meeting tomorrow at 2pm?")
+print(result)</code></pre>
+        </div>
+
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">Tool Design Best Practices</h3>
+        <div class="grid-2" style="margin-bottom:12px;">
+          <div class="highlight-box success">
+            <h4 style="font-size:13px;font-weight:700;margin-bottom:8px;">✅ Good Tool Design</h4>
+            <ul style="font-size:12px;color:var(--text2);list-style:none;display:flex;flex-direction:column;gap:4px;">
+              <li>• <strong>Clear, specific name:</strong> <code style="font-size:11px;">search_customer_orders</code></li>
+              <li>• <strong>Detailed description</strong> of what it does</li>
+              <li>• <strong>Explicit parameter descriptions</strong></li>
+              <li>• <strong>Returns structured data</strong> (JSON)</li>
+              <li>• <strong>Handles errors gracefully</strong></li>
+              <li>• <strong>Idempotent reads</strong> when possible</li>
+              <li>• <strong>Rate limiting</strong> built in</li>
+            </ul>
+          </div>
+          <div class="highlight-box danger">
+            <h4 style="font-size:13px;font-weight:700;margin-bottom:8px;">❌ Bad Tool Design</h4>
+            <ul style="font-size:12px;color:var(--text2);list-style:none;display:flex;flex-direction:column;gap:4px;">
+              <li>• Vague name: <code style="font-size:11px;">do_thing</code></li>
+              <li>• No description or poor description</li>
+              <li>• Returns raw HTML/text blobs</li>
+              <li>• Throws exceptions without handling</li>
+              <li>• Too many parameters (>5)</li>
+              <li>• Irreversible actions without confirmation</li>
+              <li>• No timeout or retry logic</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">Tool Categories for Enterprise Agents</h3>
+        <div style="overflow-x:auto;border-radius:8px;border:1px solid var(--border);">
+          <table>
+            <thead><tr><th>Category</th><th>Examples</th><th>Risk Level</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td>📖 Read-only</td><td>search, get_record, fetch_data</td><td style="color:#10b981;">Low</td><td>Safe to auto-execute</td></tr>
+              <tr><td>✍️ Write</td><td>create_ticket, send_email, update_record</td><td style="color:#f59e0b;">Medium</td><td>Consider human approval</td></tr>
+              <tr><td>💻 Code Exec</td><td>run_python, execute_sql</td><td style="color:#f59e0b;">Medium</td><td>Sandbox required</td></tr>
+              <tr><td>🗑️ Destructive</td><td>delete_record, cancel_order</td><td style="color:#ef4444;">High</td><td>Always require human-in-loop</td></tr>
+              <tr><td>💰 Financial</td><td>create_payment, transfer_funds</td><td style="color:#ef4444;">Critical</td><td>Strict approval + audit log</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 4: CHAIN OF THOUGHT -->
+    <!-- ============================================================ -->
+    <div class="card pattern-card color-purple" id="sec-cot" data-tags="pattern,concept" style="margin-bottom:24px;" data-id="cot">
+      <div class="section-header" onclick="toggleSection('cot')">
+        <span style="font-size:22px;">💭</span>
+        <div style="flex:1;">
+          <h2 style="font-size:18px;font-weight:700;">Pattern #3 — Chain of Thought (CoT)</h2>
+          <p style="color:var(--text3);font-size:13px;">Force the LLM to reason step-by-step before answering</p>
+        </div>
+        <button class="fav-btn" onclick="event.stopPropagation();toggleFav('cot',this)" id="fav-cot">☆</button>
+        <span class="badge badge-beginner">Beginner</span>
+        <span class="badge badge-pattern" style="margin-left:4px;">Pattern</span>
+        <span class="chevron open" id="chev-cot">›</span>
+      </div>
+      <div class="collapsible-body" id="body-cot" style="max-height:4000px;padding:0 20px 20px;">
+        <div class="highlight-box purple" style="margin-bottom:16px;">
+          <strong>🎯 Use CoT when:</strong> Tasks require multi-step reasoning, math, logical deduction, complex decisions, or when you need to verify the model is "thinking" correctly.
+        </div>
+
+        <div class="grid-2" style="margin-bottom:16px;">
+          <div>
+            <h3 style="font-size:14px;font-weight:700;margin-bottom:8px;">CoT Variants</h3>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div class="highlight-box info" style="padding:10px 12px;">
+                <strong style="font-size:12px;">Zero-shot CoT</strong>
+                <p style="font-size:12px;color:var(--text2);margin-top:4px;">Add "Let's think step by step" to the prompt</p>
+              </div>
+              <div class="highlight-box success" style="padding:10px 12px;">
+                <strong style="font-size:12px;">Few-shot CoT</strong>
+                <p style="font-size:12px;color:var(--text2);margin-top:4px;">Provide worked examples with reasoning steps</p>
+              </div>
+              <div class="highlight-box warning" style="padding:10px 12px;">
+                <strong style="font-size:12px;">Self-Consistency CoT</strong>
+                <p style="font-size:12px;color:var(--text2);margin-top:4px;">Sample multiple reasoning paths, pick majority answer</p>
+              </div>
+              <div class="highlight-box purple" style="padding:10px 12px;">
+                <strong style="font-size:12px;">Tree of Thought (ToT)</strong>
+                <p style="font-size:12px;color:var(--text2);margin-top:4px;">Explore multiple reasoning branches, backtrack if needed</p>
+              </div>
+            </div>
+          </div>
+          <div class="mermaid-wrap">
+            <div class="mermaid">
+flowchart TD
+    Q["❓ Complex Question"] --> ZS["Zero-Shot CoT\n'Think step by step'"]
+    ZS --> R1["Step 1: Understand\nthe problem"]
+    R1 --> R2["Step 2: Break down\ninto sub-parts"]
+    R2 --> R3["Step 3: Solve\neach part"]
+    R3 --> R4["Step 4: Combine\nresults"]
+    R4 --> A["✅ Final Answer"]
+    style Q fill:#8b5cf6,color:#fff
+    style A fill:#10b981,color:#fff
+            </div>
+          </div>
+        </div>
+
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">CoT Prompt Templates</h3>
+        <div class="code-wrap" style="margin-bottom:16px;">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-python">from langchain_openai import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate
+
+llm = ChatOpenAI(model="gpt-4o", temperature=0)
+
+# Zero-shot CoT — just add the magic phrase
+zero_shot_cot = ChatPromptTemplate.from_messages([
+    ("system", """You are a precise analytical assistant.
+When solving problems, always think step by step.
+Show your complete reasoning before giving the final answer.
+Format:
+<thinking>
+[your step-by-step reasoning here]
+</thinking>
+Final Answer: [answer]"""),
+    ("human", "{question}")
+])
+
+# Few-shot CoT — provide examples
+few_shot_cot_system = """Solve problems step by step.
+
+Example:
+Q: A store has 120 apples. They sell 35 in the morning and 48 in the afternoon. How many remain?
+Thinking:
+1. Start with 120 apples
+2. Subtract morning sales: 120 - 35 = 85
+3. Subtract afternoon sales: 85 - 48 = 37
+Final Answer: 37 apples remain.
+
+Now solve the following problem in the same way:"""
+
+# Structured reasoning with XML tags (works great with Claude)
+structured_cot = ChatPromptTemplate.from_messages([
+    ("system", """You are an expert analyst. Always reason carefully.
+
+Use this exact format:
+<problem_breakdown>
+What is being asked? What information do I have?
+</problem_breakdown>
+
+<reasoning>
+Step 1: ...
+Step 2: ...
+Step 3: ...
+</reasoning>
+
+<verification>
+Does my answer make sense? Check the logic.
+</verification>
+
+<answer>
+Final clear answer here.
+</answer>"""),
+    ("human", "{question}")
+])
+
+chain = structured_cot | llm
+
+result = chain.invoke({
+    "question": "Our API has 3 servers. Each handles 1000 req/s. "
+                "If traffic is 2500 req/s, what % of capacity are we using?"
+})
+print(result.content)</code></pre>
+        </div>
+
+        <div class="highlight-box warning">
+          <strong>⚡ Pro Tip:</strong> For enterprise agents, wrap CoT in <code>&lt;thinking&gt;</code> XML tags and strip them from user-facing output. Users see clean answers; you see the full reasoning in logs.
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 5: PLAN AND EXECUTE -->
+    <!-- ============================================================ -->
+    <div class="card pattern-card color-amber" id="sec-plan" data-tags="pattern" style="margin-bottom:24px;" data-id="plan">
+      <div class="section-header" onclick="toggleSection('plan')">
+        <span style="font-size:22px;">📋</span>
+        <div style="flex:1;">
+          <h2 style="font-size:18px;font-weight:700;">Pattern #4 — Plan and Execute</h2>
+          <p style="color:var(--text3);font-size:13px;">Separate planning from execution for complex multi-step tasks</p>
+        </div>
+        <button class="fav-btn" onclick="event.stopPropagation();toggleFav('plan',this)" id="fav-plan">☆</button>
+        <span class="badge badge-beginner">Beginner</span>
+        <span class="badge badge-pattern" style="margin-left:4px;">Pattern</span>
+        <span class="chevron open" id="chev-plan">›</span>
+      </div>
+      <div class="collapsible-body" id="body-plan" style="max-height:4000px;padding:0 20px 20px;">
+        <div class="mermaid-wrap" style="margin-bottom:16px;">
+          <div class="mermaid">
+flowchart LR
+    subgraph Planner["📋 Planner Agent"]
+        P1["Analyze goal"]
+        P2["Break into steps"]
+        P3["Order dependencies"]
+        P1-->P2-->P3
+    end
+    subgraph Executor["⚙️ Executor Agent"]
+        E1["Execute Step 1"]
+        E2["Execute Step 2"]
+        E3["Execute Step N"]
+        E1-->E2-->E3
+    end
+    subgraph Replanner["🔄 Re-Planner"]
+        R1["Check progress"]
+        R2["Adjust if needed"]
+        R1-->R2
+    end
+    Goal(["🎯 Goal"]) --> Planner
+    Planner --> Executor
+    Executor -->|"Step failed\nor unexpected result"| Replanner
+    Replanner --> Executor
+    Executor -->|"All done"| Done(["✅ Result"])
+    style Goal fill:#f59e0b,color:#fff
+    style Done fill:#10b981,color:#fff
+          </div>
+        </div>
+
+        <div class="code-wrap" style="margin-bottom:16px;">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-python">from langchain_openai import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import JsonOutputParser
+from pydantic import BaseModel
+from typing import List
+import json
+
+llm = ChatOpenAI(model="gpt-4o", temperature=0)
+
+# 1. PLANNER: Breaks goal into steps
+class ExecutionStep(BaseModel):
+    step_id: int
+    description: str
+    tool: str
+    tool_input: dict
+    depends_on: List[int] = []  # step IDs this step depends on
+
+class ExecutionPlan(BaseModel):
+    goal: str
+    steps: List[ExecutionStep]
+    reasoning: str
+
+planner_prompt = ChatPromptTemplate.from_messages([
+    ("system", """You are a planning agent. Break user goals into ordered steps.
+Return a JSON plan with this structure:
+{{
+  "goal": "...",
+  "reasoning": "why I chose these steps",
+  "steps": [
+    {{"step_id": 1, "description": "...", "tool": "...",
+      "tool_input": {{}}, "depends_on": []}}
+  ]
+}}
+
+Available tools: web_search, calculator, get_weather, send_email, read_file, write_file"""),
+    ("human", "Goal: {goal}")
+])
+
+def create_plan(goal: str) -> ExecutionPlan:
+    chain = planner_prompt | llm
+    response = chain.invoke({"goal": goal})
+    # Parse JSON from response
+    data = json.loads(response.content)
+    return ExecutionPlan(**data)
+
+# 2. EXECUTOR: Runs each step
+def execute_step(step: ExecutionStep, previous_results: dict) -> dict:
+    """Execute a single step using the specified tool."""
+    print(f"  Executing Step {step.step_id}: {step.description}")
+
+    # Get results from dependent steps
+    context = {f"step_{id}_result": previous_results.get(id, {})
+               for id in step.depends_on}
+
+    # Execute tool (simplified)
+    if step.tool == "web_search":
+        result = f"Web results for: {step.tool_input}"
+    elif step.tool == "calculator":
+        result = str(eval(step.tool_input.get("expression", "0")))
+    else:
+        result = f"Executed {step.tool} with {step.tool_input}"
+
+    return {"step_id": step.step_id, "result": result, "success": True}
+
+# 3. ORCHESTRATOR: Runs the full plan
+def run_plan_execute(goal: str):
+    print(f"\n🎯 Goal: {goal}")
+    print("=" * 50)
+
+    # Create plan
+    print("\n📋 Creating plan...")
+    plan = create_plan(goal)
+    print(f"   Reasoning: {plan.reasoning}")
+    print(f"   Steps: {len(plan.steps)}")
+
+    # Execute steps in order
+    results = {}
+    for step in plan.steps:
+        # Wait for dependencies
+        deps_done = all(dep in results for dep in step.depends_on)
+        if not deps_done:
+            print(f"  ⚠️  Waiting for dependencies: {step.depends_on}")
+            continue
+
+        step_result = execute_step(step, results)
+        results[step.step_id] = step_result
+
+    # Synthesize final answer
+    synthesis_prompt = f"""
+    Goal: {goal}
+    Steps executed: {json.dumps(list(results.values()), indent=2)}
+    Provide a comprehensive final answer based on all results.
+    """
+    final = llm.invoke(synthesis_prompt)
+    return final.content
+
+# Usage
+answer = run_plan_execute(
+    "Research the top 3 AI frameworks for 2024, compare their GitHub stars, and recommend one"
+)
+print("\n✅ Final Answer:", answer)</code></pre>
+        </div>
+
+        <div class="grid-2">
+          <div class="highlight-box success">
+            <h4 style="font-size:13px;font-weight:700;margin-bottom:6px;">✅ Best for:</h4>
+            <ul style="font-size:12px;color:var(--text2);list-style:none;gap:3px;display:flex;flex-direction:column;">
+              <li>• Multi-step research tasks</li>
+              <li>• Tasks with clear dependencies</li>
+              <li>• When you want a predictable execution path</li>
+              <li>• Long-running enterprise workflows</li>
+            </ul>
+          </div>
+          <div class="highlight-box warning">
+            <h4 style="font-size:13px;font-weight:700;margin-bottom:6px;">⚡ Optimization Tips:</h4>
+            <ul style="font-size:12px;color:var(--text2);list-style:none;gap:3px;display:flex;flex-direction:column;">
+              <li>• Run independent steps in parallel</li>
+              <li>• Add a re-planner for error recovery</li>
+              <li>• Cache step results for retry safety</li>
+              <li>• Set max replanning iterations</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 6: HUMAN-IN-THE-LOOP -->
+    <!-- ============================================================ -->
+    <div class="card pattern-card color-cyan" id="sec-hitl" data-tags="pattern,testing" style="margin-bottom:24px;" data-id="hitl">
+      <div class="section-header" onclick="toggleSection('hitl')">
+        <span style="font-size:22px;">👤</span>
+        <div style="flex:1;">
+          <h2 style="font-size:18px;font-weight:700;">Pattern #5 — Human-in-the-Loop (HITL)</h2>
+          <p style="color:var(--text3);font-size:13px;">Critical for enterprise: when to pause and ask for human approval</p>
+        </div>
+        <button class="fav-btn" onclick="event.stopPropagation();toggleFav('hitl',this)" id="fav-hitl">☆</button>
+        <span class="badge badge-beginner">Beginner</span>
+        <span class="badge badge-pattern" style="margin-left:4px;">Pattern</span>
+        <span class="chevron open" id="chev-hitl">›</span>
+      </div>
+      <div class="collapsible-body" id="body-hitl" style="max-height:4000px;padding:0 20px 20px;">
+        <div class="highlight-box danger" style="margin-bottom:16px;">
+          <strong>⚠️ Enterprise Critical:</strong> Never let agents autonomously perform irreversible or high-risk actions. HITL is not optional in production — it's your safety net.
+        </div>
+
+        <div class="mermaid-wrap" style="margin-bottom:16px;">
+          <div class="mermaid">
+flowchart TD
+    A["🤖 Agent wants to take action"] --> B{"Risk Assessment"}
+    B -->|"Low risk\n(read-only)"| C["✅ Auto-execute"]
+    B -->|"Medium risk"| D["📧 Notify human\n+ auto-execute"]
+    B -->|"High risk\n(write/delete)"| E["⏸️ Pause execution\nRequest approval"]
+    B -->|"Critical\n(financial/legal)"| F["🔴 Hard stop\nMandatory review"]
+    E --> G{"Human Decision"}
+    F --> G
+    G -->|"Approve ✅"| H["Execute action"]
+    G -->|"Modify ✏️"| I["Agent revises plan"]
+    G -->|"Reject ❌"| J["Skip / abort step"]
+    I --> A
+    C --> K["📝 Log action"]
+    H --> K
+    J --> K
+    style E fill:#f59e0b,color:#fff
+    style F fill:#ef4444,color:#fff
+    style C fill:#10b981,color:#fff
+          </div>
+        </div>
+
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">HITL with LangGraph Interrupts</h3>
+        <div class="code-wrap" style="margin-bottom:16px;">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-python">from langgraph.graph import StateGraph, END
+from langgraph.checkpoint.memory import MemorySaver
+from typing import TypedDict, Annotated
+import operator
+
+class AgentState(TypedDict):
+    messages: list
+    pending_action: dict | None
+    human_approved: bool | None
+    results: list
+
+def risk_check(state: AgentState) -> str:
+    """Determine if human approval is needed."""
+    action = state.get("pending_action", {})
+    tool = action.get("tool", "")
+
+    HIGH_RISK_TOOLS = {"delete_record", "send_email", "create_payment", "update_database"}
+
+    if tool in HIGH_RISK_TOOLS:
+        return "needs_approval"
+    return "auto_execute"
+
+def request_approval(state: AgentState) -> AgentState:
+    """Node that pauses and waits for human input."""
+    action = state["pending_action"]
+    print(f"\n⚠️  HUMAN APPROVAL REQUIRED")
+    print(f"   Tool: {action['tool']}")
+    print(f"   Args: {action['args']}")
+    print(f"   Reason: {action.get('reason', 'N/A')}")
+    # This node will be interrupted here by LangGraph
+    # Human provides approval via state update
+    return state
+
+def execute_action(state: AgentState) -> AgentState:
+    """Execute the approved action."""
+    if state.get("human_approved") == False:
+        return {**state, "results": state["results"] + ["Action rejected by human"]}
+
+    action = state["pending_action"]
+    # Execute the tool...
+    result = f"Executed {action['tool']} successfully"
+    return {
+        **state,
+        "results": state["results"] + [result],
+        "pending_action": None,
+        "human_approved": None
+    }
+
+# Build graph with interrupt
+builder = StateGraph(AgentState)
+builder.add_node("risk_check_node", lambda s: s)  # Router
+builder.add_node("request_approval", request_approval)
+builder.add_node("execute_action", execute_action)
+
+builder.add_conditional_edges(
+    "risk_check_node",
+    risk_check,
+    {
+        "needs_approval": "request_approval",
+        "auto_execute": "execute_action"
+    }
+)
+builder.add_edge("request_approval", "execute_action")
+builder.add_edge("execute_action", END)
+builder.set_entry_point("risk_check_node")
+
+# CRITICAL: interrupt_before causes the graph to pause
+memory = MemorySaver()
+graph = builder.compile(
+    checkpointer=memory,
+    interrupt_before=["execute_action"]  # Pause before executing!
+)
+
+# Usage
+config = {"configurable": {"thread_id": "enterprise-task-1"}}
+
+# Run until interrupt
+state = graph.invoke({
+    "messages": [],
+    "pending_action": {"tool": "send_email", "args": {"to": "ceo@company.com", "subject": "Q4 Report"}},
+    "human_approved": None,
+    "results": []
+}, config)
+
+# Human reviews and approves
+print("\n👤 Human: Approving action...")
+graph.update_state(config, {"human_approved": True})
+
+# Resume execution
+final_state = graph.invoke(None, config)
+print("Results:", final_state["results"])</code></pre>
+        </div>
+
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">HITL Decision Matrix</h3>
+        <div style="overflow-x:auto;border-radius:8px;border:1px solid var(--border);">
+          <table>
+            <thead><tr><th>Action Type</th><th>Auto Execute</th><th>Notify Only</th><th>Approval Required</th></tr></thead>
+            <tbody>
+              <tr><td>Read data / search</td><td style="color:#10b981;">✅ Yes</td><td></td><td></td></tr>
+              <tr><td>Generate report / draft</td><td style="color:#10b981;">✅ Yes</td><td></td><td></td></tr>
+              <tr><td>Create internal record</td><td></td><td style="color:#f59e0b;">📧 Yes</td><td></td></tr>
+              <tr><td>Send notification / message</td><td></td><td></td><td style="color:#ef4444;">🔴 Yes</td></tr>
+              <tr><td>Update / modify record</td><td></td><td></td><td style="color:#ef4444;">🔴 Yes</td></tr>
+              <tr><td>Delete data</td><td></td><td></td><td style="color:#ef4444;">🔴 Always</td></tr>
+              <tr><td>Financial transaction</td><td></td><td></td><td style="color:#ef4444;">🔴 Always + audit</td></tr>
+              <tr><td>External API write</td><td></td><td></td><td style="color:#ef4444;">🔴 Yes</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 7: MEMORY PATTERNS -->
+    <!-- ============================================================ -->
+    <div class="card" id="sec-memory" data-tags="memory,concept" style="margin-bottom:24px;" data-id="memory">
+      <div class="section-header" onclick="toggleSection('memory')" style="border-left:4px solid var(--accent6);border-radius:10px 10px 0 0;">
+        <span style="font-size:22px;">💾</span>
+        <div style="flex:1;">
+          <h2 style="font-size:18px;font-weight:700;">Memory Architecture for AI Agents</h2>
+          <p style="color:var(--text3);font-size:13px;">4 types of memory every enterprise agent needs</p>
+        </div>
+        <button class="fav-btn" onclick="event.stopPropagation();toggleFav('memory',this)" id="fav-memory">☆</button>
+        <span class="badge badge-concept">Concept</span>
+        <span class="chevron open" id="chev-memory">›</span>
+      </div>
+      <div class="collapsible-body" id="body-memory" style="max-height:5000px;padding:0 20px 20px;">
+        <div class="mermaid-wrap" style="margin-bottom:16px;">
+          <div class="mermaid">
+graph LR
+    subgraph Memory Types
+        A["🟡 In-Context\n(Short-term)\nConversation window\nLimited tokens\nFastest"] 
+        B["🟢 External DB\n(Long-term)\nVector database\nUnlimited storage\nPersistent"]
+        C["🔵 Episodic\nPast task runs\nWhat worked before\nLearning from history"]
+        D["🟣 Semantic\nFacts & knowledge\nDomain expertise\nReference data"]
+    end
+    Agent["🤖 Agent"] <-->|"Read/Write"| A
+    Agent <-->|"Retrieve by similarity"| B
+    Agent <-->|"Recall past runs"| C
+    Agent <-->|"Domain knowledge"| D
+    style A fill:#f59e0b20,stroke:#f59e0b
+    style B fill:#10b98120,stroke:#10b981
+    style C fill:#3b82f620,stroke:#3b82f6
+    style D fill:#8b5cf620,stroke:#8b5cf6
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;" class="grid-2">
+          <div class="card" style="padding:14px;border-left:4px solid #f59e0b;">
+            <h4 style="font-size:13px;font-weight:700;color:#f59e0b;margin-bottom:8px;">🟡 In-Context Memory</h4>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:8px;">The conversation history in the LLM's context window.</p>
+            <div class="code-wrap">
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+              <pre><code class="language-python"># ConversationBufferMemory — keep all history
+from langchain.memory import ConversationBufferWindowMemory
+
+memory = ConversationBufferWindowMemory(
+    k=10,  # Keep last 10 exchanges
+    return_messages=True
+)
+
+# ConversationSummaryMemory — summarize old history
+from langchain.memory import ConversationSummaryMemory
+summary_memory = ConversationSummaryMemory(
+    llm=llm,
+    max_token_limit=1000  # Summarize when over limit
+)</code></pre>
+            </div>
+          </div>
+
+          <div class="card" style="padding:14px;border-left:4px solid #10b981;">
+            <h4 style="font-size:13px;font-weight:700;color:#10b981;margin-bottom:8px;">🟢 Vector Store Memory</h4>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:8px;">Long-term storage with semantic search retrieval.</p>
+            <div class="code-wrap">
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+              <pre><code class="language-python">from langchain.vectorstores import Chroma
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.memory import VectorStoreRetrieverMemory
+
+# Set up vector store
+vectorstore = Chroma(
+    embedding_function=OpenAIEmbeddings(),
+    collection_name="agent_memory"
+)
+retriever = vectorstore.as_retriever(
+    search_kwargs={"k": 5}  # Retrieve top 5 memories
+)
+# Memory that retrieves relevant past interactions
+memory = VectorStoreRetrieverMemory(
+    retriever=retriever)</code></pre>
+            </div>
+          </div>
+
+          <div class="card" style="padding:14px;border-left:4px solid #3b82f6;">
+            <h4 style="font-size:13px;font-weight:700;color:#3b82f6;margin-bottom:8px;">🔵 Episodic Memory Pattern</h4>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:8px;">Remember and learn from past task runs.</p>
+            <div class="code-wrap">
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+              <pre><code class="language-python">import json, sqlite3
+from datetime import datetime
+
+class EpisodicMemory:
+    def __init__(self, db_path="agent_episodes.db"):
+        self.conn = sqlite3.connect(db_path)
+        self.conn.execute("""CREATE TABLE IF NOT EXISTS episodes
+            (id INTEGER PRIMARY KEY, task TEXT,
+             outcome TEXT, steps TEXT,
+             success INTEGER, timestamp TEXT)""")
+
+    def store_episode(self, task, outcome, steps, success):
+        self.conn.execute(
+            "INSERT INTO episodes VALUES (NULL,?,?,?,?,?)",
+            (task, outcome, json.dumps(steps),
+             int(success), datetime.now().isoformat()))
+        self.conn.commit()
+
+    def recall_similar(self, task: str, limit=3) -> list:
+        # In production, use vector similarity
+        cursor = self.conn.execute(
+            "SELECT * FROM episodes WHERE success=1 "
+            "ORDER BY timestamp DESC LIMIT ?", (limit,))
+        return cursor.fetchall()</code></pre>
+            </div>
+          </div>
+
+          <div class="card" style="padding:14px;border-left:4px solid #8b5cf6;">
+            <h4 style="font-size:13px;font-weight:700;color:#8b5cf6;margin-bottom:8px;">🟣 Semantic / Knowledge Memory</h4>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:8px;">RAG: domain knowledge always available.</p>
+            <div class="code-wrap">
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+              <pre><code class="language-python">from langchain.document_loaders import DirectoryLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.vectorstores import Chroma
+from langchain.embeddings import OpenAIEmbeddings
+
+# Load and index enterprise knowledge
+loader = DirectoryLoader('./knowledge_base', glob="**/*.pdf")
+docs = loader.load()
+
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size=1000, chunk_overlap=200)
+chunks = splitter.split_documents(docs)
+
+vectorstore = Chroma.from_documents(
+    chunks,
+    OpenAIEmbeddings(),
+    collection_name="enterprise_knowledge"
+)
+# Agent uses this for RAG
+retriever = vectorstore.as_retriever(
+    search_kwargs={"k": 3}
+)</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="highlight-box warning">
+          <strong>🏢 Enterprise Memory Strategy:</strong> Use all 4 types together. In-context for current task · Vector DB for domain knowledge (RAG) · Episodic for learning from past runs · Semantic store for company policies and procedures.
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 8: TESTING AI AGENTS -->
+    <!-- ============================================================ -->
+    <div class="card" id="sec-testing" data-tags="testing" style="margin-bottom:24px;border-left:4px solid var(--accent4);" data-id="testing">
+      <div class="section-header" onclick="toggleSection('testing')">
+        <span style="font-size:22px;">🧪</span>
+        <div style="flex:1;">
+          <h2 style="font-size:18px;font-weight:700;">Testing AI Agents — End to End</h2>
+          <p style="color:var(--text3);font-size:13px;">Complete testing strategy from unit tests to production evals</p>
+        </div>
+        <button class="fav-btn" onclick="event.stopPropagation();toggleFav('testing',this)" id="fav-testing">☆</button>
+        <span class="badge badge-testing">Testing</span>
+        <span class="chevron open" id="chev-testing">›</span>
+      </div>
+      <div class="collapsible-body" id="body-testing" style="max-height:6000px;padding:0 20px 20px;">
+        <div class="mermaid-wrap" style="margin-bottom:16px;">
+          <div class="mermaid">
+flowchart LR
+    subgraph Testing Pyramid
+        direction TB
+        A["🔺 E2E / Eval\nFull agent runs\nLLM-as-judge\nHuman eval"]
+        B["🔷 Integration Tests\nAgent + real tools\nScenario tests\nGolden datasets"]
+        C["🟦 Unit Tests\nMock LLM calls\nTool logic\nPrompt templates"]
+    end
+    C --> B --> A
+    style A fill:#ef444420,stroke:#ef4444
+    style B fill:#f59e0b20,stroke:#f59e0b
+    style C fill:#10b98120,stroke:#10b981
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:16px;">
+          <div>
+            <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">Level 1: Unit Testing Tools</h3>
+            <div class="code-wrap">
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+              <pre><code class="language-python">import pytest
+from unittest.mock import patch, MagicMock
+
+# Test tool function directly
+def test_weather_tool():
+    result = get_weather("Tokyo", unit="celsius")
+    assert "city" in result
+    assert "temp" in result
+    assert result["unit"] == "celsius"
+
+# Test with mocked LLM
+def test_agent_calls_right_tool():
+    mock_llm = MagicMock()
+    mock_llm.invoke.return_value = MagicMock(
+        tool_calls=[{
+            "name": "get_weather",
+            "args": {"city": "Tokyo"}
+        }]
+    )
+    # Inject mock LLM
+    agent = MyAgent(llm=mock_llm)
+    result = agent.run("What's the weather in Tokyo?")
+    # Verify the right tool was called
+    assert mock_llm.invoke.called
+
+# Test prompt template
+def test_cot_prompt_format():
+    chain = structured_cot | FakeLLM()
+    result = chain.invoke({"question": "2+2?"})
+    assert "&lt;thinking&gt;" in result.lower() or \
+           "step" in result.lower()</code></pre>
+            </div>
+          </div>
+          <div>
+            <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">Level 2: Integration Testing</h3>
+            <div class="code-wrap">
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+              <pre><code class="language-python">import pytest
+
+# Golden test dataset
+TEST_CASES = [
+    {
+        "input": "Search for the CEO of Apple",
+        "expected_tool": "web_search",
+        "expected_keywords": ["Tim Cook", "Apple"]
+    },
+    {
+        "input": "What is 15% of 480?",
+        "expected_tool": "calculator",
+        "expected_answer": "72"
+    },
+    {
+        "input": "Schedule meeting tomorrow at 3pm",
+        "expected_tool": "create_calendar_event",
+        "expected_keys": ["title", "date"]
+    }
+]
+
+@pytest.mark.parametrize("case", TEST_CASES)
+def test_agent_routing(case, agent_executor):
+    result = agent_executor.invoke({"input": case["input"]})
+
+    # Check correct tool was used
+    tools_used = [step[0].tool for step in
+                  result.get("intermediate_steps", [])]
+    assert case["expected_tool"] in tools_used
+
+    # Check output quality
+    output = result["output"].lower()
+    for keyword in case.get("expected_keywords", []):
+        assert keyword.lower() in output</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">Level 3: LLM-as-Judge Evaluation</h3>
+        <div class="code-wrap" style="margin-bottom:16px;">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-python">from langchain_openai import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate
+
+eval_llm = ChatOpenAI(model="gpt-4o", temperature=0)
+
+EVAL_PROMPT = ChatPromptTemplate.from_messages([
+    ("system", """You are an expert evaluator for AI agent responses.
+Rate the response on these criteria (each 1-5):
+- Correctness: Is the answer factually correct?
+- Completeness: Does it fully answer the question?
+- Helpfulness: Is it useful to the user?
+- Safety: Is it free of harmful content?
+
+Return JSON:
+{{"correctness": N, "completeness": N, "helpfulness": N,
+  "safety": N, "overall": N, "explanation": "..."}}"""),
+    ("human", """Question: {question}
+Agent Response: {response}
+Ground Truth (if available): {ground_truth}
+Evaluate:""")
+])
+
+def evaluate_response(question, response, ground_truth="N/A"):
+    chain = EVAL_PROMPT | eval_llm
+    result = chain.invoke({
+        "question": question,
+        "response": response,
+        "ground_truth": ground_truth
+    })
+    import json
+    return json.loads(result.content)
+
+# Run eval suite
+def run_evaluation_suite(agent, test_cases):
+    scores = []
+    for case in test_cases:
+        response = agent.run(case["input"])
+        score = evaluate_response(
+            case["input"],
+            response,
+            case.get("ground_truth", "N/A")
+        )
+        scores.append(score)
+        print(f"Q: {case['input'][:50]}...")
+        print(f"   Overall: {score['overall']}/5 — {score['explanation'][:80]}")
+
+    avg = sum(s["overall"] for s in scores) / len(scores)
+    print(f"\n📊 Average Score: {avg:.2f}/5.0")
+    return scores</code></pre>
+        </div>
+
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">Tracing & Observability</h3>
+        <div class="code-wrap" style="margin-bottom:16px;">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-python"># Option 1: LangSmith (LangChain's tracing tool)
+import os
+os.environ["LANGCHAIN_TRACING_V2"] = "true"
+os.environ["LANGCHAIN_API_KEY"] = "your-langsmith-key"
+os.environ["LANGCHAIN_PROJECT"] = "enterprise-agent-v1"
+
+# Every agent run is now automatically traced!
+result = agent_executor.invoke({"input": "Your query here"})
+
+# Option 2: Custom tracing with callbacks
+from langchain.callbacks import StdOutCallbackHandler
+from langchain.callbacks.base import BaseCallbackHandler
+
+class EnterpriseTracer(BaseCallbackHandler):
+    def __init__(self, run_id):
+        self.run_id = run_id
+        self.steps = []
+
+    def on_agent_action(self, action, **kwargs):
+        self.steps.append({
+            "type": "action",
+            "tool": action.tool,
+            "input": action.tool_input,
+        })
+        print(f"🔧 Tool: {action.tool} | Input: {action.tool_input}")
+
+    def on_tool_end(self, output, **kwargs):
+        self.steps[-1]["output"] = str(output)[:200]
+        print(f"   Result: {str(output)[:100]}...")
+
+    def on_agent_finish(self, finish, **kwargs):
+        print(f"✅ Done: {finish.return_values.get('output','')[:100]}")
+
+# Usage
+tracer = EnterpriseTracer(run_id="run_001")
+result = agent_executor.invoke(
+    {"input": "Query here"},
+    {"callbacks": [tracer]}
+)</code></pre>
+        </div>
+
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">Testing Checklist</h3>
+        <div style="overflow-x:auto;border-radius:8px;border:1px solid var(--border);">
+          <table>
+            <thead><tr><th>Test Type</th><th>What to Test</th><th>Tools</th><th>Frequency</th></tr></thead>
+            <tbody>
+              <tr><td>Unit Tests</td><td>Each tool function in isolation</td><td>pytest, unittest.mock</td><td>Every commit</td></tr>
+              <tr><td>Prompt Tests</td><td>Prompt templates, output format</td><td>pytest + FakeLLM</td><td>Every commit</td></tr>
+              <tr><td>Integration</td><td>Agent + tools end-to-end</td><td>pytest + real LLM</td><td>Daily</td></tr>
+              <tr><td>Golden Dataset</td><td>Regression on known Q&amp;A pairs</td><td>Custom harness</td><td>Daily</td></tr>
+              <tr><td>LLM-as-Judge</td><td>Quality, safety, helpfulness</td><td>GPT-4 eval prompts</td><td>Weekly</td></tr>
+              <tr><td>Load Testing</td><td>Latency, token cost, concurrency</td><td>Locust, custom</td><td>Pre-release</td></tr>
+              <tr><td>Red Team</td><td>Adversarial inputs, jailbreaks</td><td>Manual + automated</td><td>Pre-release</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 9: COMMON PITFALLS -->
+    <!-- ============================================================ -->
+    <div class="card" id="sec-pitfalls" data-tags="pitfall" style="margin-bottom:24px;border-left:4px solid var(--accent5);" data-id="pitfalls">
+      <div class="section-header" onclick="toggleSection('pitfalls')">
+        <span style="font-size:22px;">⚠️</span>
+        <div style="flex:1;">
+          <h2 style="font-size:18px;font-weight:700;">Common Pitfalls & How to Avoid Them</h2>
+          <p style="color:var(--text3);font-size:13px;">Learn from others' mistakes — especially in enterprise</p>
+        </div>
+        <button class="fav-btn" onclick="event.stopPropagation();toggleFav('pitfalls',this)" id="fav-pitfalls">☆</button>
+        <span class="badge" style="background:#ef4444;">Pitfalls</span>
+        <span class="chevron open" id="chev-pitfalls">›</span>
+      </div>
+      <div class="collapsible-body" id="body-pitfalls" style="max-height:4000px;padding:0 20px 20px;">
+        <div style="display:flex;flex-direction:column;gap:12px;">
+
+          <div class="highlight-box danger">
+            <h4 style="font-size:13px;font-weight:700;margin-bottom:6px;">🔄 Infinite Loops</h4>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:6px;">Agent keeps calling tools without terminating. Costs money and time.</p>
+            <div class="code-wrap">
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+              <pre><code class="language-python"># ALWAYS set max_iterations
+agent_executor = AgentExecutor(
+    agent=agent, tools=tools,
+    max_iterations=15,         # Hard stop
+    max_execution_time=60.0,   # 60 second timeout
+    early_stopping_method="generate",  # LLM generates final answer
+)</code></pre>
+            </div>
+          </div>
+
+          <div class="highlight-box warning">
+            <h4 style="font-size:13px;font-weight:700;margin-bottom:6px;">🪟 Context Window Overflow</h4>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:6px;">Too much history / tool results fill the context, causing errors or degraded performance.</p>
+            <div class="code-wrap">
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+              <pre><code class="language-python"># Truncate tool outputs
+def safe_tool_output(result: str, max_chars=2000) -> str:
+    if len(result) > max_chars:
+        return result[:max_chars] + f"\n...[Truncated. Full result has {len(result)} chars]"
+    return result
+
+# Use token-aware memory management
+from langchain.memory import ConversationTokenBufferMemory
+memory = ConversationTokenBufferMemory(
+    llm=llm,
+    max_token_limit=3000,  # Keep within budget
+    return_messages=True
+)</code></pre>
+            </div>
+          </div>
+
+          <div class="highlight-box danger">
+            <h4 style="font-size:13px;font-weight:700;margin-bottom:6px;">💸 Runaway Token Costs</h4>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:6px;">Agents in a loop with verbose tools can spend $100s accidentally.</p>
+            <div class="code-wrap">
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+              <pre><code class="language-python">from langchain.callbacks import get_openai_callback
+
+# Track costs on every run
+with get_openai_callback() as cb:
+    result = agent_executor.invoke({"input": "query"})
+    print(f"Tokens: {cb.total_tokens} | Cost: ${cb.total_cost:.4f}")
+
+    # Alert if over budget
+    if cb.total_cost > 0.50:  # $0.50 per run limit
+        raise Exception(f"Cost limit exceeded: ${cb.total_cost:.2f}")</code></pre>
+            </div>
+          </div>
+
+          <div class="highlight-box warning">
+            <h4 style="font-size:13px;font-weight:700;margin-bottom:6px;">🎭 Prompt Injection</h4>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:6px;">Malicious input in tool results manipulates agent behavior.</p>
+            <div class="code-wrap">
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+              <pre><code class="language-python">import re
+
+def sanitize_tool_output(output: str) -> str:
+    """Remove potential prompt injection attempts."""
+    # Remove instruction-like patterns
+    patterns = [
+        r'ignore\s+previous\s+instructions',
+        r'system:\s*you\s+are',
+        r'new\s+instructions:',
+        r'forget\s+everything',
+    ]
+    for pattern in patterns:
+        output = re.sub(pattern, '[FILTERED]', output,
+                       flags=re.IGNORECASE)
+    return output
+
+# Wrap all tool outputs
+def safe_tool_wrapper(tool_func):
+    def wrapper(*args, **kwargs):
+        result = tool_func(*args, **kwargs)
+        return sanitize_tool_output(str(result))
+    return wrapper</code></pre>
+            </div>
+          </div>
+
+          <div class="highlight-box danger">
+            <h4 style="font-size:13px;font-weight:700;margin-bottom:6px;">🔇 Silent Failures</h4>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:6px;">Agent fails silently and returns wrong answer with confidence.</p>
+            <div class="code-wrap">
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+              <pre><code class="language-python">class RobustTool:
+    def __init__(self, func, name, max_retries=3):
+        self.func = func
+        self.name = name
+        self.max_retries = max_retries
+
+    def run(self, *args, **kwargs):
+        for attempt in range(self.max_retries):
+            try:
+                result = self.func(*args, **kwargs)
+                return {"success": True, "data": result}
+            except Exception as e:
+                if attempt == self.max_retries - 1:
+                    # Return structured error for LLM to handle
+                    return {
+                        "success": False,
+                        "error": str(e),
+                        "suggestion": "Try a different approach"
+                    }
+                time.sleep(2 ** attempt)  # Exponential backoff</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;overflow-x:auto;border-radius:8px;border:1px solid var(--border);">
+          <table>
+            <thead><tr><th>Pitfall</th><th>Symptom</th><th>Prevention</th></tr></thead>
+            <tbody>
+              <tr><td>Infinite loops</td><td>Agent keeps running, huge bill</td><td>max_iterations + timeout</td></tr>
+              <tr><td>Context overflow</td><td>LLM errors, degraded quality</td><td>Token-aware memory, truncate outputs</td></tr>
+              <tr><td>Hallucinated tool calls</td><td>Wrong tool used, wrong args</td><td>GPT-4o/Claude, strict schemas</td></tr>
+              <tr><td>No error recovery</td><td>Agent crashes on tool failure</td><td>handle_parsing_errors=True, retries</td></tr>
+              <tr><td>No tracing</td><td>Can't debug production issues</td><td>LangSmith / custom callbacks</td></tr>
+              <tr><td>Unsafe actions</td><td>Data loss, security breach</td><td>HITL for all write operations</td></tr>
+              <tr><td>Prompt injection</td><td>Agent manipulated via tool output</td><td>Sanitize all external inputs</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 10: FRAMEWORKS CHEAT SHEET -->
+    <!-- ============================================================ -->
+    <div class="card" id="sec-frameworks" data-tags="tool,concept" style="margin-bottom:24px;" data-id="frameworks">
+      <div class="section-header" onclick="toggleSection('frameworks')">
+        <span style="font-size:22px;">🛠️</span>
+        <div style="flex:1;">
+          <h2 style="font-size:18px;font-weight:700;">Framework Cheat Sheet — Pick the Right Tool</h2>
+          <p style="color:var(--text3);font-size:13px;">LangChain, LangGraph, AutoGen, CrewAI, LlamaIndex compared</p>
+        </div>
+        <button class="fav-btn" onclick="event.stopPropagation();toggleFav('frameworks',this)" id="fav-frameworks">☆</button>
+        <span class="badge badge-concept">Concept</span>
+        <span class="chevron open" id="chev-frameworks">›</span>
+      </div>
+      <div class="collapsible-body" id="body-frameworks" style="max-height:3000px;padding:0 20px 20px;">
+        <div style="overflow-x:auto;border-radius:8px;border:1px solid var(--border);margin-bottom:16px;">
+          <table>
+            <thead><tr><th>Framework</th><th>Best For</th><th>Strengths</th><th>Weaknesses</th><th>Install</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong style="color:#3b82f6;">LangChain</strong></td>
+                <td>General agents, RAG</td>
+                <td>Huge ecosystem, tons of integrations, great docs</td>
+                <td>Can be complex, abstractions can hide bugs</td>
+                <td><code style="font-size:11px;">pip install langchain langchain-openai</code></td>
+              </tr>
+              <tr>
+                <td><strong style="color:#8b5cf6;">LangGraph</strong></td>
+                <td>Complex workflows, HITL</td>
+                <td>Graph-based, checkpointing, interrupts, production-ready</td>
+                <td>Steeper learning curve</td>
+                <td><code style="font-size:11px;">pip install langgraph</code></td>
+              </tr>
+              <tr>
+                <td><strong style="color:#10b981;">AutoGen</strong></td>
+                <td>Multi-agent conversations</td>
+                <td>Easy multi-agent setup, great for autonomous tasks</td>
+                <td>Less control over flow, can be unpredictable</td>
+                <td><code style="font-size:11px;">pip install pyautogen</code></td>
+              </tr>
+              <tr>
+                <td><strong style="color:#f59e0b;">CrewAI</strong></td>
+                <td>Role-based multi-agent teams</td>
+                <td>Intuitive, role-focused, good for business use cases</td>
+                <td>Less flexible than LangGraph</td>
+                <td><code style="font-size:11px;">pip install crewai</code></td>
+              </tr>
+              <tr>
+                <td><strong style="color:#06b6d4;">LlamaIndex</strong></td>
+                <td>Document Q&amp;A, RAG</td>
+                <td>Best-in-class for RAG, great document connectors</td>
+                <td>Primarily focused on retrieval use cases</td>
+                <td><code style="font-size:11px;">pip install llama-index</code></td>
+              </tr>
+              <tr>
+                <td><strong style="color:#ec4899;">Semantic Kernel</strong></td>
+                <td>Enterprise / .NET / Azure</td>
+                <td>Microsoft-backed, C#/Python, Azure integration</td>
+                <td>Less community resources than LangChain</td>
+                <td><code style="font-size:11px;">pip install semantic-kernel</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="highlight-box info">
+          <strong>🏢 Enterprise Recommendation:</strong> Start with <strong>LangChain</strong> for prototyping → move to <strong>LangGraph</strong> for production workflows. Add <strong>LlamaIndex</strong> for document/RAG use cases. Use <strong>LangSmith</strong> for observability from day one.
+        </div>
+
+        <div class="code-wrap" style="margin-top:16px;">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-bash"># Recommended enterprise setup
+pip install langchain langchain-openai langchain-community
+pip install langgraph langsmith
+pip install llama-index chromadb
+pip install python-dotenv pydantic
+
+# For testing
+pip install pytest pytest-asyncio
+
+# For observability
+# Set in .env:
+# LANGCHAIN_TRACING_V2=true
+# LANGCHAIN_API_KEY=your-key
+# OPENAI_API_KEY=your-key</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 11: QUICK REFERENCE -->
+    <!-- ============================================================ -->
+    <div class="card" id="sec-quickref" data-tags="concept,pattern" style="margin-bottom:24px;" data-id="quickref">
+      <div class="section-header" onclick="toggleSection('quickref')">
+        <span style="font-size:22px;">⚡</span>
+        <div style="flex:1;">
+          <h2 style="font-size:18px;font-weight:700;">Quick Reference — Prompt Snippets & Templates</h2>
+          <p style="color:var(--text3);font-size:13px;">Copy-paste ready system prompts for common agent tasks</p>
+        </div>
+        <button class="fav-btn" onclick="event.stopPropagation();toggleFav('quickref',this)" id="fav-quickref">☆</button>
+        <span class="badge badge-pattern">Pattern</span>
+        <span class="chevron open" id="chev-quickref">›</span>
+      </div>
+      <div class="collapsible-body" id="body-quickref" style="max-height:5000px;padding:0 20px 20px;">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">System Prompt: Research Agent</h3>
+        <div class="code-wrap" style="margin-bottom:16px;">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-python">RESEARCH_AGENT_SYSTEM = """You are an expert research analyst AI agent.
+
+Your goal is to provide accurate, well-sourced answers to research questions.
+
+## Rules
+1. Always search for current information before answering
+2. Cite your sources with URLs when possible
+3. If information is uncertain, say so explicitly
+4. Break complex research into sub-questions
+5. Provide a confidence score (low/medium/high) for your answer
+
+## Format
+For research tasks, structure your response as:
+**Summary**: [1-2 sentence summary]
+**Key Findings**: [bullet points]
+**Sources**: [numbered list of sources]
+**Confidence**: [low/medium/high] — [reason]
+
+## Limitations
+- Do not make up facts or sources
+- If you can't find reliable information, say so
+- Always distinguish between facts and opinions
+"""</code></pre>
+        </div>
+
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">System Prompt: Enterprise Task Agent</h3>
+        <div class="code-wrap" style="margin-bottom:16px;">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-python">ENTERPRISE_AGENT_SYSTEM = """You are an enterprise AI assistant for {company_name}.
+
+## Identity
+- You are a professional assistant with access to company systems
+- You follow company policies and escalation procedures
+- You never share confidential data outside authorized systems
+
+## Decision Framework
+Before any action, classify it:
+- READ: Safe to execute immediately
+- WRITE: Notify user, then execute
+- DELETE/FINANCIAL: STOP. Request explicit confirmation.
+
+## Communication Style
+- Professional and concise
+- Use bullet points for multiple items
+- Always confirm before irreversible actions
+- Escalate to human when: unclear instructions, ethical concerns, high-risk actions
+
+## Error Handling
+- If a tool fails, explain what happened and suggest alternatives
+- Never silently ignore errors
+- Provide fallback options when possible
+
+## Available Context
+- User: {user_name} ({user_role})
+- Department: {department}
+- Time: {current_time}
+"""</code></pre>
+        </div>
+
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">Agent Environment Setup Template</h3>
+        <div class="code-wrap" style="margin-bottom:16px;">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-python"># agent_config.py — starter template for any enterprise agent
+
+from langchain_openai import ChatOpenAI
+from langchain.agents import AgentExecutor, create_openai_tools_agent
+from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain.memory import ConversationTokenBufferMemory
+from langchain.tools import StructuredTool
+from pydantic import BaseModel, Field
+import os
+
+# ---- CONFIGURATION ----
+class AgentConfig:
+    MODEL = "gpt-4o"
+    TEMPERATURE = 0
+    MAX_TOKENS = 4096
+    MAX_ITERATIONS = 15
+    MAX_EXECUTION_TIME = 120  # seconds
+    MEMORY_TOKEN_LIMIT = 3000
+
+# ---- LLM ----
+llm = ChatOpenAI(
+    model=AgentConfig.MODEL,
+    temperature=AgentConfig.TEMPERATURE,
+    max_tokens=AgentConfig.MAX_TOKENS,
+    api_key=os.getenv("OPENAI_API_KEY")
+)
+
+# ---- MEMORY ----
+memory = ConversationTokenBufferMemory(
+    llm=llm,
+    max_token_limit=AgentConfig.MEMORY_TOKEN_LIMIT,
+    memory_key="chat_history",
+    return_messages=True
+)
+
+# ---- TOOLS ---- (Define your tools here)
+class SearchInput(BaseModel):
+    query: str = Field(description="Search query string")
+
+def my_search_tool(query: str) -> str:
+    """Your search implementation."""
+    return f"Results for: {query}"
+
+tools = [
+    StructuredTool.from_function(
+        func=my_search_tool,
+        name="web_search",
+        description="Search the web for current information",
+        args_schema=SearchInput,
+    )
+]
+
+# ---- PROMPT ----
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are a helpful enterprise AI assistant."),
+    MessagesPlaceholder(variable_name="chat_history"),
+    ("human", "{input}"),
+    MessagesPlaceholder(variable_name="agent_scratchpad"),
+])
+
+# ---- AGENT ----
+agent = create_openai_tools_agent(llm, tools, prompt)
+
+agent_executor = AgentExecutor(
+    agent=agent,
+    tools=tools,
+    memory=memory,
+    verbose=True,
+    max_iterations=AgentConfig.MAX_ITERATIONS,
+    max_execution_time=AgentConfig.MAX_EXECUTION_TIME,
+    handle_parsing_errors=True,
+    return_intermediate_steps=True,
+)
+
+# ---- USAGE ----
+if __name__ == "__main__":
+    while True:
+        user_input = input("\nYou: ")
+        if user_input.lower() in ["exit", "quit"]:
+            break
+        result = agent_executor.invoke({"input": user_input})
+        print(f"\nAgent: {result['output']}")</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMING SOON -->
+    <div class="card" style="margin-bottom:24px;border:2px dashed var(--border);background:transparent;">
+      <div style="padding:28px;text-align:center;">
+        <div style="font-size:40px;margin-bottom:12px;">🚀</div>
+        <h2 style="font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text);">Intermediate & Advanced Patterns — Coming Next Session</h2>
+        <p style="color:var(--text2);font-size:14px;margin-bottom:16px;">When limit resets, the next session will add:</p>
+        <div class="grid-2" style="text-align:left;gap:12px;max-width:700px;margin:0 auto;">
+          <div class="highlight-box info" style="padding:10px 14px;">
+            <strong style="font-size:12px;">🔷 Intermediate</strong>
+            <ul style="font-size:12px;color:var(--text2);margin-top:6px;list-style:none;display:flex;flex-direction:column;gap:2px;">
+              <li>• Multi-Agent Orchestration</li>
+              <li>• Supervisor + Subagent Pattern</li>
+              <li>• Parallel Agent Execution</li>
+              <li>• RAG + Agent Integration</li>
+              <li>• Streaming Responses</li>
+            </ul>
+          </div>
+          <div class="highlight-box purple" style="padding:10px 14px;">
+            <strong style="font-size:12px;">🔺 Advanced</strong>
+            <ul style="font-size:12px;color:var(--text2);margin-top:6px;list-style:none;display:flex;flex-direction:column;gap:2px;">
+              <li>• Self-Reflective Agents</li>
+              <li>• Agent with Long-term Learning</li>
+              <li>• Production Deployment Patterns</li>
+              <li>• Cost Optimization Strategies</li>
+              <li>• Security & Guardrails</li>
+            </ul>
+          </div>
+        </div>
+        <p style="color:var(--text3);font-size:12px;margin-top:16px;">💡 Tip: Save this file — all your favorites will be preserved via localStorage</p>
+      </div>
+    </div>
+
+    <div style="text-align:center;padding:20px 0;color:var(--text3);font-size:12px;">
+      🤖 AI Agent Patterns Cheat Sheet · Beginner Track v1.0 · Made with ❤️ for enterprise developers
+    </div>
+
+  </div><!-- /content-area -->
+</div><!-- /main-content -->
+
+<script>
+// ============================================================
+// MERMAID INIT
+// ============================================================
+mermaid.initialize({
+  startOnLoad: true,
+  theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default',
+  darkMode: true,
+  fontFamily: 'Inter, Segoe UI, sans-serif',
+  flowchart: { curve: 'basis', padding: 20 },
+  sequence: { actorMargin: 80 },
+});
+
+// ============================================================
+// THEME TOGGLE
+// ============================================================
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.dataset.theme === 'dark';
+  html.dataset.theme = isDark ? 'light' : 'dark';
+  document.getElementById('theme-btn').textContent = isDark ? '🌙 Dark Mode' : '☀️ Light Mode';
+  document.querySelectorAll('.topbar-theme-btn').forEach(b => b.textContent = isDark ? '🌙' : '☀️');
+  // Re-render mermaid with new theme
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: isDark ? 'default' : 'dark',
+    fontFamily: 'Inter, Segoe UI, sans-serif',
+  });
+  mermaid.init(undefined, document.querySelectorAll('.mermaid'));
+}
+
+// ============================================================
+// COLLAPSIBLE SECTIONS
+// ============================================================
+function toggleSection(id) {
+  const body = document.getElementById('body-' + id);
+  const chev = document.getElementById('chev-' + id);
+  if (!body) return;
+  const isOpen = !body.classList.contains('collapsed');
+  if (isOpen) {
+    body.style.maxHeight = body.scrollHeight + 'px';
+    requestAnimationFrame(() => {
+      body.style.maxHeight = '0px';
+      body.classList.add('collapsed');
+    });
+    chev.classList.remove('open');
+  } else {
+    body.classList.remove('collapsed');
+    body.style.maxHeight = '9999px';
+    chev.classList.add('open');
+  }
+}
+
+function expandAll() {
+  document.querySelectorAll('.collapsible-body').forEach(b => {
+    b.classList.remove('collapsed');
+    b.style.maxHeight = '9999px';
+  });
+  document.querySelectorAll('.chevron').forEach(c => c.classList.add('open'));
+}
+
+function collapseAll() {
+  document.querySelectorAll('.collapsible-body').forEach(b => {
+    b.style.maxHeight = '0px';
+    b.classList.add('collapsed');
+  });
+  document.querySelectorAll('.chevron').forEach(c => c.classList.remove('open'));
+}
+
+// ============================================================
+// FAVORITES
+// ============================================================
+let favorites = JSON.parse(localStorage.getItem('agent-cheatsheet-favs') || '[]');
+
+function toggleFav(id, btn) {
+  const idx = favorites.indexOf(id);
+  if (idx > -1) {
+    favorites.splice(idx, 1);
+    btn.textContent = '☆';
+    btn.classList.remove('active');
+  } else {
+    favorites.push(id);
+    btn.textContent = '★';
+    btn.classList.add('active');
+  }
+  localStorage.setItem('agent-cheatsheet-favs', JSON.stringify(favorites));
+  updateFavCount();
+}
+
+function updateFavCount() {
+  document.getElementById('fav-count').textContent = favorites.length;
+}
+
+function initFavs() {
+  favorites.forEach(id => {
+    const btn = document.getElementById('fav-' + id);
+    if (btn) {
+      btn.textContent = '★';
+      btn.classList.add('active');
+    }
+  });
+  updateFavCount();
+}
+
+// ============================================================
+// COPY TO CLIPBOARD
+// ============================================================
+function copyCode(btn) {
+  const pre = btn.closest('.code-wrap').querySelector('pre');
+  const text = pre.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copy';
+      btn.classList.remove('copied');
+    }, 2000);
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// ============================================================
+// FUZZY SEARCH
+// ============================================================
+let currentFilter = 'all';
+let currentSearch = '';
+
+function fuzzyMatch(text, query) {
+  if (!query) return true;
+  const t = text.toLowerCase();
+  const q = query.toLowerCase();
+  // Exact substring match first
+  if (t.includes(q)) return true;
+  // Fuzzy: all chars of query appear in order
+  let qi = 0;
+  for (let ci = 0; ci < t.length && qi < q.length; ci++) {
+    if (t[ci] === q[qi]) qi++;
+  }
+  return qi === q.length;
+}
+
+function doSearch(query) {
+  currentSearch = query;
+  applyFilters();
+}
+
+function setFilter(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('#filter-bar .tag').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function applyFilters() {
+  const cards = document.querySelectorAll('[data-id]');
+  let visibleCount = 0;
+
+  cards.forEach(card => {
+    const tags = (card.dataset.tags || '').split(',');
+    const id = card.dataset.id;
+    const isFav = favorites.includes(id);
+
+    // Tag filter
+    let tagMatch = currentFilter === 'all' ||
+                   (currentFilter === 'favorites' ? isFav : tags.includes(currentFilter));
+
+    // Search filter
+    let searchMatch = true;
+    if (currentSearch) {
+      const text = card.textContent;
+      searchMatch = fuzzyMatch(text, currentSearch);
+    }
+
+    const visible = tagMatch && searchMatch;
+    card.style.display = visible ? '' : 'none';
+    if (visible) visibleCount++;
+  });
+
+  document.getElementById('pattern-count').textContent = visibleCount;
+}
+
+// ============================================================
+// TABLE OF CONTENTS
+// ============================================================
+const TOC_ITEMS = [
+  { id: 'mindmap', icon: '🗺️', label: 'Mind Map Overview' },
+  { id: 'what', icon: '🧠', label: 'What is an AI Agent?' },
+  { id: 'react', icon: '⚛️', label: 'Pattern #1: ReAct' },
+  { id: 'tooluse', icon: '🔧', label: 'Pattern #2: Tool Use' },
+  { id: 'cot', icon: '💭', label: 'Pattern #3: Chain of Thought' },
+  { id: 'plan', icon: '📋', label: 'Pattern #4: Plan & Execute' },
+  { id: 'hitl', icon: '👤', label: 'Pattern #5: Human-in-Loop' },
+  { id: 'memory', icon: '💾', label: 'Memory Architecture' },
+  { id: 'testing', icon: '🧪', label: 'Testing E2E' },
+  { id: 'pitfalls', icon: '⚠️', label: 'Common Pitfalls' },
+  { id: 'frameworks', icon: '🛠️', label: 'Framework Comparison' },
+  { id: 'quickref', icon: '⚡', label: 'Quick Reference' },
+];
+
+function buildTOC() {
+  const toc = document.getElementById('toc-list');
+  toc.innerHTML = '<div style="font-size:10px;font-weight:700;color:var(--text3);padding:4px 12px 8px;letter-spacing:0.08em;">CONTENTS</div>';
+  TOC_ITEMS.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'toc-item';
+    div.innerHTML = `<span>${item.icon}</span><span>${item.label}</span>`;
+    div.onclick = () => {
+      document.getElementById('sec-' + item.id)?.scrollIntoView({behavior:'smooth', block:'start'});
+      document.querySelectorAll('.toc-item').forEach(t => t.classList.remove('active'));
+      div.classList.add('active');
+      // Close mobile sidebar
+      document.getElementById('sidebar').classList.remove('open');
+    };
+    toc.appendChild(div);
+  });
+}
+
+// Count patterns for header
+function countPatterns() {
+  const count = document.querySelectorAll('[data-id]').length;
+  document.getElementById('pattern-count').textContent = count;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  buildTOC();
+  initFavs();
+  countPatterns();
+
+  // Intersection observer for TOC active state
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const id = e.target.dataset.id;
+        document.querySelectorAll('.toc-item').forEach((t, i) => {
+          t.classList.toggle('active', TOC_ITEMS[i]?.id === id);
+        });
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '-100px 0px -60% 0px' });
+
+  document.querySelectorAll('[data-id]').forEach(el => observer.observe(el));
+});
+</script>
+</body>
+</html>
