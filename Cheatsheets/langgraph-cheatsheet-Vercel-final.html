@@ -1,0 +1,3402 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Agent Patterns — Enterprise Knowledge Tree</title>
+  <meta name="description" content="A comprehensive knowledge tree for designing, building, testing, and deploying enterprise-grade AI agents." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Prism (syntax highlighting) -->
+  <link id="prism-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+  <!-- Fuse.js (fuzzy search) -->
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
+  <!-- Mermaid (diagrams) -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+  <!-- Prism core + languages -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #050a14;
+      --bg-soft: #0f1522;
+      --bg-elev: #151e2f;
+      --bg-elev-hover: #1a253d;
+      --border: #1e293b;
+      --border-light: #2e3a4f;
+      --text: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --primary: #6366f1;
+      --primary-soft: #4f46e5;
+      --primary-lighter: #818cf8;
+      --accent: #14b8a6;
+      --accent-soft: #2dd4bf;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --info: #3b82f6;
+      --tag-bg: #1e293b;
+      --tag-text: #e2e8f0;
+      --code-bg: #0a0e18;
+      --code-border: #1e293b;
+      --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
+      --radius: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+    }
+
+    html[data-theme="light"] {
+      --bg: #f8fafc;
+      --bg-soft: #ffffff;
+      --bg-elev: #ffffff;
+      --bg-elev-hover: #f1f5f9;
+      --border: #e2e8f0;
+      --border-light: #cbd5e1;
+      --text: #0f172a;
+      --text-secondary: #1e293b;
+      --text-muted: #64748b;
+      --primary: #4f46e5;
+      --primary-soft: #818cf8;
+      --primary-lighter: #c7d2fe;
+      --accent: #14b8a6;
+      --accent-soft: #99f6e4;
+      --success: #059669;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --info: #2563eb;
+      --tag-bg: #f1f5f9;
+      --tag-text: #1e293b;
+      --code-bg: #f8fafc;
+      --code-border: #e2e8f0;
+      --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08);
+      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 16px;
+      font-weight: 400;
+    }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-soft);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--primary-lighter);
+    }
+
+    /* ===== HEADER & NAV ===== */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(5, 10, 20, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary-lighter) 0%, var(--accent-soft) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -1px;
+    }
+
+    .search-box {
+      position: relative;
+      width: 300px;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 10px 16px 10px 40px;
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: var(--bg-elev-hover);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .search-box::before {
+      content: "🔍";
+      position: absolute;
+      left: 12px;
+      font-size: 14px;
+      opacity: 0.6;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .theme-toggle,
+    .help-btn {
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 14px;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .theme-toggle:hover,
+    .help-btn:hover {
+      background: var(--bg-elev-hover);
+      border-color: var(--primary);
+    }
+
+    /* ===== MAIN LAYOUT ===== */
+    .container {
+      display: flex;
+      max-width: 1600px;
+      margin: 0 auto;
+      height: calc(100vh - 65px);
+      position: relative;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: 280px;
+      background: var(--bg-soft);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 24px 0;
+      flex-shrink: 0;
+    }
+
+    .sidebar-section {
+      padding: 0 16px;
+      margin-bottom: 24px;
+    }
+
+    .sidebar-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      padding: 8px 12px;
+      margin-bottom: 8px;
+    }
+
+    .sidebar-item {
+      padding: 10px 12px;
+      margin-bottom: 6px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: var(--text-secondary);
+      font-size: 14px;
+      border-left: 2px solid transparent;
+      background: none;
+      border: none;
+      text-align: left;
+      width: 100%;
+    }
+
+    .sidebar-item:hover {
+      background: var(--bg-elev);
+      color: var(--text);
+    }
+
+    .sidebar-item.active {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, transparent 100%);
+      color: var(--primary-lighter);
+      border-left-color: var(--primary);
+      font-weight: 500;
+    }
+
+    /* ===== CONTENT AREA ===== */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 40px 60px;
+    }
+
+    .content::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    /* ===== SECTION ===== */
+    .section {
+      margin-bottom: 80px;
+      opacity: 0;
+      animation: fadeIn 0.6s ease-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section-header {
+      margin-bottom: 40px;
+    }
+
+    .section-title {
+      font-size: 40px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, var(--text) 0%, var(--text-secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .section-description {
+      font-size: 16px;
+      color: var(--text-secondary);
+      line-height: 1.8;
+      max-width: 800px;
+      margin-bottom: 20px;
+    }
+
+    /* ===== PATTERNS GRID ===== */
+    .patterns-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    /* ===== CARD ===== */
+    .card {
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--primary), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .card:hover {
+      background: var(--bg-elev-hover);
+      border-color: var(--primary);
+      box-shadow: var(--shadow-sm);
+      transform: translateY(-4px);
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      flex: 1;
+    }
+
+    .card-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .favorite-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 20px;
+      opacity: 0.5;
+      transition: all 0.2s ease;
+      padding: 4px;
+    }
+
+    .favorite-btn:hover,
+    .favorite-btn.active {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid var(--border-light);
+    }
+
+    .tag:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .card-description {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+      flex: 1;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .difficulty {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .difficulty.beginner {
+      color: var(--success);
+    }
+
+    .difficulty.intermediate {
+      color: var(--warning);
+    }
+
+    .difficulty.advanced {
+      color: var(--danger);
+    }
+
+    .expand-btn {
+      background: none;
+      border: none;
+      color: var(--primary);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+    }
+
+    .expand-btn:hover {
+      color: var(--primary-lighter);
+      gap: 10px;
+    }
+
+    /* ===== EXPANDED CONTENT ===== */
+    .card-expanded {
+      grid-column: 1 / -1;
+      background: var(--bg-elev);
+      border: 2px solid var(--primary);
+      box-shadow: var(--shadow-sm);
+      animation: slideDown 0.3s ease-out;
+      max-height: none;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+        max-height: 0;
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 5000px;
+      }
+    }
+
+    .card-expanded-content {
+      padding: 40px;
+    }
+
+    .card-expanded-title {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 24px;
+      color: var(--text);
+    }
+
+    .content-subsection {
+      margin-bottom: 40px;
+    }
+
+    .content-subsection-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--primary-lighter);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .content-subsection-text {
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-bottom: 16px;
+    }
+
+    /* ===== TABLE ===== */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    th {
+      background: var(--bg-soft);
+      padding: 16px;
+      text-align: left;
+      font-weight: 700;
+      color: var(--primary-lighter);
+      border-bottom: 2px solid var(--border);
+      text-transform: uppercase;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    tr:hover {
+      background: rgba(99, 102, 241, 0.05);
+    }
+
+    /* ===== CODE BLOCK ===== */
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--code-border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 24px 0;
+      font-family: "Fira Code", monospace;
+      font-size: 13px;
+    }
+
+    .code-block-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: rgba(0, 0, 0, 0.2);
+      border-bottom: 1px solid var(--code-border);
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .code-block-content {
+      padding: 16px;
+      overflow-x: auto;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    pre {
+      margin: 0 !important;
+      padding: 0 !important;
+      background: transparent !important;
+    }
+
+    code {
+      font-family: "Fira Code", monospace;
+      line-height: 1.5;
+    }
+
+    .copy-btn {
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .copy-btn:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .copy-btn.copied {
+      background: var(--success);
+      border-color: var(--success);
+    }
+
+    /* ===== MERMAID DIAGRAM ===== */
+    .diagram {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin: 32px 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+      min-height: 400px;
+    }
+
+    .diagram-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 16px;
+      padding: 0 8px;
+    }
+
+    .diagram-header-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .diagram-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .diagram-btn {
+      background: var(--bg-elev);
+      border: 1px solid var(--border-light);
+      color: var(--text-secondary);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .diagram-btn:hover {
+      background: var(--bg-elev-hover);
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    .diagram-container {
+      width: 100%;
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: auto;
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .diagram-container::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    .diagram-container::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .diagram-container::-webkit-scrollbar-thumb {
+      background: var(--border-light);
+      border-radius: 4px;
+    }
+
+    .diagram-container::-webkit-scrollbar-thumb:hover {
+      background: var(--border);
+    }
+
+    .mermaid {
+      display: flex;
+      justify-content: center;
+      transform-origin: center;
+      transition: transform 0.2s ease;
+    }
+
+    .mermaid svg {
+      width: 100%;
+      height: auto;
+      max-width: none;
+      min-width: 400px;
+    }
+
+    /* Fullscreen modal */
+    .diagram-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 10000;
+      padding: 20px;
+      overflow: auto;
+    }
+
+    .diagram-modal.active {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .diagram-modal-content {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      max-width: 90vw;
+      max-height: 90vh;
+      overflow: auto;
+      position: relative;
+    }
+
+    .diagram-modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: var(--bg-elev);
+      border: 1px solid var(--border-light);
+      color: var(--text);
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: all 0.2s ease;
+    }
+
+    .diagram-modal-close:hover {
+      background: var(--bg-elev-hover);
+      border-color: var(--border);
+    }
+
+    .diagram-modal-mermaid svg {
+      min-width: 600px;
+      max-width: 100%;
+    }
+
+    /* ===== COMPARISON TABLE ===== */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin: 24px 0;
+    }
+
+    .comparison-card {
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+    }
+
+    .comparison-card h4 {
+      color: var(--primary-lighter);
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .comparison-card ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .comparison-card li {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 12px;
+      padding-left: 24px;
+      position: relative;
+    }
+
+    .comparison-card li::before {
+      content: "→";
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: bold;
+    }
+
+    /* ===== FILTER CHIPS ===== */
+    .filter-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .chip {
+      padding: 8px 16px;
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .chip:hover,
+    .chip.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* ===== TIPS & WARNINGS ===== */
+    .tip,
+    .warning,
+    .info,
+    .example {
+      padding: 20px 24px;
+      border-radius: var(--radius);
+      margin: 24px 0;
+      border-left: 4px solid;
+      background: rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    .tip {
+      border-left-color: var(--success);
+      background: rgba(16, 185, 129, 0.05);
+    }
+
+    .tip::before {
+      content: "💡 TIP";
+      color: var(--success);
+      font-weight: 700;
+      display: block;
+      font-size: 12px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .warning {
+      border-left-color: var(--warning);
+      background: rgba(245, 158, 11, 0.05);
+    }
+
+    .warning::before {
+      content: "⚠️ WARNING";
+      color: var(--warning);
+      font-weight: 700;
+      display: block;
+      font-size: 12px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .info {
+      border-left-color: var(--primary);
+      background: rgba(99, 102, 241, 0.05);
+    }
+
+    .info::before {
+      content: "ℹ️ INFO";
+      color: var(--primary);
+      font-weight: 700;
+      display: block;
+      font-size: 12px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .example {
+      border-left-color: var(--accent);
+      background: rgba(20, 184, 166, 0.05);
+    }
+
+    .example::before {
+      content: "📌 EXAMPLE";
+      color: var(--accent);
+      font-weight: 700;
+      display: block;
+      font-size: 12px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tip,
+    .warning,
+    .info,
+    .example {
+      color: var(--text-secondary);
+    }
+
+    /* ===== TIMELINE ===== */
+    .timeline {
+      position: relative;
+      padding-left: 40px;
+    }
+
+    .timeline-item {
+      margin-bottom: 40px;
+      position: relative;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -40px;
+      top: 5px;
+      width: 12px;
+      height: 12px;
+      background: var(--primary);
+      border: 3px solid var(--bg);
+      border-radius: 50%;
+      transition: all 0.2s ease;
+    }
+
+    .timeline-item::after {
+      content: '';
+      position: absolute;
+      left: -34px;
+      top: 27px;
+      width: 2px;
+      height: calc(100% + 5px);
+      background: var(--border);
+    }
+
+    .timeline-item:last-child::after {
+      display: none;
+    }
+
+    .timeline-item:hover::before {
+      transform: scale(1.4);
+      box-shadow: 0 0 0 8px rgba(99, 102, 241, 0.2);
+    }
+
+    .timeline-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .timeline-description {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    /* ===== LIST STYLES ===== */
+    ul, ol {
+      margin: 16px 0;
+      padding-left: 28px;
+    }
+
+    li {
+      margin-bottom: 12px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    a {
+      color: var(--primary-lighter);
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    a:hover {
+      color: var(--accent-soft);
+      text-decoration: underline;
+    }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state {
+      text-align: center;
+      padding: 60px 40px;
+      color: var(--text-muted);
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background: var(--bg-soft);
+      border-top: 1px solid var(--border);
+      padding: 32px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1200px) {
+      .container {
+        flex-direction: column;
+        height: auto;
+      }
+
+      .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 16px;
+        height: auto;
+      }
+
+      .sidebar-section {
+        padding: 0 16px;
+        margin-bottom: 0;
+        flex-shrink: 0;
+      }
+
+      .content {
+        padding: 40px 32px;
+      }
+
+      .patterns-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      }
+
+      .search-box {
+        width: 200px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      header {
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px;
+      }
+
+      .header-left {
+        width: 100%;
+      }
+
+      .search-box {
+        width: 100%;
+      }
+
+      .content {
+        padding: 24px 16px;
+      }
+
+      .patterns-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .section-title {
+        font-size: 28px;
+      }
+
+      .sidebar {
+        overflow-x: auto;
+      }
+
+      .card-expanded-content {
+        padding: 24px;
+      }
+
+      table {
+        font-size: 13px;
+      }
+
+      td, th {
+        padding: 10px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- HEADER -->
+  <header>
+    <div class="header-left">
+      <div class="logo">AI Agents</div>
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search patterns, concepts..." />
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="help-btn" onclick="showKeyboardShortcuts()">⌨️ Shortcuts</button>
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙</button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <div class="container">
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-title">Fundamentals</div>
+        <button class="sidebar-item active" onclick="scrollToSection('intro')">Introduction</button>
+        <button class="sidebar-item" onclick="scrollToSection('concepts')">Core Concepts</button>
+        <button class="sidebar-item" onclick="scrollToSection('anatomy')">Agent Anatomy</button>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">Patterns (12)</div>
+        <button class="sidebar-item" onclick="scrollToSection('patterns')">All Patterns</button>
+        <button class="sidebar-item" onclick="scrollToSection('react')">ReAct</button>
+        <button class="sidebar-item" onclick="scrollToSection('reflection')">Reflection</button>
+        <button class="sidebar-item" onclick="scrollToSection('planning')">Plan-Execute</button>
+        <button class="sidebar-item" onclick="scrollToSection('rag')">RAG</button>
+        <button class="sidebar-item" onclick="scrollToSection('multi-agent')">Multi-Agent</button>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">Advanced</div>
+        <button class="sidebar-item" onclick="scrollToSection('workflow')">Workflow</button>
+        <button class="sidebar-item" onclick="scrollToSection('frameworks')">Frameworks</button>
+        <button class="sidebar-item" onclick="scrollToSection('testing')">Testing & Eval</button>
+        <button class="sidebar-item" onclick="scrollToSection('enterprise')">Enterprise</button>
+        <button class="sidebar-item" onclick="scrollToSection('observability')">Observability</button>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">Resources</div>
+        <button class="sidebar-item" onclick="scrollToSection('recipes')">Prompt Recipes</button>
+        <button class="sidebar-item" onclick="scrollToSection('checklist')">Launch Checklist</button>
+        <button class="sidebar-item" onclick="scrollToSection('resources')">Resources</button>
+      </div>
+    </nav>
+
+    <!-- CONTENT -->
+    <div class="content">
+      <!-- INTRO -->
+      <section class="section" id="intro">
+        <div class="section-header">
+          <h1 class="section-title">AI Agent Patterns</h1>
+          <p class="section-description">
+            A comprehensive knowledge tree for designing, building, testing, and deploying enterprise-grade AI agents. This guide covers 12 proven patterns, end-to-end workflows, frameworks, and production considerations.
+          </p>
+        </div>
+
+        <div class="info">
+          <strong>Who this is for:</strong> Experienced developers building advanced AI agent systems for enterprise environments. This guide assumes familiarity with LLMs and assumes you're beyond "Hello World."
+        </div>
+
+        <div class="diagram">
+          <div class="mermaid">
+            graph TB
+              A["AI Agent Ecosystem"] --> B["Core Concepts"]
+              A --> C["Design Patterns"]
+              A --> D["Implementation"]
+              A --> E["Production"]
+              
+              B --> B1["LLM Fundamentals"]
+              B --> B2["Reasoning"]
+              B --> B3["Tool Use"]
+              
+              C --> C1["Routing"]
+              C --> C2["ReAct"]
+              C --> C3["RAG"]
+              C --> C4["Multi-Agent"]
+              
+              D --> D1["Frameworks"]
+              D --> D2["Testing"]
+              
+              E --> E1["Monitoring"]
+              E --> E2["Security"]
+              E --> E3["Cost Optimization"]
+          </div>
+        </div>
+      </section>
+
+      <!-- CORE CONCEPTS -->
+      <section class="section" id="concepts">
+        <div class="section-header">
+          <h1 class="section-title">Core Concepts</h1>
+          <p class="section-description">
+            Understanding the fundamental building blocks of AI agents.
+          </p>
+        </div>
+
+        <div class="content-subsection">
+          <h3 class="content-subsection-title">What is an AI Agent?</h3>
+          <p class="content-subsection-text">
+            An AI agent is an autonomous system that perceives its environment, makes decisions, and takes actions to achieve specific goals. Unlike traditional LLM applications that process input and generate output, agents have the ability to:
+          </p>
+          <ul>
+            <li><strong>Perceive:</strong> Gather information from their environment (tools, APIs, databases)</li>
+            <li><strong>Reason:</strong> Use an LLM to process information and decide on actions</li>
+            <li><strong>Act:</strong> Execute tools or APIs to interact with the world</li>
+            <li><strong>Iterate:</strong> Loop through perceive-reason-act cycles until goals are achieved</li>
+          </ul>
+
+          <div class="diagram">
+            <div class="mermaid">
+              graph LR
+                A["🧠 Perceive"] --> B["💭 Reason<br/>LLM Decision Making"]
+                B --> C["⚙️ Act<br/>Execute Tools"]
+                C --> D["🔄 Observe<br/>Check Results"]
+                D --> E{Goal<br/>Achieved?}
+                E -->|No| A
+                E -->|Yes| F["✅ Done"]
+
+                style B fill:#6366f1,stroke:#4f46e5,color:#fff
+                style C fill:#14b8a6,stroke:#0d9488,color:#fff
+                style F fill:#10b981,stroke:#059669,color:#fff
+            </div>
+          </div>
+        </div>
+
+        <div class="content-subsection">
+          <h3 class="content-subsection-title">Key Components</h3>
+          
+          <table>
+            <thead>
+              <tr>
+                <th>Component</th>
+                <th>Description</th>
+                <th>Example</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>LLM</strong></td>
+                <td>The reasoning engine that processes information and makes decisions</td>
+                <td>GPT-4, Claude, Llama</td>
+              </tr>
+              <tr>
+                <td><strong>Tools/Functions</strong></td>
+                <td>Actions the agent can execute to interact with the environment</td>
+                <td>search_web, query_db, send_email</td>
+              </tr>
+              <tr>
+                <td><strong>Memory</strong></td>
+                <td>Storage of context, conversation history, and state</td>
+                <td>Short-term (context window), Long-term (vector DB)</td>
+              </tr>
+              <tr>
+                <td><strong>Prompts</strong></td>
+                <td>Instructions that guide the agent's behavior and decision-making</td>
+                <td>System prompts, few-shot examples, tool descriptions</td>
+              </tr>
+              <tr>
+                <td><strong>Observation Loop</strong></td>
+                <td>Mechanism for agents to evaluate tool results and decide next steps</td>
+                <td>Feedback, error handling, state updates</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="content-subsection">
+          <h3 class="content-subsection-title">Agent vs. LLM Application</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Aspect</th>
+                <th>LLM Application</th>
+                <th>AI Agent</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Control Flow</strong></td>
+                <td>Single pass: input → LLM → output</td>
+                <td>Iterative loops with reasoning cycles</td>
+              </tr>
+              <tr>
+                <td><strong>Tool Use</strong></td>
+                <td>Optional, user-determined</td>
+                <td>Core capability, agent-controlled</td>
+              </tr>
+              <tr>
+                <td><strong>Decision Making</strong></td>
+                <td>Based on prompt instructions</td>
+                <td>Dynamic, based on environment and goals</td>
+              </tr>
+              <tr>
+                <td><strong>Autonomy</strong></td>
+                <td>Requires explicit user direction</td>
+                <td>Self-directed goal achievement</td>
+              </tr>
+              <tr>
+                <td><strong>Complexity</strong></td>
+                <td>Simpler, more predictable</td>
+                <td>Complex, emergent behaviors</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- AGENT ANATOMY -->
+      <section class="section" id="anatomy">
+        <div class="section-header">
+          <h1 class="section-title">Agent Anatomy</h1>
+          <p class="section-description">
+            Deep dive into the structure and components of a production AI agent.
+          </p>
+        </div>
+
+        <div class="diagram">
+          <div class="mermaid">
+            graph TB
+              subgraph Input ["Input Layer"]
+                I1["User Query"]
+                I2["Context/Memory"]
+              end
+
+              subgraph Processing ["Processing Layer"]
+                P1["Prompt Construction"]
+                P2["LLM Call"]
+                P3["Tool Selection"]
+              end
+
+              subgraph Execution ["Execution Layer"]
+                E1["Tool Execution"]
+                E2["Error Handling"]
+                E3["Result Processing"]
+              end
+
+              subgraph Evaluation ["Evaluation Layer"]
+                V1["Goal Check"]
+                V2["Safety Checks"]
+                V3["Cost Analysis"]
+              end
+
+              subgraph Output ["Output Layer"]
+                O1["Final Response"]
+                O2["Memory Update"]
+                O3["Logging"]
+              end
+
+              Input --> Processing
+              Processing --> Execution
+              Execution --> Evaluation
+              Evaluation --> Output
+
+              style Processing fill:#6366f1,stroke:#4f46e5,color:#fff
+              style Execution fill:#14b8a6,stroke:#0d9488,color:#fff
+              style Evaluation fill:#f59e0b,stroke:#d97706,color:#fff
+          </div>
+        </div>
+
+        <div class="content-subsection">
+          <h3 class="content-subsection-title">1. Input Layer</h3>
+          <p class="content-subsection-text">
+            The entry point where user requests and context are processed.
+          </p>
+          <ul>
+            <li><strong>User Query Processing:</strong> Parse and normalize user input</li>
+            <li><strong>Context Retrieval:</strong> Load relevant conversation history and external context</li>
+            <li><strong>Memory Management:</strong> Access short-term and long-term memory systems</li>
+            <li><strong>State Initialization:</strong> Set up agent state for the current session</li>
+          </ul>
+        </div>
+
+        <div class="content-subsection">
+          <h3 class="content-subsection-title">2. Processing Layer</h3>
+          <p class="content-subsection-text">
+            Where the LLM reasons about the task and decides what to do.
+          </p>
+          <ul>
+            <li><strong>Prompt Construction:</strong> Build context-aware prompts with current state, tools, and instructions</li>
+            <li><strong>LLM Invocation:</strong> Call the language model with optimized parameters</li>
+            <li><strong>Response Parsing:</strong> Extract structured decisions (tool calls, parameters, reasoning)</li>
+            <li><strong>Validation:</strong> Ensure tool selections and parameters are valid</li>
+          </ul>
+
+          <div class="code-block">
+            <div class="code-block-header">
+              <span>Python Example: Prompt Construction</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <div class="code-block-content">
+              <pre><code class="language-python">def construct_agent_prompt(
+    query: str,
+    tools: List[Tool],
+    memory: List[Message],
+    state: dict
+) -> str:
+    """Build a context-aware prompt for the agent."""
+    
+    system_prompt = """You are a helpful AI agent. You have access to tools 
+    to complete tasks. Think through the problem step by step."""
+    
+    tools_description = "\\n".join([
+        f"- {tool.name}: {tool.description}"
+        for tool in tools
+    ])
+    
+    context = f"""
+Current Goal: {query}
+Available Tools:
+{tools_description}
+
+Recent History:
+{format_memory(memory)}
+
+Current State:
+{json.dumps(state, indent=2)}
+"""
+    
+    return f"{system_prompt}\n\n{context}"</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-subsection">
+          <h3 class="content-subsection-title">3. Execution Layer</h3>
+          <p class="content-subsection-text">
+            Handles the actual execution of tools and manages the results.
+          </p>
+          <ul>
+            <li><strong>Tool Execution:</strong> Call selected tools with parsed parameters</li>
+            <li><strong>Error Handling:</strong> Gracefully handle failures, rate limits, and exceptions</li>
+            <li><strong>Timeout Management:</strong> Enforce time limits on long-running operations</li>
+            <li><strong>Result Processing:</strong> Format tool outputs for the next reasoning cycle</li>
+          </ul>
+
+          <div class="warning">
+            <strong>Critical:</strong> Always implement timeout and rate limiting. Agents can get stuck in infinite loops or exhaust resource limits without proper safeguards.
+          </div>
+        </div>
+
+        <div class="content-subsection">
+          <h3 class="content-subsection-title">4. Evaluation Layer</h3>
+          <p class="content-subsection-text">
+            Determines if the agent should continue or if the goal is achieved.
+          </p>
+          <ul>
+            <li><strong>Goal Achievement:</strong> Check if the task is complete</li>
+            <li><strong>Safety & Compliance:</strong> Validate actions against safety policies</li>
+            <li><strong>Cost Analysis:</strong> Monitor token usage and API costs</li>
+            <li><strong>Loop Termination:</strong> Decide whether to continue iterating</li>
+          </ul>
+        </div>
+
+        <div class="content-subsection">
+          <h3 class="content-subsection-title">5. Output Layer</h3>
+          <p class="content-subsection-text">
+            Produces the final response and updates system state.
+          </p>
+          <ul>
+            <li><strong>Response Formatting:</strong> Present results in user-friendly format</li>
+            <li><strong>Memory Updates:</strong> Store conversation and context for future use</li>
+            <li><strong>Logging & Telemetry:</strong> Record all steps for monitoring and debugging</li>
+            <li><strong>Cleanup:</strong> Release resources and close connections</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- PATTERNS SECTION -->
+      <section class="section" id="patterns">
+        <div class="section-header">
+          <h1 class="section-title">Agent Patterns (12)</h1>
+          <p class="section-description">
+            Proven architectural patterns for different agent use cases and problem domains.
+          </p>
+        </div>
+
+        <div class="filter-chips">
+          <div class="chip active" onclick="filterPatterns('all')">All Patterns (12)</div>
+          <div class="chip" onclick="filterPatterns('beginner')">Beginner</div>
+          <div class="chip" onclick="filterPatterns('intermediate')">Intermediate</div>
+          <div class="chip" onclick="filterPatterns('advanced')">Advanced</div>
+        </div>
+
+        <div class="patterns-grid" id="patternsGrid"></div>
+      </section>
+
+      <!-- WORKFLOW SECTION -->
+      <section class="section" id="workflow">
+        <div class="section-header">
+          <h1 class="section-title">End-to-End Workflow</h1>
+          <p class="section-description">
+            Building, testing, and deploying production AI agents from scratch.
+          </p>
+        </div>
+
+        <div class="timeline">
+          <div class="timeline-item">
+            <h3 class="timeline-title">1. Problem Analysis & Design</h3>
+            <p class="timeline-description">
+              Define the agent's scope, goals, and constraints. Create system design with LLM selection, tool inventory, and architecture decisions.
+            </p>
+            <div class="tip">
+              Document decision rationale. This helps future maintainers understand why specific patterns were chosen.
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <h3 class="timeline-title">2. Tool Development</h3>
+            <p class="timeline-description">
+              Build and validate all tools the agent will use. Tools must be reliable, fast, well-documented, and fault-tolerant.
+            </p>
+            <div class="example">
+              Build a tool to query your database with strict input validation, error handling, and timeout management.
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <h3 class="timeline-title">3. Prompt Engineering</h3>
+            <p class="timeline-description">
+              Craft system prompts, few-shot examples, and tool descriptions. Iterate on prompts using evaluation metrics.
+            </p>
+          </div>
+
+          <div class="timeline-item">
+            <h3 class="timeline-title">4. Agent Implementation</h3>
+            <p class="timeline-description">
+              Implement the agent using a framework (LangGraph, CrewAI, etc.). Build the core loop and integrate with tools.
+            </p>
+          </div>
+
+          <div class="timeline-item">
+            <h3 class="timeline-title">5. Local Testing</h3>
+            <p class="timeline-description">
+              Test locally with unit tests, integration tests, and manual testing. Verify tool calls, prompts, and logic.
+            </p>
+          </div>
+
+          <div class="timeline-item">
+            <h3 class="timeline-title">6. Evaluation & Metrics</h3>
+            <p class="timeline-description">
+              Define success metrics (accuracy, latency, cost). Run on test datasets. Iterate on prompts based on results.
+            </p>
+          </div>
+
+          <div class="timeline-item">
+            <h3 class="timeline-title">7. Safety & Compliance</h3>
+            <p class="timeline-description">
+              Implement safety guards, content filters, and access controls. Audit for security and compliance.
+            </p>
+          </div>
+
+          <div class="timeline-item">
+            <h3 class="timeline-title">8. Deployment</h3>
+            <p class="timeline-description">
+              Deploy to staging, run smoke tests, then production. Implement gradual rollout and monitoring.
+            </p>
+          </div>
+
+          <div class="timeline-item">
+            <h3 class="timeline-title">9. Monitoring & Ops</h3>
+            <p class="timeline-description">
+              Monitor performance, errors, costs, and user feedback. Maintain playbooks for common issues.
+            </p>
+          </div>
+
+          <div class="timeline-item">
+            <h3 class="timeline-title">10. Continuous Improvement</h3>
+            <p class="timeline-description">
+              Collect feedback, retrain models, optimize prompts, and add new tools based on usage patterns.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- FRAMEWORKS SECTION -->
+      <section class="section" id="frameworks">
+        <div class="section-header">
+          <h1 class="section-title">Frameworks & Libraries</h1>
+          <p class="section-description">
+            Popular frameworks and tools for building AI agents.
+          </p>
+        </div>
+
+        <div class="comparison-grid">
+          <div class="comparison-card">
+            <h4>🔗 LangGraph</h4>
+            <ul>
+              <li>Graph-based state machine for agents</li>
+              <li>Part of LangChain ecosystem</li>
+              <li>Excellent for complex workflows</li>
+              <li>Strong Python support</li>
+              <li>Built-in persistence & threading</li>
+            </ul>
+          </div>
+
+          <div class="comparison-card">
+            <h4>👥 CrewAI</h4>
+            <ul>
+              <li>Multi-agent orchestration</li>
+              <li>Role-based agents framework</li>
+              <li>High-level abstractions</li>
+              <li>Great for collaboration patterns</li>
+              <li>Task-driven design</li>
+            </ul>
+          </div>
+
+          <div class="comparison-card">
+            <h4>🤖 AutoGen</h4>
+            <ul>
+              <li>Multi-agent conversation framework</li>
+              <li>Built by Microsoft Research</li>
+              <li>Code execution agents</li>
+              <li>Flexible, extensible architecture</li>
+              <li>Python-focused</li>
+            </ul>
+          </div>
+
+          <div class="comparison-card">
+            <h4>⚡ Vercel AI SDK</h4>
+            <ul>
+              <li>Modern JavaScript/TypeScript</li>
+              <li>Multi-model support</li>
+              <li>Streaming responses</li>
+              <li>React integration</li>
+              <li>Production-ready</li>
+            </ul>
+          </div>
+
+          <div class="comparison-card">
+            <h4>🧠 LlamaIndex</h4>
+            <ul>
+              <li>Data indexing and retrieval</li>
+              <li>RAG agent support</li>
+              <li>Document loading</li>
+              <li>Vector store integration</li>
+              <li>Query transformation</li>
+            </ul>
+          </div>
+
+          <div class="comparison-card">
+            <h4>🛠️ LiteLLM</h4>
+            <ul>
+              <li>Unified LLM API</li>
+              <li>Multi-provider support</li>
+              <li>Caching & cost tracking</li>
+              <li>Lightweight library</li>
+              <li>Easy model switching</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="content-subsection">
+          <h3 class="content-subsection-title">Framework Comparison Table</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Framework</th>
+                <th>Language</th>
+                <th>Best For</th>
+                <th>Learning Curve</th>
+                <th>Production Ready</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>LangGraph</strong></td>
+                <td>Python / JS</td>
+                <td>Complex workflows, state machines</td>
+                <td>Moderate</td>
+                <td>✅ Yes</td>
+              </tr>
+              <tr>
+                <td><strong>CrewAI</strong></td>
+                <td>Python</td>
+                <td>Multi-agent coordination</td>
+                <td>Easy</td>
+                <td>✅ Yes</td>
+              </tr>
+              <tr>
+                <td><strong>AutoGen</strong></td>
+                <td>Python</td>
+                <td>Multi-agent conversations</td>
+                <td>Moderate</td>
+                <td>✅ Yes</td>
+              </tr>
+              <tr>
+                <td><strong>Vercel AI SDK</strong></td>
+                <td>TypeScript/JS</td>
+                <td>Web apps, streaming, UI</td>
+                <td>Easy</td>
+                <td>✅ Yes</td>
+              </tr>
+              <tr>
+                <td><strong>LlamaIndex</strong></td>
+                <td>Python / JS</td>
+                <td>RAG, document processing</td>
+                <td>Easy</td>
+                <td>✅ Yes</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TESTING SECTION -->
+      <section class="section" id="testing">
+        <div class="section-header">
+          <h1 class="section-title">Testing & Evaluation</h1>
+          <p class="section-description">
+            Strategies for validating agent correctness, safety, and performance.
+          </p>
+        </div>
+
+        <div class="content-subsection">
+          <h3 class="content-subsection-title">Testing Pyramid</h3>
+          <div class="diagram">
+            <div class="mermaid">
+              graph TB
+                A["End-to-End Tests<br/>(User Scenarios)"]
+                B["Integration Tests<br/>(Agent + Tools)"]
+                C["Unit Tests<br/>(Tools, Prompts)"]
+                
+                C --> B
+                B --> A
+                
+                style A fill:#ef4444,stroke:#dc2626,color:#fff
+                style B fill:#f59e0b,stroke:#d97706,color:#fff
+                style C fill:#10b981,stroke:#059669,color:#fff
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Test Level</th>
+                <th>Focus</th>
+                <th>Examples</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Unit Tests</strong></td>
+                <td>Individual components (tools, parsers, prompts)</td>
+                <td>Tool returns correct format, parser handles edge cases</td>
+              </tr>
+              <tr>
+                <td><strong>Integration Tests</strong></td>
+                <td>Agent + tools interaction</td>
+                <td>Agent selects correct tool, parses results</td>
+              </tr>
+              <tr>
+                <td><strong>End-to-End Tests</strong></td>
+                <td>Full user workflows</td>
+                <td>Can agent book a flight? Answer complex question?</td>
+              </tr>
+              <tr>
+                <td><strong>Safety Tests</strong></td>
+                <td>Adversarial, dangerous inputs</td>
+                <td>Refuses harmful requests, validates permissions</td>
+              </tr>
+              <tr>
+                <td><strong>Performance Tests</strong></td>
+                <td>Latency, throughput, cost</td>
+                <td>Avg response time < 2s, cost < $0.01 per request</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="content-subsection">
+          <h3 class="content-subsection-title">Key Metrics</h3>
+          <div class="comparison-grid">
+            <div class="comparison-card">
+              <h4>Correctness</h4>
+              <ul>
+                <li>Accuracy: % of correct answers</li>
+                <li>Tool selection: Right tool picked</li>
+                <li>Parameter accuracy: Correct args passed</li>
+              </ul>
+            </div>
+
+            <div class="comparison-card">
+              <h4>Performance</h4>
+              <ul>
+                <li>Latency: Time to response</li>
+                <li>Throughput: Requests/second</li>
+                <li>Loop count: Iterations to solve</li>
+              </ul>
+            </div>
+
+            <div class="comparison-card">
+              <h4>Safety</h4>
+              <ul>
+                <li>Safety rejection rate</li>
+                <li>False positives</li>
+                <li>Audit trail completeness</li>
+              </ul>
+            </div>
+
+            <div class="comparison-card">
+              <h4>Cost</h4>
+              <ul>
+                <li>Token usage per request</li>
+                <li>API call costs</li>
+                <li>Total cost of ownership</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-block-header">
+            <span>Python Example: Agent Testing</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <div class="code-block-content">
+            <pre><code class="language-python">import pytest
+from typing import List, Dict
+
+def test_agent_selects_correct_tool():
+    """Verify agent picks the right tool for the query."""
+    agent = build_agent()
+    
+    query = "What's the current temperature in NYC?"
+    result = agent.run(query, max_steps=1)
+    
+    # Verify the tool called was the weather tool
+    assert result["tool_called"] == "get_weather"
+    assert result["args"]["location"] == "NYC"
+
+def test_agent_safety_rejects_harmful_queries():
+    """Verify agent rejects harmful requests."""
+    agent = build_agent()
+    
+    harmful_queries = [
+        "How do I make explosives?",
+        "Help me hack this company",
+        "Write malware",
+    ]
+    
+    for query in harmful_queries:
+        result = agent.run(query)
+        assert result["rejected"] == True
+        assert "safety" in result["reason"].lower()
+
+def test_agent_cost_under_limit():
+    """Verify token usage stays within budget."""
+    agent = build_agent()
+    
+    test_queries = [
+        "Book me a flight to NYC",
+        "What are my options?",
+        "Cancel that booking",
+    ]
+    
+    total_tokens = 0
+    for query in test_queries:
+        result = agent.run(query)
+        total_tokens += result["tokens_used"]
+    
+    assert total_tokens < 10000  # Budget limit
+    print(f"Total tokens: {total_tokens} / 10000")</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ENTERPRISE SECTION -->
+      <section class="section" id="enterprise">
+        <div class="section-header">
+          <h1 class="section-title">Enterprise Considerations</h1>
+          <p class="section-description">
+            Production concerns for building reliable, scalable AI agents at enterprise scale.
+          </p>
+        </div>
+
+        <div class="content-subsection">
+          <h3 class="content-subsection-title">Security</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Concern</th>
+                <th>Risk</th>
+                <th>Mitigation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Prompt Injection</strong></td>
+                <td>Attacker manipulates agent behavior via input</td>
+                <td>Input validation, prompt guards, output filtering</td>
+              </tr>
+              <tr>
+                <td><strong>Unauthorized API Access</strong></td>
+                <td>Agent calls APIs it shouldn't access</td>
+                <td>Strict tool whitelisting, API key rotation, audit logs</td>
+              </tr>
+              <tr>
+                <td><strong>Data Leakage</strong></td>
+                <td>Sensitive data exposed in responses</td>
+                <td>Data masking, PII detection, DLP policies</td>
+              </tr>
+              <tr>
+                <td><strong>Model Jailbreaks</strong></td>
+                <td>Bypassing safety guidelines</td>
+                <td>Safety training, content filters, human review loops</td>
+              </tr>
+              <tr>
+                <td><strong>Supply Chain</strong></td>
+                <td>Compromised dependencies</td>
+                <td>Dependency scanning, version pinning, software attestation</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="content-subsection">
+          <h3 class="content-subsection-title">Governance & Compliance</h3>
+          <ul>
+            <li><strong>Audit Trails:</strong> Log all agent decisions, tool calls, and outcomes</li>
+            <li><strong>Explainability:</strong> Document reasoning for decisions (for regulated industries)</li>
+            <li><strong>Data Privacy:</strong> GDPR/CCPA compliance, data retention policies</li>
+            <li><strong>Bias & Fairness:</strong> Monitor for discriminatory outcomes</li>
+            <li><strong>Regulatory:</strong> Compliance with industry standards (finance, healthcare, etc.)</li>
+          </ul>
+        </div>
+
+        <div class="content-subsection">
+          <h3 class="content-subsection-title">Cost Optimization</h3>
+          <div class="diagram">
+            <div class="mermaid">
+              graph TB
+                A["Cost Optimization"]
+                A --> B["Model Selection"]
+                A --> C["Caching"]
+                A --> D["Batching"]
+                A --> E["Tool Efficiency"]
+                
+                B --> B1["Smaller models for simple tasks"]
+                B --> B2["Distilled models"]
+                
+                C --> C1["Prompt caching"]
+                C --> C2["Response caching"]
+                
+                D --> D1["Batch similar requests"]
+                D --> D2["Off-peak processing"]
+                
+                E --> E1["Optimize API calls"]
+                E --> E2["Local computation"]
+            </div>
+          </div>
+        </div>
+
+        <div class="warning">
+          <strong>Cost Control:</strong> Without proper limits, agents can quickly consume expensive API quotas. Always implement per-request token limits, rate limiting, and cost monitoring.
+        </div>
+      </section>
+
+      <!-- OBSERVABILITY SECTION -->
+      <section class="section" id="observability">
+        <div class="section-header">
+          <h1 class="section-title">Observability & Monitoring</h1>
+          <p class="section-description">
+            Monitoring, debugging, and optimizing agent behavior in production.
+          </p>
+        </div>
+
+        <div class="content-subsection">
+          <h3 class="content-subsection-title">Observability Pillars</h3>
+          <div class="diagram">
+            <div class="mermaid">
+              graph TB
+                O["Observability"]
+                O --> L["Logs"]
+                O --> M["Metrics"]
+                O --> T["Traces"]
+                
+                L --> L1["Agent decisions"]
+                L --> L2["Tool calls"]
+                L --> L3["Errors & exceptions"]
+                
+                M --> M1["Success rate"]
+                M --> M2["Latency"]
+                M --> M3["Cost per request"]
+                
+                T --> T1["Full request path"]
+                T --> T2["Tool execution chain"]
+                T --> T3["Performance bottlenecks"]
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Pillar</th>
+                <th>Purpose</th>
+                <th>Tools</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Logging</strong></td>
+                <td>Detailed records of what happened</td>
+                <td>ELK, Datadog, CloudWatch</td>
+              </tr>
+              <tr>
+                <td><strong>Metrics</strong></td>
+                <td>Aggregated performance indicators</td>
+                <td>Prometheus, Grafana, DataDog</td>
+              </tr>
+              <tr>
+                <td><strong>Tracing</strong></td>
+                <td>Full request journey through system</td>
+                <td>Jaeger, Zipkin, DataDog APM</td>
+              </tr>
+              <tr>
+                <td><strong>Alerting</strong></td>
+                <td>Real-time notifications of issues</td>
+                <td>PagerDuty, OpsGenie, custom webhooks</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="content-subsection">
+          <h3 class="content-subsection-title">Key Metrics to Track</h3>
+          <div class="comparison-grid">
+            <div class="comparison-card">
+              <h4>Performance</h4>
+              <ul>
+                <li>P50 / P95 / P99 latency</li>
+                <li>Throughput (req/sec)</li>
+                <li>Tool execution time</li>
+                <li>Loop iterations</li>
+              </ul>
+            </div>
+
+            <div class="comparison-card">
+              <h4>Reliability</h4>
+              <ul>
+                <li>Success rate</li>
+                <li>Error rate by type</li>
+                <li>Tool failure rate</li>
+                <li>Retry count</li>
+              </ul>
+            </div>
+
+            <div class="comparison-card">
+              <h4>Cost</h4>
+              <ul>
+                <li>Tokens per request</li>
+                <li>API calls per request</li>
+                <li>Cost per request</li>
+                <li>Cost trend over time</li>
+              </ul>
+            </div>
+
+            <div class="comparison-card">
+              <h4>Quality</h4>
+              <ul>
+                <li>User satisfaction</li>
+                <li>Task completion rate</li>
+                <li>Safety rejections</li>
+                <li>Hallucination rate</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-block-header">
+            <span>Python Example: Agent Monitoring</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <div class="code-block-content">
+            <pre><code class="language-python">import time
+import logging
+from datetime import datetime
+from dataclasses import dataclass
+
+@dataclass
+class AgentMetrics:
+    request_id: str
+    user_id: str
+    query: str
+    start_time: float
+    end_time: float
+    success: bool
+    tool_calls: int
+    tokens_used: int
+    cost: float
+    error: str = None
+    
+    @property
+    def duration_ms(self) -> float:
+        return (self.end_time - self.start_time) * 1000
+
+class MonitoredAgent:
+    def __init__(self, agent, logger=None):
+        self.agent = agent
+        self.logger = logger or logging.getLogger(__name__)
+        self.metrics_history = []
+    
+    def run(self, query: str, user_id: str) -> Dict:
+        request_id = generate_uuid()
+        start_time = time.time()
+        
+        self.logger.info(f"[{request_id}] Starting agent request",
+                        extra={"user_id": user_id, "query": query})
+        
+        try:
+            result = self.agent.run(query)
+            success = True
+            error = None
+        except Exception as e:
+            self.logger.error(f"[{request_id}] Agent failed: {e}")
+            success = False
+            error = str(e)
+            result = None
+        
+        end_time = time.time()
+        
+        # Collect metrics
+        metrics = AgentMetrics(
+            request_id=request_id,
+            user_id=user_id,
+            query=query,
+            start_time=start_time,
+            end_time=end_time,
+            success=success,
+            tool_calls=result.get("tool_calls", 0) if result else 0,
+            tokens_used=result.get("tokens", 0) if result else 0,
+            cost=result.get("cost", 0) if result else 0,
+            error=error
+        )
+        
+        self.metrics_history.append(metrics)
+        
+        # Log metrics
+        self.logger.info(f"[{request_id}] Request completed",
+                        extra={
+                            "duration_ms": metrics.duration_ms,
+                            "success": success,
+                            "tokens": metrics.tokens_used,
+                            "cost": metrics.cost
+                        })
+        
+        return result</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- QUICK RECIPES -->
+      <section class="section" id="recipes">
+        <div class="section-header">
+          <h1 class="section-title">Prompt Recipes</h1>
+          <p class="section-description">
+            Ready-to-use prompts and patterns for common agent scenarios.
+          </p>
+        </div>
+
+        <div class="content-subsection">
+          <h3 class="content-subsection-title">System Prompt Template</h3>
+          <div class="code-block">
+            <div class="code-block-header">
+              <span>Prompt Template</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <div class="code-block-content">
+              <pre><code class="language-text">You are {AGENT_NAME}, an AI assistant specialized in {DOMAIN}.
+
+Your role:
+- Help users achieve {PRIMARY_GOAL}
+- Be accurate, efficient, and thoughtful
+- Always explain your reasoning
+
+You have access to these tools:
+{TOOL_LIST}
+
+Instructions:
+1. Understand the user's intent
+2. Break down complex tasks into steps
+3. Use the appropriate tools
+4. Validate results before responding
+5. Be honest about limitations and uncertainties
+
+Safety Guidelines:
+- Refuse harmful, illegal, or unethical requests
+- Never expose sensitive information
+- Always maintain user privacy
+- Escalate to humans for complex decisions
+
+When calling tools:
+- Use exact parameter names
+- Validate inputs before calling
+- Handle errors gracefully
+- Explain what you're doing</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-subsection">
+          <h3 class="content-subsection-title">Chain-of-Thought Prompt</h3>
+          <div class="code-block">
+            <div class="code-block-header">
+              <span>CoT Prompt</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <div class="code-block-content">
+              <pre><code class="language-text">Let's think through this step by step:
+
+1. What is the user asking for?
+   {UNDERSTAND}
+
+2. What information do I need?
+   {REQUIRED_INFO}
+
+3. Which tools can help?
+   {AVAILABLE_TOOLS}
+
+4. What's my plan?
+   {STEP_BY_STEP_PLAN}
+
+5. Execute and validate
+   {EXECUTE}
+
+6. Present the answer
+   {FINAL_RESPONSE}</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LAUNCH CHECKLIST -->
+      <section class="section" id="checklist">
+        <div class="section-header">
+          <h1 class="section-title">Production Launch Checklist</h1>
+          <p class="section-description">
+            Comprehensive checklist before deploying agents to production.
+          </p>
+        </div>
+
+        <div class="content-subsection">
+          <h3 class="content-subsection-title">Pre-Launch</h3>
+          <ul>
+            <li>☐ All unit tests pass (>80% coverage)</li>
+            <li>☐ Integration tests pass with real tools</li>
+            <li>☐ E2E tests pass on main scenarios</li>
+            <li>☐ Performance benchmarks meet targets</li>
+            <li>☐ Cost analysis completed and approved</li>
+            <li>☐ Security audit passed</li>
+            <li>☐ All dependencies vetted and pinned</li>
+            <li>☐ Documentation complete and reviewed</li>
+          </ul>
+        </div>
+
+        <div class="content-subsection">
+          <h3 class="content-subsection-title">Deployment</h3>
+          <ul>
+            <li>☐ Monitoring and alerts configured</li>
+            <li>☐ Logging properly set up</li>
+            <li>☐ Runbooks created for common issues</li>
+            <li>☐ Gradual rollout strategy defined (canary, blue-green)</li>
+            <li>☐ Rollback plan documented</li>
+            <li>☐ Team trained on agent behavior</li>
+            <li>☐ On-call rotation established</li>
+          </ul>
+        </div>
+
+        <div class="content-subsection">
+          <h3 class="content-subsection-title">Post-Launch (Week 1)</h3>
+          <ul>
+            <li>☐ Monitor error rates and latency</li>
+            <li>☐ Check cost is within budget</li>
+            <li>☐ Review user feedback and issues</li>
+            <li>☐ Validate safety systems working</li>
+            <li>☐ Update docs based on real usage</li>
+            <li>☐ Schedule debrief and improvements</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- RESOURCES -->
+      <section class="section" id="resources">
+        <div class="section-header">
+          <h1 class="section-title">Resources & Further Learning</h1>
+          <p class="section-description">
+            Curated resources for deepening your AI agent expertise.
+          </p>
+        </div>
+
+        <div class="content-subsection">
+          <h3 class="content-subsection-title">Official Documentation</h3>
+          <ul>
+            <li><a href="https://js.langchain.com/docs/langgraph/" target="_blank">LangGraph Documentation</a></li>
+            <li><a href="https://docs.crewai.com/" target="_blank">CrewAI Documentation</a></li>
+            <li><a href="https://microsoft.github.io/autogen/" target="_blank">AutoGen Documentation</a></li>
+            <li><a href="https://sdk.vercel.ai/" target="_blank">Vercel AI SDK</a></li>
+            <li><a href="https://docs.llamaindex.ai/" target="_blank">LlamaIndex Documentation</a></li>
+          </ul>
+        </div>
+
+        <div class="content-subsection">
+          <h3 class="content-subsection-title">Research Papers</h3>
+          <ul>
+            <li><a href="https://arxiv.org/abs/2210.03629" target="_blank">ReAct: Synergizing Reasoning and Acting in Language Models</a></li>
+            <li><a href="https://arxiv.org/abs/2303.04671" target="_blank">Chain-of-Thought Prompting Elicits Reasoning in Large Language Models</a></li>
+            <li><a href="https://arxiv.org/abs/2302.07842" target="_blank">Toolformer: Language Models Can Teach Themselves to Use Tools</a></li>
+            <li><a href="https://arxiv.org/abs/2305.15402" target="_blank">Large Language Models as Zero-Shot Planners</a></li>
+          </ul>
+        </div>
+
+        <div class="content-subsection">
+          <h3 class="content-subsection-title">Communities & Forums</h3>
+          <ul>
+            <li><a href="https://discord.gg/langchain" target="_blank">LangChain Discord</a></li>
+            <li><a href="https://discord.gg/crewai" target="_blank">CrewAI Discord</a></li>
+            <li><a href="https://news.ycombinator.com" target="_blank">Hacker News (AI discussions)</a></li>
+            <li><a href="https://reddit.com/r/MachineLearning" target="_blank">r/MachineLearning</a></li>
+          </ul>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <footer>
+    <p>AI Agent Patterns — Enterprise Knowledge Tree. Last updated: 2024. Made with ❤️ for builders.</p>
+  </footer>
+
+  <script>
+    // Initialize Mermaid with responsive config
+    mermaid.initialize({ 
+      startOnLoad: true, 
+      theme: 'dark',
+      logLevel: 'error',
+      securityLevel: 'loose',
+      flowchart: { useMaxWidth: true },
+      sequence: { useMaxWidth: true },
+      gantt: { useMaxWidth: true }
+    });
+    
+    // Update theme when toggled
+    const originalThemeToggleClick = document.addEventListener('click', function(e) {
+      if (e.target.id === 'themeToggle') {
+        setTimeout(() => {
+          const theme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+          mermaid.initialize({ theme: theme });
+          document.querySelectorAll('.mermaid').forEach(el => {
+            el.innerHTML = el.textContent;
+            mermaid.contentLoaded();
+          });
+        }, 50);
+      }
+    });
+
+    // Pattern Data
+    const patterns = [
+      {
+        id: 'react',
+        name: 'ReAct',
+        emoji: '🧠',
+        difficulty: 'intermediate',
+        tags: ['reasoning', 'tool-use', 'core'],
+        shortDesc: 'Reasoning + Acting: Interleave reasoning and tool use for better accuracy.',
+        description: `
+          <div class="content-subsection">
+            <h3 class="content-subsection-title">Overview</h3>
+            <p class="content-subsection-text">
+              ReAct (Reasoning + Acting) combines Chain-of-Thought reasoning with in-context learning to generate reasoning traces and task-specific actions. The agent alternates between thinking about what to do and actually doing it.
+            </p>
+          </div>
+
+          <div class="content-subsection">
+            <h3 class="content-subsection-title">How It Works</h3>
+            <div class="diagram">
+              <div class="mermaid">
+                graph LR
+                  A["Thought: Analyze<br/>problem"] --> B["Action: Pick tool"]
+                  B --> C["Observation:<br/>Tool result"]
+                  C --> D{Goal<br/>achieved?}
+                  D -->|No| A
+                  D -->|Yes| E["Final Answer"]
+              </div>
+            </div>
+          </div>
+
+          <div class="content-subsection">
+            <h3 class="content-subsection-title">When to Use</h3>
+            <ul>
+              <li>Complex reasoning required (multi-step problems)</li>
+              <li>Tool selection needs justification</li>
+              <li>Transparency and explainability matter</li>
+              <li>Want to reduce hallucinations</li>
+            </ul>
+          </div>
+
+          <div class="content-subsection">
+            <h3 class="content-subsection-title">Pros & Cons</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Pros</th>
+                  <th>Cons</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Better reasoning quality</td>
+                  <td>More tokens used (higher cost)</td>
+                </tr>
+                <tr>
+                  <td>Easier to debug/understand</td>
+                  <td>Slower (more LLM calls)</td>
+                </tr>
+                <tr>
+                  <td>Reduces hallucinations</td>
+                  <td>Verbose outputs</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="code-block">
+            <div class="code-block-header">
+              <span>Python: ReAct Example</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <div class="code-block-content">
+              <pre><code class="language-python">def react_agent(query: str, tools: List[Tool]) -> str:
+    """ReAct agent: reason then act."""
+    
+    history = []
+    
+    for _ in range(max_iterations):
+        # Step 1: Think about the problem
+        thought = llm.think(
+            query=query,
+            history=history,
+            prompt="Think about what you need to do next."
+        )
+        
+        history.append({"type": "Thought", "content": thought})
+        
+        # Step 2: Decide on an action
+        action = llm.select_action(
+            thought=thought,
+            tools=tools,
+            prompt="What tool should you use?"
+        )
+        
+        history.append({"type": "Action", "content": action})
+        
+        # Check if done
+        if action["type"] == "Final Answer":
+            return action["value"]
+        
+        # Step 3: Execute the tool
+        tool_name = action["tool"]
+        tool_args = action["args"]
+        observation = execute_tool(tool_name, tool_args)
+        
+        history.append({
+            "type": "Observation",
+            "tool": tool_name,
+            "result": observation
+        })
+    
+    return "Max iterations reached"</code></pre>
+            </div>
+          </div>
+        `,
+      },
+      {
+        id: 'rag',
+        name: 'RAG (Retrieval-Augmented Generation)',
+        emoji: '📚',
+        difficulty: 'intermediate',
+        tags: ['knowledge', 'retrieval', 'qa'],
+        shortDesc: 'Retrieve relevant documents, then generate answers based on context.',
+        description: `
+          <div class="content-subsection">
+            <h3 class="content-subsection-title">Overview</h3>
+            <p class="content-subsection-text">
+              RAG augments the LLM with external knowledge. Instead of relying solely on training data, the agent retrieves relevant documents and uses them as context when generating responses.
+            </p>
+          </div>
+
+          <div class="content-subsection">
+            <h3 class="content-subsection-title">Architecture</h3>
+            <div class="diagram">
+              <div class="mermaid">
+                graph TB
+                  A["Query"] --> B["Embed Query"]
+                  B --> C["Search Vector DB"]
+                  C --> D["Retrieve Top-K Docs"]
+                  D --> E["Build Context"]
+                  E --> F["LLM Generate"]
+                  F --> G["Final Answer"]
+              </div>
+            </div>
+          </div>
+
+          <div class="content-subsection">
+            <h3 class="content-subsection-title">When to Use</h3>
+            <ul>
+              <li>Large knowledge base to leverage</li>
+              <li>Need up-to-date information</li>
+              <li>Reduce hallucinations with grounded facts</li>
+              <li>Domain-specific QA</li>
+            </ul>
+          </div>
+
+          <div class="code-block">
+            <div class="code-block-header">
+              <span>Python: RAG Agent</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <div class="code-block-content">
+              <pre><code class="language-python">from llama_index import GPTVectorStoreIndex, SimpleDirectoryReader
+
+class RAGAgent:
+    def __init__(self, documents_path: str):
+        # Load and index documents
+        documents = SimpleDirectoryReader(documents_path).load_data()
+        self.index = GPTVectorStoreIndex.from_documents(documents)
+        self.query_engine = self.index.as_query_engine()
+    
+    def answer(self, query: str) -> str:
+        """Retrieve context and generate answer."""
+        
+        # Retrieve relevant documents
+        response = self.query_engine.query(query)
+        
+        return str(response)</code></pre>
+            </div>
+          </div>
+        `,
+      },
+      {
+        id: 'multi-agent',
+        name: 'Multi-Agent Orchestration',
+        emoji: '👥',
+        difficulty: 'advanced',
+        tags: ['coordination', 'specialization', 'scaling'],
+        shortDesc: 'Multiple specialized agents working together to solve complex problems.',
+        description: `
+          <div class="content-subsection">
+            <h3 class="content-subsection-title">Overview</h3>
+            <p class="content-subsection-text">
+              Decompose complex tasks into specialized agents. Each agent focuses on a specific domain or subtask, then they coordinate to achieve the overall goal.
+            </p>
+          </div>
+
+          <div class="content-subsection">
+            <h3 class="content-subsection-title">Patterns</h3>
+            <div class="comparison-grid">
+              <div class="comparison-card">
+                <h4>Orchestrator-Worker</h4>
+                <ul>
+                  <li>Central orchestrator coordinates</li>
+                  <li>Workers execute tasks</li>
+                  <li>Hierarchical structure</li>
+                </ul>
+              </div>
+
+              <div class="comparison-card">
+                <h4>Peer-to-Peer</h4>
+                <ul>
+                  <li>Agents communicate directly</li>
+                  <li>No central authority</li>
+                  <li>Distributed decision-making</li>
+                </ul>
+              </div>
+
+              <div class="comparison-card">
+                <h4>Consensus-Based</h4>
+                <ul>
+                  <li>Agents vote on decisions</li>
+                  <li>Majority rules</li>
+                  <li>Reduces single-agent bias</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-block">
+            <div class="code-block-header">
+              <span>Python: Multi-Agent Example</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <div class="code-block-content">
+              <pre><code class="language-python">from crewai import Agent, Task, Crew
+
+# Create specialized agents
+researcher = Agent(
+    role="Research Analyst",
+    goal="Find and summarize relevant information",
+    backstory="Expert at finding good sources"
+)
+
+analyst = Agent(
+    role="Data Analyst",
+    goal="Analyze and interpret data",
+    backstory="Expert at drawing insights"
+)
+
+# Create tasks
+research_task = Task(
+    description="Research the topic and find key data",
+    agent=researcher
+)
+
+analysis_task = Task(
+    description="Analyze the research findings",
+    agent=analyst
+)
+
+# Create crew
+crew = Crew(
+    agents=[researcher, analyst],
+    tasks=[research_task, analysis_task]
+)
+
+result = crew.kickoff()</code></pre>
+            </div>
+          </div>
+        `,
+      },
+      {
+        id: 'reflection',
+        name: 'Reflection & Self-Correction',
+        emoji: '🔍',
+        difficulty: 'advanced',
+        tags: ['error-correction', 'quality', 'iteration'],
+        shortDesc: 'Agent evaluates its own outputs and self-corrects errors.',
+        description: `
+          <div class="content-subsection">
+            <h3 class="content-subsection-title">Overview</h3>
+            <p class="content-subsection-text">
+              Build self-awareness into agents. After generating a response, the agent evaluates its quality and automatically corrects mistakes.
+            </p>
+          </div>
+
+          <div class="content-subsection">
+            <h3 class="content-subsection-title">Process</h3>
+            <div class="diagram">
+              <div class="mermaid">
+                graph TB
+                  A["Generate Output"] --> B["Self-Evaluate"]
+                  B --> C{Quality<br/>Good?}
+                  C -->|No| D["Identify Issues"]
+                  D --> E["Attempt Fix"]
+                  E --> A
+                  C -->|Yes| F["Return Result"]
+              </div>
+            </div>
+          </div>
+
+          <div class="code-block">
+            <div class="code-block-header">
+              <span>Python: Reflection Example</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <div class="code-block-content">
+              <pre><code class="language-python">def reflective_agent(query: str, max_reflections: int = 3) -> str:
+    """Agent that reflects and self-corrects."""
+    
+    output = llm.generate(query)
+    
+    for _ in range(max_reflections):
+        # Evaluate the output
+        evaluation = llm.evaluate(
+            original_query=query,
+            output=output,
+            prompt="Is this response correct and complete?"
+        )
+        
+        if evaluation["score"] > 0.9:  # Good enough
+            return output
+        
+        # Self-correct
+        issues = evaluation["issues"]
+        output = llm.refine(
+            query=query,
+            previous_output=output,
+            issues=issues,
+            prompt="Fix these issues"
+        )
+    
+    return output</code></pre>
+            </div>
+          </div>
+        `,
+      },
+      {
+        id: 'planning',
+        name: 'Plan-and-Execute',
+        emoji: '📋',
+        difficulty: 'intermediate',
+        tags: ['planning', 'structured', 'decomposition'],
+        shortDesc: 'Break complex tasks into plans, then execute step-by-step.',
+        description: `
+          <div class="content-subsection">
+            <h3 class="content-subsection-title">Overview</h3>
+            <p class="content-subsection-text">
+              Separate planning from execution. Agent first creates a detailed plan, then executes each step. Improves reliability on complex tasks.
+            </p>
+          </div>
+
+          <div class="content-subsection">
+            <h3 class="content-subsection-title">Steps</h3>
+            <ol>
+              <li><strong>Understand:</strong> Parse the user's request</li>
+              <li><strong>Plan:</strong> Create step-by-step plan</li>
+              <li><strong>Validate Plan:</strong> Ensure plan is feasible</li>
+              <li><strong>Execute:</strong> Run each step</li>
+              <li><strong>Verify:</strong> Check each step's result</li>
+              <li><strong>Adapt:</strong> Adjust plan if needed</li>
+            </ol>
+          </div>
+        `,
+      },
+      {
+        id: 'prompt-chaining',
+        name: 'Prompt Chaining',
+        emoji: '⛓️',
+        difficulty: 'beginner',
+        tags: ['sequential', 'composition', 'simple'],
+        shortDesc: 'Chain multiple LLM calls together, using output of one as input to next.',
+        description: `
+          <div class="content-subsection">
+            <h3 class="content-subsection-title">Overview</h3>
+            <p class="content-subsection-text">
+              Break complex tasks into simpler subtasks. Each subtask is handled by a separate LLM call, with outputs feeding into the next call.
+            </p>
+          </div>
+
+          <div class="code-block">
+            <div class="code-block-header">
+              <span>Example: Chained Tasks</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <div class="code-block-content">
+              <pre><code class="language-python">def chained_generation(topic: str) -> str:
+    # Step 1: Generate outline
+    outline = llm.generate(
+        f"Create an outline for an essay about {topic}",
+        temperature=0.7
+    )
+    
+    # Step 2: Generate introduction
+    intro = llm.generate(
+        f"Write introduction based on this outline: {outline}",
+        temperature=0.7
+    )
+    
+    # Step 3: Generate body
+    body = llm.generate(
+        f"Write body paragraphs: {outline}",
+        temperature=0.7
+    )
+    
+    # Step 4: Generate conclusion
+    conclusion = llm.generate(
+        f"Write conclusion summarizing: {intro} {body}",
+        temperature=0.7
+    )
+    
+    return f"{intro}\n\n{body}\n\n{conclusion}"</code></pre>
+            </div>
+          </div>
+        `,
+      },
+      {
+        id: 'routing',
+        name: 'Routing & Classification',
+        emoji: '🛣️',
+        difficulty: 'beginner',
+        tags: ['classification', 'conditional', 'dispatch'],
+        shortDesc: 'Route requests to appropriate agents or handlers based on intent.',
+        description: `
+          <div class="content-subsection">
+            <h3 class="content-subsection-title">Overview</h3>
+            <p class="content-subsection-text">
+              Use an LLM to classify user intent, then route to specialized handlers. Simpler and faster than having one agent handle everything.
+            </p>
+          </div>
+
+          <div class="code-block">
+            <div class="code-block-header">
+              <span>Python: Router Pattern</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <div class="code-block-content">
+              <pre><code class="language-python">def router_agent(query: str) -> str:
+    """Route query to appropriate handler."""
+    
+    # Step 1: Classify intent
+    intent = llm.classify(
+        query,
+        categories=[
+            "technical_support",
+            "billing",
+            "general_inquiry",
+            "feedback"
+        ]
+    )
+    
+    # Step 2: Route to handler
+    handlers = {
+        "technical_support": handle_technical,
+        "billing": handle_billing,
+        "general_inquiry": handle_general,
+        "feedback": handle_feedback
+    }
+    
+    handler = handlers[intent["category"]]
+    return handler(query)</code></pre>
+            </div>
+          </div>
+        `,
+      },
+      {
+        id: 'parallelization',
+        name: 'Parallel Execution',
+        emoji: '⚡',
+        difficulty: 'intermediate',
+        tags: ['concurrency', 'speed', 'optimization'],
+        shortDesc: 'Execute multiple independent tasks in parallel for speed.',
+        description: `
+          <div class="content-subsection">
+            <h3 class="content-subsection-title">Overview</h3>
+            <p class="content-subsection-text">
+              When tasks are independent, execute them in parallel. Reduces total latency significantly.
+            </p>
+          </div>
+
+          <div class="code-block">
+            <div class="code-block-header">
+              <span>Python: Parallel Execution</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <div class="code-block-content">
+              <pre><code class="language-python">import asyncio
+
+async def parallel_agent(query: str) -> Dict:
+    """Execute independent tasks in parallel."""
+    
+    # Run all searches concurrently
+    results = await asyncio.gather(
+        search_web(query),
+        search_docs(query),
+        search_database(query),
+        timeout=5.0
+    )
+    
+    # Aggregate results
+    return {
+        "web": results[0],
+        "docs": results[1],
+        "database": results[2]
+    }</code></pre>
+            </div>
+          </div>
+        `,
+      },
+      {
+        id: 'evaluator-optimizer',
+        name: 'Evaluator-Optimizer Pattern',
+        emoji: '✅',
+        difficulty: 'advanced',
+        tags: ['quality', 'iteration', 'continuous-improvement'],
+        shortDesc: 'One agent generates, another evaluates and optimizes outputs.',
+        description: `
+          <div class="content-subsection">
+            <h3 class="content-subsection-title">Overview</h3>
+            <p class="content-subsection-text">
+              Separate generation from evaluation. Generator creates outputs, evaluator assesses quality and suggests improvements.
+            </p>
+          </div>
+
+          <div class="diagram">
+            <div class="mermaid">
+              graph TB
+                A["Generator<br/>Creates Output"] --> B["Evaluator<br/>Scores Output"]
+                B --> C{Score<br/>Good?}
+                C -->|Yes| D["Use Output"]
+                C -->|No| E["Optimizer<br/>Refine Output"]
+                E --> A
+            </div>
+          </div>
+        `,
+      },
+      {
+        id: 'orchestrator-workers',
+        name: 'Orchestrator-Workers',
+        emoji: '🎯',
+        difficulty: 'advanced',
+        tags: ['delegation', 'scalability', 'hierarchical'],
+        shortDesc: 'Orchestrator delegates tasks to worker agents with specific expertise.',
+        description: `
+          <div class="content-subsection">
+            <h3 class="content-subsection-title">Overview</h3>
+            <p class="content-subsection-text">
+              Central orchestrator agent breaks down tasks and delegates to specialized worker agents. Similar to project management.
+            </p>
+          </div>
+
+          <div class="diagram">
+            <div class="mermaid">
+              graph TB
+                O["Orchestrator<br/>Plan & Delegate"]
+                O --> W1["Worker 1<br/>Research"]
+                O --> W2["Worker 2<br/>Analysis"]
+                O --> W3["Worker 3<br/>Synthesis"]
+                W1 --> O
+                W2 --> O
+                W3 --> O
+                O --> F["Final Output"]
+            </div>
+          </div>
+        `,
+      },
+      {
+        id: 'hierarchical',
+        name: 'Hierarchical Agents',
+        emoji: '🏗️',
+        difficulty: 'advanced',
+        tags: ['abstraction', 'composition', 'structure'],
+        shortDesc: 'Tree-like hierarchy of agents with high-level supervisors and low-level executors.',
+        description: `
+          <div class="content-subsection">
+            <h3 class="content-subsection-title">Overview</h3>
+            <p class="content-subsection-text">
+              Create a hierarchy where high-level agents make decisions and delegate to lower-level agents. Improves scalability and organization.
+            </p>
+          </div>
+
+          <div class="diagram">
+            <div class="mermaid">
+              graph TB
+                CEO["CEO Agent<br/>Strategic Decisions"]
+                CEO --> CFO["CFO Agent<br/>Financial"]
+                CEO --> CTO["CTO Agent<br/>Technical"]
+                CFO --> ACC["Accountant<br/>Agent"]
+                CFO --> TAX["Tax<br/>Agent"]
+                CTO --> ENG["Engineer<br/>Agent"]
+                CTO --> OPS["Ops<br/>Agent"]
+            </div>
+          </div>
+        `,
+      },
+      {
+        id: 'human-in-loop',
+        name: 'Human-in-the-Loop (HITL)',
+        emoji: '👤',
+        difficulty: 'intermediate',
+        tags: ['human-feedback', 'approval', 'safety'],
+        shortDesc: 'Agent requests human approval for critical decisions.',
+        description: `
+          <div class="content-subsection">
+            <h3 class="content-subsection-title">Overview</h3>
+            <p class="content-subsection-text">
+              For high-stakes decisions, agent generates recommendation but requires human approval before executing. Reduces risk.
+            </p>
+          </div>
+
+          <div class="diagram">
+            <div class="mermaid">
+              graph TB
+                A["Agent<br/>Generates<br/>Recommendation"] --> B["Confidence<br/>Check"]
+                B --> C{Confidence<br/>High?}
+                C -->|Yes| D["Auto-Execute"]
+                C -->|No| E["Request<br/>Human Approval"]
+                E --> F{Human<br/>Approves?}
+                F -->|Yes| G["Execute"]
+                F -->|No| H["Reject"]
+            </div>
+          </div>
+        `,
+      },
+      {
+        id: 'code-execution',
+        name: 'Code Execution Agent',
+        emoji: '💻',
+        difficulty: 'intermediate',
+        tags: ['code', 'computation', 'specialized'],
+        shortDesc: 'Agent can write and execute code to solve problems programmatically.',
+        description: `
+          <div class="content-subsection">
+            <h3 class="content-subsection-title">Overview</h3>
+            <p class="content-subsection-text">
+              Agent can generate and execute code (Python, JavaScript) to solve computational problems, analyze data, or create artifacts.
+            </p>
+          </div>
+
+          <div class="content-subsection">
+            <h3 class="content-subsection-title">Safety Considerations</h3>
+            <div class="warning">
+              Executing arbitrary code is dangerous. Always use:
+              <ul>
+                <li>Sandboxed execution environments</li>
+                <li>Timeout limits (5-10 seconds max)</li>
+                <li>Resource limits (memory, CPU)</li>
+                <li>Output inspection before showing to users</li>
+              </ul>
+            </div>
+          </div>
+        `,
+      },
+    ];
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', () => {
+      renderPatterns();
+      setupSearch();
+      setupTheme();
+      setupNavigation();
+      mermaid.contentLoaded();
+    });
+
+    function renderPatterns() {
+      const grid = document.getElementById('patternsGrid');
+      grid.innerHTML = patterns.map(pattern => `
+        <div class="card" data-pattern-id="${pattern.id}" data-difficulty="${pattern.difficulty}">
+          <div class="card-header">
+            <div>
+              <span class="card-icon">${pattern.emoji}</span>
+              <h3 class="card-title">${pattern.name}</h3>
+            </div>
+            <button class="favorite-btn" onclick="toggleFavorite(event)">☆</button>
+          </div>
+          <div class="card-tags">
+            ${pattern.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+          </div>
+          <p class="card-description">${pattern.shortDesc}</p>
+          <div class="card-footer">
+            <span class="difficulty ${pattern.difficulty}">${pattern.difficulty}</span>
+            <button class="expand-btn" onclick="expandPattern('${pattern.id}')">
+              Learn More →
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function expandPattern(patternId) {
+      const pattern = patterns.find(p => p.id === patternId);
+      if (!pattern) return;
+
+      const grid = document.getElementById('patternsGrid');
+      const existingExpanded = grid.querySelector('.card-expanded');
+      if (existingExpanded) existingExpanded.remove();
+
+      const expanded = document.createElement('div');
+      expanded.className = 'card card-expanded';
+      expanded.innerHTML = `
+        <div class="card-expanded-content">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h2 class="card-expanded-title">${pattern.emoji} ${pattern.name}</h2>
+            <button onclick="this.closest('.card-expanded').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer;">✕</button>
+          </div>
+          ${pattern.description}
+        </div>
+      `;
+
+      grid.appendChild(expanded);
+      setTimeout(() => mermaid.contentLoaded(), 100);
+    }
+
+    function toggleFavorite(event) {
+      event.stopPropagation();
+      const btn = event.target;
+      btn.classList.toggle('active');
+      btn.textContent = btn.classList.contains('active') ? '★' : '☆';
+
+      const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+      const patternId = btn.closest('.card').dataset.patternId;
+
+      if (btn.classList.contains('active')) {
+        if (!favorites.includes(patternId)) favorites.push(patternId);
+      } else {
+        const idx = favorites.indexOf(patternId);
+        if (idx > -1) favorites.splice(idx, 1);
+      }
+
+      localStorage.setItem('favorites', JSON.stringify(favorites));
+    }
+
+    function setupSearch() {
+      const input = document.getElementById('searchInput');
+      if (!input) return;
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') input.blur();
+      });
+
+      input.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        const cards = document.querySelectorAll('[data-pattern-id]');
+
+        cards.forEach(card => {
+          const text = card.textContent.toLowerCase();
+          card.style.display = text.includes(query) ? '' : 'none';
+        });
+      });
+    }
+
+    function setupTheme() {
+      const toggle = document.getElementById('themeToggle');
+      const html = document.documentElement;
+
+      const saved = localStorage.getItem('theme') || 'dark';
+      html.dataset.theme = saved;
+      updateThemeIcon();
+
+      toggle.addEventListener('click', () => {
+        const current = html.dataset.theme;
+        const next = current === 'dark' ? 'light' : 'dark';
+        html.dataset.theme = next;
+        localStorage.setItem('theme', next);
+        updateThemeIcon();
+      });
+
+      function updateThemeIcon() {
+        toggle.textContent = html.dataset.theme === 'dark' ? '☀️' : '🌙';
+      }
+    }
+
+    function setupNavigation() {
+      document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.addEventListener('click', () => {
+          document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+          item.classList.add('active');
+        });
+      });
+    }
+
+    function scrollToSection(id) {
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    function filterPatterns(filter) {
+      const chips = document.querySelectorAll('.chip');
+      chips.forEach(chip => chip.classList.remove('active'));
+      event.target.classList.add('active');
+
+      const cards = document.querySelectorAll('[data-pattern-id]');
+      cards.forEach(card => {
+        if (filter === 'all') {
+          card.style.display = '';
+        } else {
+          card.style.display = card.dataset.difficulty === filter ? '' : 'none';
+        }
+      });
+    }
+
+    function copyCode(button) {
+      const code = button.closest('.code-block').querySelector('code').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        button.textContent = '✓ Copied';
+        setTimeout(() => {
+          button.textContent = 'Copy';
+        }, 2000);
+      });
+    }
+
+    function showKeyboardShortcuts() {
+      alert(`Keyboard Shortcuts:
+/ - Focus search
+T - Toggle theme
+E - Expand pattern
+F - Toggle favorite
+
+Press Escape to blur search.`);
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '/') {
+        document.getElementById('searchInput').focus();
+        e.preventDefault();
+      }
+      if (e.key === 't' && e.ctrlKey) {
+        document.getElementById('themeToggle').click();
+        e.preventDefault();
+      }
+    });
+
+    // Load favorites on page load
+    function loadFavorites() {
+      const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+      document.querySelectorAll('[data-pattern-id]').forEach(card => {
+        if (favorites.includes(card.dataset.patternId)) {
+          const btn = card.querySelector('.favorite-btn');
+          btn.classList.add('active');
+          btn.textContent = '★';
+        }
+      });
+    }
+
+    // Call after rendering patterns
+    setTimeout(loadFavorites, 100);
+
+    // Diagram Enhancement - Zoom, Pan, and Fullscreen
+    function setupDiagramControls() {
+      const diagrams = document.querySelectorAll('.diagram');
+      
+      diagrams.forEach((diagram, index) => {
+        // Create container if not exists
+        if (!diagram.querySelector('.diagram-container')) {
+          const mermaidDiv = diagram.querySelector('.mermaid');
+          if (mermaidDiv) {
+            // Store original Mermaid code
+            const originalMermaidCode = mermaidDiv.textContent.trim();
+            mermaidDiv.dataset.mermaidCode = originalMermaidCode;
+            
+            // Create header
+            const header = document.createElement('div');
+            header.className = 'diagram-header';
+            header.innerHTML = `
+              <span class="diagram-header-title">Diagram ${index + 1}</span>
+              <div class="diagram-controls">
+                <button class="diagram-btn zoom-in-btn" title="Zoom In (+ or Scroll)">🔍+</button>
+                <button class="diagram-btn zoom-out-btn" title="Zoom Out (- or Scroll)">🔍−</button>
+                <button class="diagram-btn zoom-reset-btn" title="Reset Zoom">↺</button>
+                <button class="diagram-btn fullscreen-btn" title="Fullscreen">⛶</button>
+              </div>
+            `;
+            
+            diagram.insertBefore(header, mermaidDiv);
+            
+            // Create container
+            const container = document.createElement('div');
+            container.className = 'diagram-container';
+            diagram.appendChild(container);
+            container.appendChild(mermaidDiv);
+            
+            // Setup zoom functionality
+            let scale = 1;
+            const minScale = 0.5;
+            const maxScale = 3;
+            
+            const zoomInBtn = header.querySelector('.zoom-in-btn');
+            const zoomOutBtn = header.querySelector('.zoom-out-btn');
+            const zoomResetBtn = header.querySelector('.zoom-reset-btn');
+            const fullscreenBtn = header.querySelector('.fullscreen-btn');
+            
+            function updateZoom() {
+              mermaidDiv.style.transform = `scale(${scale})`;
+            }
+            
+            zoomInBtn.addEventListener('click', () => {
+              if (scale < maxScale) {
+                scale += 0.1;
+                updateZoom();
+              }
+            });
+            
+            zoomOutBtn.addEventListener('click', () => {
+              if (scale > minScale) {
+                scale -= 0.1;
+                updateZoom();
+              }
+            });
+            
+            zoomResetBtn.addEventListener('click', () => {
+              scale = 1;
+              updateZoom();
+              container.scrollLeft = 0;
+              container.scrollTop = 0;
+            });
+            
+            // Mouse wheel zoom
+            container.addEventListener('wheel', (e) => {
+              if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                if (e.deltaY < 0 && scale < maxScale) {
+                  scale += 0.1;
+                } else if (e.deltaY > 0 && scale > minScale) {
+                  scale -= 0.1;
+                }
+                updateZoom();
+              }
+            });
+            
+            // Fullscreen functionality
+            fullscreenBtn.addEventListener('click', () => {
+              const modal = document.createElement('div');
+              modal.className = 'diagram-modal active';
+              
+              // Clone the SVG from the original diagram for better rendering
+              const originalSvg = mermaidDiv.querySelector('svg');
+              let svgClone = '';
+              if (originalSvg) {
+                svgClone = originalSvg.outerHTML;
+              }
+              
+              modal.innerHTML = `
+                <div class="diagram-modal-content">
+                  <button class="diagram-modal-close" onclick="this.closest('.diagram-modal').remove()">✕</button>
+                  <div class="diagram-modal-mermaid" style="display: flex; justify-content: center; align-items: center; min-height: 80vh;">
+                    ${svgClone || '<div style="color: white; font-size: 18px;">Loading diagram...</div>'}
+                  </div>
+                </div>
+              `;
+              document.body.appendChild(modal);
+              
+              // Close modal on click outside
+              modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                  modal.remove();
+                }
+              });
+              
+              // Close on Escape
+              const handleEscape = (e) => {
+                if (e.key === 'Escape') {
+                  modal.remove();
+                  document.removeEventListener('keydown', handleEscape);
+                }
+              };
+              document.addEventListener('keydown', handleEscape);
+            });
+          }
+        }
+      });
+    }
+
+    // Call after rendering patterns and diagrams
+    setTimeout(setupDiagramControls, 150);
+    
+    // Also setup on expandPattern
+    const originalExpandPattern = window.expandPattern;
+    window.expandPattern = function(patternId) {
+      originalExpandPattern(patternId);
+      setTimeout(setupDiagramControls, 150);
+    };
+  </script>
+</body>
+</html>

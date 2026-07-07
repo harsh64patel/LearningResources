@@ -1,0 +1,332 @@
+
+<style>
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.day-card{transition:box-shadow 0.15s}
+.day-card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.dot{transition:transform 0.15s;cursor:pointer}
+.dot:hover{transform:scale(1.4)}
+.nb-btn{transition:opacity 0.15s}
+.nb-btn:hover{opacity:0.85}
+.phase-btn{transition:background 0.15s, color 0.15s}
+.tag-pill{display:inline-block}
+</style>
+<h2 class="sr-only">30-day agentic AI roadmap using Gemini API and Google Colab</h2>
+<div id="root" style="padding:1rem 0;font-family:var(--font-sans);color:var(--color-text-primary)"></div>
+<script>
+const PHASES=[
+  {id:1,name:"Core API mastery",emoji:"⚡",range:"Days 1–7",accent:"#185FA5",bg:"#E6F1FB",text:"#0C447C",border:"#B5D4F4",
+   days:[
+    {day:1,title:"Setup & first API call",time:"1.5h",diff:"Beginner",
+     concepts:["API key + google-generativeai SDK install","generate_content() call structure","Gemini Flash vs Pro: speed/quality tradeoffs","Basic request/response cycle & error handling"],
+     project:"Hello Gemini: interactive demo comparing Flash vs Pro outputs side-by-side on 5 diverse prompts",
+     tags:["google-generativeai","Python"],
+     nb:"https://colab.research.google.com/github/google-gemini/cookbook/blob/main/quickstarts/Get_started.ipynb",official:true},
+    {day:2,title:"Prompt engineering fundamentals",time:"2h",diff:"Beginner",
+     concepts:["Zero-shot prompting patterns","Few-shot with labeled examples","Chain-of-thought (CoT) reasoning","Temperature, top-p & top-k tuning"],
+     project:"Fact vs hallucination detector: compare zero-shot, few-shot and CoT strategies on same questions",
+     tags:["Prompting","CoT","Temperature"],
+     nb:"https://colab.research.google.com/github/google-gemini/cookbook/blob/main/quickstarts/Prompting.ipynb",official:true},
+    {day:3,title:"System instructions & personas",time:"2h",diff:"Beginner",
+     concepts:["system_instruction parameter usage","Persona design patterns","Behavioral constraints & guardrails","Tone, register and domain control"],
+     project:"Build 3 distinct AI personas: technical interviewer, Socratic tutor, strict code reviewer",
+     tags:["System Prompt","Persona"],
+     nb:"https://colab.research.google.com/github/google-gemini/cookbook/blob/main/quickstarts/System_instructions.ipynb",official:true},
+    {day:4,title:"Multi-turn chat",time:"2h",diff:"Beginner",
+     concepts:["ChatSession object creation","history parameter format","Context window limits in practice","Token counting with count_tokens()"],
+     project:"Stateful study buddy that tracks covered topics and generates adaptive quiz questions",
+     tags:["ChatSession","History"],
+     nb:"https://colab.research.google.com/github/google-gemini/cookbook/blob/main/quickstarts/Chat.ipynb",official:true},
+    {day:5,title:"Structured outputs (JSON mode)",time:"2.5h",diff:"Intermediate",
+     concepts:["response_mime_type='application/json'","response_schema definition","Constrained generation guarantees","Schema validation & error recovery"],
+     project:"Resume parser: extract name, skills, education and work experience as validated typed JSON",
+     tags:["JSON Mode","Schema"],
+     nb:"https://colab.research.google.com/github/google-gemini/cookbook/blob/main/quickstarts/JSON_mode.ipynb",official:true},
+    {day:6,title:"Streaming responses",time:"2h",diff:"Beginner",
+     concepts:["stream=True parameter","Iterating response chunks with for loop","Async streaming with asyncio","Building progress display in terminal"],
+     project:"Live story generator with real-time token-by-token display and running word count",
+     tags:["Streaming","AsyncIO"],
+     nb:"https://colab.research.google.com/github/google-gemini/cookbook/blob/main/quickstarts/Streaming.ipynb",official:true},
+    {day:7,title:"Mini-project: smart CLI chatbot",time:"3h",diff:"Beginner+",
+     concepts:["Synthesis of all days 1–6","CLI loop with /quit and /save commands","JSON session logging to disk","Retry logic & graceful error handling"],
+     project:"Terminal chatbot combining: custom persona + streaming output + full conversation saved to JSON log",
+     tags:["CLI","Synthesis"],
+     nb:"https://colab.research.google.com/#create=true",official:false,milestone:true},
+  ]},
+  {id:2,name:"Tool use & grounding",emoji:"🔧",range:"Days 8–14",accent:"#534AB7",bg:"#EEEDFE",text:"#3C3489",border:"#CECBF6",
+   days:[
+    {day:8,title:"Function calling basics",time:"2.5h",diff:"Intermediate",
+     concepts:["tools= parameter structure","FunctionDeclaration with JSON schema","AUTO / NONE / ANY tool_config modes","Complete tool response loop"],
+     project:"Weather + time zone agent: Gemini autonomously calls your Python functions by name",
+     tags:["Function Calling","Tools"],
+     nb:"https://colab.research.google.com/github/google-gemini/cookbook/blob/main/quickstarts/Function_calling.ipynb",official:true},
+    {day:9,title:"Parallel function calling",time:"2.5h",diff:"Intermediate",
+     concepts:["Multiple tool calls per single turn","Batch function response submission","Result merging strategies","Latency optimization via parallelism"],
+     project:"Multi-source aggregator: one prompt triggers parallel stock price + weather + news API calls",
+     tags:["Parallel","Batch"],
+     nb:"https://colab.research.google.com/#create=true",official:false},
+    {day:10,title:"Google Search grounding",time:"2h",diff:"Intermediate",
+     concepts:["google_search_retrieval config object","grounding_metadata parsing","Source attribution & rendering","Dynamic retrieval threshold tuning"],
+     project:"Real-time news summarizer with inline citations and clickable source URLs",
+     tags:["Search","Grounding"],
+     nb:"https://colab.research.google.com/github/google-gemini/cookbook/blob/main/quickstarts/Search_Grounding.ipynb",official:true},
+    {day:11,title:"Code execution tool",time:"2.5h",diff:"Intermediate",
+     concepts:["CodeExecution tool type setup","Sandboxed Python runtime behavior","Parsing executable_code blocks","Reading tool_outputs results"],
+     project:"NL data analyst: describe a CSV in plain English, get back matplotlib charts + summary statistics",
+     tags:["Code Exec","Sandbox"],
+     nb:"https://colab.research.google.com/github/google-gemini/cookbook/blob/main/quickstarts/Code_execution.ipynb",official:true},
+    {day:12,title:"Files API",time:"2h",diff:"Intermediate",
+     concepts:["genai.upload_file() method","MIME type handling for PDF / image / video","File TTL and lifecycle management","Large file upload patterns"],
+     project:"Multi-format document reader: single agent answers questions across PDF, image and .txt input",
+     tags:["Files API","PDF"],
+     nb:"https://colab.research.google.com/github/google-gemini/cookbook/blob/main/quickstarts/File_API.ipynb",official:true},
+    {day:13,title:"Multimodal vision",time:"2.5h",diff:"Intermediate",
+     concepts:["inline_data with base64 encoding","Image + text prompt construction","Visual Q&A and OCR patterns","Chart, diagram and screenshot analysis"],
+     project:"Screenshot analyzer: extracts UI elements, reads all text, and describes full layout structure",
+     tags:["Vision","Multimodal"],
+     nb:"https://colab.research.google.com/github/google-gemini/cookbook/blob/main/quickstarts/Multimodal.ipynb",official:true},
+    {day:14,title:"Mini-project: research assistant agent",time:"4h",diff:"Intermediate+",
+     concepts:["PDF upload + structured parsing","Search grounding for web context","Code execution for data analysis","Synthesized cited markdown report"],
+     project:"Upload any PDF → search related topics on the web → run analysis → generate a fully cited report",
+     tags:["Integration","Research","Multi-tool"],
+     nb:"https://colab.research.google.com/#create=true",official:false,milestone:true},
+  ]},
+  {id:3,name:"RAG & embeddings",emoji:"🧠",range:"Days 15–19",accent:"#0F6E56",bg:"#E1F5EE",text:"#085041",border:"#9FE1CB",
+   days:[
+    {day:15,title:"Embeddings API",time:"2h",diff:"Intermediate",
+     concepts:["embed_content() method","task_type: RETRIEVAL_DOCUMENT vs QUERY","Batch embedding for efficiency","Cosine similarity implemented from scratch"],
+     project:"Semantic cluster visualizer: embed 50 documents, reduce with PCA, plot color-coded clusters",
+     tags:["Embeddings","Similarity"],
+     nb:"https://colab.research.google.com/github/google-gemini/cookbook/blob/main/quickstarts/Embeddings.ipynb",official:true},
+    {day:16,title:"Vector search with FAISS",time:"2.5h",diff:"Intermediate",
+     concepts:["faiss.IndexFlatIP setup & indexing","Vector normalization for cosine search","Top-k similarity retrieval","Persistent index save and load"],
+     project:"Personal note search engine: embed your markdown notes, run semantic top-5 lookup queries",
+     tags:["FAISS","Vector DB"],
+     nb:"https://colab.research.google.com/#create=true",official:false},
+    {day:17,title:"Simple RAG pipeline",time:"3h",diff:"Intermediate",
+     concepts:["Fixed-size vs recursive text chunking","Embed chunks and build FAISS index","Top-k retrieval into context window","Augmented generation with source context"],
+     project:"RAG over Wikipedia: chunk → embed → retrieve top-k → answer questions with cited context",
+     tags:["RAG","Chunking"],
+     nb:"https://colab.research.google.com/#create=true",official:false},
+    {day:18,title:"Multi-document RAG",time:"3h",diff:"Advanced",
+     concepts:["Multi-file ingestion pipeline","Source + page metadata tagging","Cross-encoder re-ranking of results","[Source: doc_name, p.X] citation format"],
+     project:"Course notes Q&A: query across 3+ PDFs with precise source-page citations in every answer",
+     tags:["Multi-doc","Metadata"],
+     nb:"https://colab.research.google.com/#create=true",official:false},
+    {day:19,title:"Mini-project: PDF Q&A agent",time:"4h",diff:"Advanced",
+     concepts:["Files API + Embeddings + FAISS + RAG + Streaming — full integration"],
+     project:"Upload any PDF → semantic chunking → FAISS index → streamed answers with inline citations",
+     tags:["RAG","Files API","Streaming"],
+     nb:"https://colab.research.google.com/#create=true",official:false,milestone:true},
+  ]},
+  {id:4,name:"Agentic patterns",emoji:"🤖",range:"Days 20–26",accent:"#854F0B",bg:"#FAEEDA",text:"#633806",border:"#FAC775",
+   days:[
+    {day:20,title:"ReAct from scratch",time:"3h",diff:"Advanced",
+     concepts:["Thought-Action-Observation loop anatomy","Manual Python agent loop implementation","Tool dispatch dictionary pattern","Termination conditions & max-steps guard"],
+     project:"ReAct agent from zero: calculator + Wikipedia lookup + date tool, zero frameworks used",
+     tags:["ReAct","Agent Loop"],
+     nb:"https://colab.research.google.com/#create=true",official:false},
+    {day:21,title:"Tool orchestration & routing",time:"3h",diff:"Advanced",
+     concepts:["Intent-based routing with Gemini","Confidence scoring per tool","Fallback chains & graceful degradation","Multi-tool composition patterns"],
+     project:"Smart router: classifies query intent → dispatches to search / code / RAG / function call",
+     tags:["Router","Orchestration"],
+     nb:"https://colab.research.google.com/#create=true",official:false},
+    {day:22,title:"LangChain + Gemini",time:"2.5h",diff:"Intermediate",
+     concepts:["ChatGoogleGenerativeAI class","LCEL pipe syntax (|)","LangChain tool wrappers","ConversationalRetrievalChain setup"],
+     project:"LangChain RAG chain + conversational agent — both backed by Gemini Flash",
+     tags:["LangChain","LCEL"],
+     nb:"https://colab.research.google.com/github/google-gemini/cookbook/blob/main/integrations/langchain/intro_to_langchain.ipynb",official:true},
+    {day:23,title:"LangGraph basics",time:"3h",diff:"Advanced",
+     concepts:["StateGraph + TypedDict state schema","Node functions and state mutations","add_edge vs add_conditional_edges","Graph compilation and invoke/stream"],
+     project:"3-node chatbot graph: classify_intent → conditional route → specialist responder node",
+     tags:["LangGraph","StateGraph"],
+     nb:"https://colab.research.google.com/#create=true",official:false},
+    {day:24,title:"Multi-agent systems",time:"3.5h",diff:"Advanced",
+     concepts:["Supervisor-worker architecture","Agent handoff via shared TypedDict state","Task delegation and result bubbling","Human-in-the-loop interruption points"],
+     project:"2-agent LangGraph pipeline: Researcher gathers facts, Writer composes the article, both use Gemini",
+     tags:["Multi-Agent","Supervisor"],
+     nb:"https://colab.research.google.com/#create=true",official:false},
+    {day:25,title:"Memory & persistence",time:"3h",diff:"Advanced",
+     concepts:["Short-term in-state memory design","Long-term SQLite/file-based store","Conversation summarization node","MemorySaver checkpointer with thread_id"],
+     project:"Persistent agent: remembers user facts and full chat history across independent sessions",
+     tags:["Memory","Checkpointer"],
+     nb:"https://colab.research.google.com/#create=true",official:false},
+    {day:26,title:"Mini-project: full LangGraph agent",time:"5h",diff:"Expert",
+     concepts:["LangGraph + Gemini + RAG + Memory + function calling — all integrated in one graph"],
+     project:"Research → write → self-review loop: full LangGraph agent with Gemini and all tools wired in",
+     tags:["LangGraph","Full Agent"],
+     nb:"https://colab.research.google.com/#create=true",official:false,milestone:true},
+  ]},
+  {id:5,name:"Production & deployment",emoji:"🚀",range:"Days 27–30",accent:"#993C1D",bg:"#FAECE7",text:"#712B13",border:"#F5C4B3",
+   days:[
+    {day:27,title:"Reflection & self-correction",time:"3h",diff:"Expert",
+     concepts:["Agent self-critique loop design","Output validation against schema or tests","Conditional re-generation with feedback","Quality gates and max-retry limits"],
+     project:"Self-correcting code generator: writes → runs pytest → reads failures → auto-fixes the code",
+     tags:["Reflection","Quality"],
+     nb:"https://colab.research.google.com/#create=true",official:false},
+    {day:28,title:"Gradio UI for agents",time:"2.5h",diff:"Intermediate",
+     concepts:["gr.ChatInterface with streaming yield","File upload component wiring","gr.share() for free public URL","Connecting to LangGraph backend"],
+     project:"Gradio front-end: wrap your day 26 LangGraph agent in a shareable chat UI, deployed in one line",
+     tags:["Gradio","UI"],
+     nb:"https://colab.research.google.com/#create=true",official:false},
+    {day:29,title:"Evaluation & safety",time:"3h",diff:"Advanced",
+     concepts:["LLM-as-judge scoring pattern","Prompt injection detection heuristics","Faithfulness + relevance + accuracy metrics","Automated eval harness with score report"],
+     project:"Agent evaluator: auto-scores your agent outputs on accuracy, safety and relevance — full report",
+     tags:["Evaluation","Safety"],
+     nb:"https://colab.research.google.com/#create=true",official:false},
+    {day:30,title:"Final project: full agentic pipeline",time:"6h",diff:"Expert",
+     concepts:["Multimodal input handling (PDF or image)","RAG retrieval layer","LangGraph orchestration with memory","Gradio UI + safety evaluation layer"],
+     project:"Upload image/PDF → RAG → LangGraph agent → self-correct → Gradio chat UI → auto-eval score",
+     tags:["Full Stack","Production","Pipeline"],
+     nb:"https://colab.research.google.com/#create=true",official:false,milestone:true,final:true},
+  ]},
+];
+
+const DIFF={
+  "Beginner":{c:"#27500A",bg:"#EAF3DE"},
+  "Beginner+":{c:"#27500A",bg:"#EAF3DE"},
+  "Intermediate":{c:"#633806",bg:"#FAEEDA"},
+  "Intermediate+":{c:"#633806",bg:"#FAEEDA"},
+  "Advanced":{c:"#712B13",bg:"#FAECE7"},
+  "Expert":{c:"#3C3489",bg:"#EEEDFE"},
+};
+
+let filter=null, expanded=null;
+
+function render(){
+  const root=document.getElementById('root');
+  const vis=filter?PHASES.filter(p=>p.id===filter):PHASES;
+
+  root.innerHTML=`
+    <p style="font-size:11px;color:var(--color-text-tertiary);margin:0 0 3px;text-transform:uppercase;letter-spacing:0.08em">Free · Google Colab + Gemini API</p>
+    <h1 style="font-size:22px;font-weight:500;margin:0 0 14px;color:var(--color-text-primary)">30-day agentic AI roadmap</h1>
+
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:14px" id="dots"></div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px" id="stats">
+      ${[["30","days"],["5","phases"],["5","projects"],["Free","cost"]].map(([v,l])=>`
+        <div style="display:flex;flex-direction:column">
+          <span style="font-size:18px;font-weight:500;color:var(--color-text-primary);line-height:1">${v}</span>
+          <span style="font-size:11px;color:var(--color-text-secondary)">${l}</span>
+        </div>`).join('')}
+    </div>
+
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px" id="filters">
+      <button class="phase-btn" onclick="setFilter(null)" style="padding:5px 13px;border-radius:20px;border:${filter===null?'0.5px solid var(--color-border-primary)':'0.5px solid var(--color-border-tertiary)'};background:${filter===null?'var(--color-background-secondary)':'transparent'};cursor:pointer;font-size:13px;font-weight:${filter===null?500:400};color:var(--color-text-primary)">All phases</button>
+      ${PHASES.map(p=>`<button class="phase-btn" onclick="setFilter(${p.id})" style="padding:5px 13px;border-radius:20px;border:${filter===p.id?`0.5px solid ${p.accent}`:'0.5px solid var(--color-border-tertiary)'};background:${filter===p.id?p.bg:'transparent'};cursor:pointer;font-size:13px;font-weight:${filter===p.id?500:400};color:${filter===p.id?p.text:'var(--color-text-primary)'}">
+        ${p.emoji} ${p.name}
+      </button>`).join('')}
+    </div>
+
+    <div id="phases">${vis.map(renderPhase).join('')}</div>
+
+    <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);padding:1rem 1.25rem;margin-top:1rem">
+      <p style="margin:0 0 6px;font-size:13px;font-weight:500;color:var(--color-text-primary)">Free tier limits</p>
+      <p style="margin:0 0 10px;font-size:12px;color:var(--color-text-secondary);line-height:1.7">
+        Gemini API: 15 RPM · 1M TPM · 1,500 req/day — Gemini Flash is fastest for agentic loops<br>
+        Google Colab free tier: T4 GPU · 12 GB RAM · up to ~12 hrs per session
+      </p>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px">
+        <a href="https://aistudio.google.com/app/apikey" target="_blank" style="font-size:12px;color:var(--color-text-info);text-decoration:none;font-weight:500">
+          <i class="ti ti-key" style="font-size:13px;margin-right:4px" aria-hidden="true"></i>Get Gemini API key
+        </a>
+        <a href="https://github.com/google-gemini/cookbook" target="_blank" style="font-size:12px;color:var(--color-text-info);text-decoration:none;font-weight:500">
+          <i class="ti ti-book-2" style="font-size:13px;margin-right:4px" aria-hidden="true"></i>Official cookbook
+        </a>
+        <a href="https://ai.google.dev/gemini-api/docs" target="_blank" style="font-size:12px;color:var(--color-text-info);text-decoration:none;font-weight:500">
+          <i class="ti ti-file-text" style="font-size:13px;margin-right:4px" aria-hidden="true"></i>API docs
+        </a>
+      </div>
+      <div style="padding:9px 12px;background:var(--color-background-primary);border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary)">
+        <p style="margin:0 0 4px;font-size:10px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:0.08em">Install all packages</p>
+        <code style="font-size:11px;color:var(--color-text-secondary);font-family:var(--font-mono)">!pip install google-generativeai langchain-google-genai langgraph faiss-cpu gradio</code>
+      </div>
+    </div>
+  `;
+
+  const dotsEl=document.getElementById('dots');
+  PHASES.forEach(p=>{
+    p.days.forEach(d=>{
+      const dot=document.createElement('div');
+      dot.className='dot';
+      dot.title=`Day ${d.day}: ${d.title}`;
+      dot.style.cssText=`width:11px;height:11px;border-radius:50%;background:${d.milestone?p.accent:p.border};border:0.5px solid ${p.border}`;
+      dot.onclick=()=>{setFilter(p.id);toggleDay(d.day)};
+      dotsEl.appendChild(dot);
+    });
+  });
+}
+
+function renderPhase(p){
+  return `
+    <div style="margin-bottom:24px">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:${p.bg};border-radius:var(--border-radius-md);border:0.5px solid ${p.border};margin-bottom:10px">
+        <span style="font-size:20px;line-height:1">${p.emoji}</span>
+        <div>
+          <p style="margin:0;font-size:10px;color:${p.text};opacity:0.75;text-transform:uppercase;letter-spacing:0.08em">Phase ${p.id} · ${p.range}</p>
+          <p style="margin:0;font-size:15px;font-weight:500;color:${p.text}">${p.name}</p>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        ${p.days.map(d=>renderDay(d,p)).join('')}
+      </div>
+    </div>`;
+}
+
+function renderDay(d,p){
+  const isOpen=expanded===d.day;
+  const diff=DIFF[d.diff]||DIFF["Beginner"];
+  return `
+    <div class="day-card" style="background:var(--color-background-primary);border-radius:var(--border-radius-lg);border:${d.milestone?`2px solid ${p.accent}`:'0.5px solid var(--color-border-tertiary)'};overflow:hidden">
+      <div onclick="toggleDay(${d.day})" style="display:flex;align-items:center;gap:11px;padding:11px 13px;cursor:pointer;border-left:3px solid ${p.accent}">
+        <div style="width:30px;height:30px;border-radius:50%;background:${d.milestone?p.accent:p.bg};border:0.5px solid ${p.border};display:flex;align-items:center;justify-content:center;font-size:${d.final?'14px':'12px'};font-weight:500;color:${d.milestone?'#fff':p.text};flex-shrink:0;font-feature-settings:'tnum'">
+          ${d.final?'🏆':d.day}
+        </div>
+        <div style="flex:1;min-width:0">
+          <p style="margin:0 0 4px;font-size:13px;font-weight:500;color:var(--color-text-primary);line-height:1.3">${d.title}</p>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+            <span style="font-size:10px;font-weight:500;color:${diff.c};background:${diff.bg};padding:2px 7px;border-radius:var(--border-radius-md)">${d.diff}</span>
+            <span style="font-size:11px;color:var(--color-text-tertiary)"><i class="ti ti-clock" style="font-size:11px;margin-right:2px" aria-hidden="true"></i>${d.time}</span>
+            ${d.official?`<span style="font-size:10px;color:#185FA5;background:#E6F1FB;padding:2px 7px;border-radius:var(--border-radius-md)">official notebook</span>`:''}
+          </div>
+        </div>
+        <i class="ti ti-chevron-${isOpen?'up':'down'}" style="font-size:15px;color:var(--color-text-tertiary);flex-shrink:0" aria-hidden="true"></i>
+      </div>
+      ${isOpen?renderExpanded(d,p):''}
+    </div>`;
+}
+
+function renderExpanded(d,p){
+  return `
+    <div style="padding:0 13px 13px;border-top:0.5px solid var(--color-border-tertiary);padding-left:16px">
+      <div style="background:${p.bg};border:0.5px solid ${p.border};border-radius:var(--border-radius-md);padding:10px 12px;margin:11px 0 11px">
+        <p style="margin:0 0 3px;font-size:10px;font-weight:500;color:${p.text};text-transform:uppercase;letter-spacing:0.06em">
+          <i class="ti ti-hammer" style="font-size:11px;margin-right:3px" aria-hidden="true"></i>Mini-project
+        </p>
+        <p style="margin:0;font-size:13px;color:${p.text};line-height:1.5">${d.project}</p>
+      </div>
+      <p style="margin:0 0 6px;font-size:10px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:0.06em">Topics covered</p>
+      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:11px">
+        ${d.concepts.map(c=>`<div style="display:flex;gap:8px;align-items:flex-start">
+          <span style="color:${p.accent};margin-top:1px;font-size:10px;flex-shrink:0">◆</span>
+          <span style="font-size:12px;color:var(--color-text-secondary);line-height:1.5">${c}</span>
+        </div>`).join('')}
+      </div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px">
+        ${d.tags.map(t=>`<span style="font-size:11px;color:${p.text};background:${p.bg};border:0.5px solid ${p.border};padding:2px 8px;border-radius:var(--border-radius-md)">${t}</span>`).join('')}
+      </div>
+      <a href="${d.nb}" target="_blank" rel="noopener noreferrer" class="nb-btn"
+        style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#F9AB00;color:#412402;border-radius:var(--border-radius-md);font-size:12px;font-weight:500;text-decoration:none">
+        <i class="ti ti-player-play" style="font-size:13px" aria-hidden="true"></i>
+        Open in Colab
+        <span style="font-size:10px;background:rgba(0,0,0,0.1);padding:2px 6px;border-radius:4px;color:#412402">
+          ${d.official?'official':'new notebook'}
+        </span>
+      </a>
+    </div>`;
+}
+
+function setFilter(id){filter=(id===filter?null:id);expanded=null;render();}
+function toggleDay(day){expanded=(expanded===day?null:day);render();}
+
+render();
+</script>
